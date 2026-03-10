@@ -4846,10 +4846,15 @@ function _relTime(ts) {
   return Math.floor(secs/86400) + 'd';
 }
 
+// Text-safe escaper for innerHTML content â€” only escapes < > & (not quotes, which avoids &#39; mangling)
+function _escT(s) {
+  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
 function _renderDribzyPost(id, d, isNew) {
   const liked    = !!_dribzyLikes[id];
   const likeCount = (d.likes || 0) + (liked ? 1 : 0);
-  const text = _esc(d.text || '').replace(/#(\w+)/g, '<span class="hashtag">#$1</span>');
+  const text = _escT(d.text || '').replace(/#(\w+)/g, '<span class="hashtag">#$1</span>');
   return `<div class="dribzy-post" id="dz-${id}">
     <div class="dribzy-avatar"><img src="dribzy.gif" alt="Dribzy"></div>
     <div class="dribzy-body">
@@ -4859,11 +4864,11 @@ function _renderDribzyPost(id, d, isNew) {
         <span class="dribzy-time">${_relTime(d.timestamp)}</span>
       </div>
       <div class="dribzy-text">${text}</div>
-      ${d.headline ? `<div class="dribzy-source">â†³ re: ${_esc(d.headline)}</div>` : ''}
+      ${d.headline ? `<div class="dribzy-source">â†³ re: ${_escT(d.headline)}</div>` : ''}
       <div class="dribzy-footer">
         <span class="dribzy-action ${liked?'liked':''}" onclick="_dribzyLike('${id}',${d.likes||0})">â™¥ ${likeCount}</span>
         <span class="dribzy-action">â†© ${d.reposts || 0}</span>
-        ${d.topic ? `<span style="font-size:10px;color:var(--dim);">#${_esc(d.topic)}</span>` : ''}
+        ${d.topic ? `<span style="font-size:10px;color:var(--dim);">#${_escT(d.topic)}</span>` : ''}
         <a href="https://x.com/intent/tweet?text=${encodeURIComponent((d.text||'').slice(0,240)+' â€” @Dribzybot on tonykrink.com')}" target="_blank" rel="noopener" class="dribzy-action" style="margin-left:auto;text-decoration:none;">ð• share</a>
       </div>
     </div>
