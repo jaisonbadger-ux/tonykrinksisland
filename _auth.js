@@ -126,30 +126,53 @@ async function _onAuthChanged(user) {
 }
 
 async function _loadProfile(uid) {
-  // Derive a sane fallback name from email rather than 'anon'
-  const emailFallback = (_currentUser?.email || '').split('@')[0]
-    .replace(/[^a-zA-Z0-9_\-\.]/g, '').slice(0, 16) || 'user';
   try {
     const snap = await _db.doc(`users/${uid}/data/profile`).get();
-    if (snap.exists) {
-      _currentProfile = snap.data();
-      // Repair if username is somehow blank/anon
-      if (!_currentProfile.username || _currentProfile.username === 'anon') {
-        _currentProfile.username = emailFallback;
-        _db.doc(`users/${uid}/data/profile`).set(_currentProfile, { merge: true }).catch(() => {});
-      }
-    } else {
-      // Profile doc missing — create a minimal one from email
-      _currentProfile = { username: emailFallback, avatarId: 'goblin' };
-      _db.doc(`users/${uid}/data/profile`).set(_currentProfile).catch(() => {});
-    }
+    _currentProfile = snap.exists ? snap.data() : null;
   } catch(e) {
-    // Firestore read blocked — still show email prefix, not 'anon'
-    _currentProfile = { username: emailFallback, avatarId: 'goblin' };
+    _currentProfile = null;
   }
-  // Expose profile to bungalow (map.html) via localStorage
+  const missingUsername = !_currentProfile?.username || _currentProfile.username === 'anon';
+  if (!_currentProfile || missingUsername) {
+    // No profile or blank username — prompt the user to pick one
+    _currentProfile = _currentProfile || { avatarId: 'goblin' };
+    _currentProfile.username = '';
+    _showUsernameSetup();
+    return; // don't write localStorage yet — wait for user to save
+  }
   try { localStorage.setItem('tk_profile', JSON.stringify(_currentProfile)); } catch(e) {}
 }
+
+function _showUsernameSetup() {
+  const el = document.getElementById('username-setup');
+  if (el) el.style.display = 'flex';
+  const badge = document.getElementById('profile-badge');
+  if (badge) badge.style.display = 'none';
+}
+
+function _hideUsernameSetup() {
+  const el = document.getElementById('username-setup');
+  if (el) el.style.display = 'none';
+}
+
+window.authSaveUsername = async function() {
+  const input = document.getElementById('username-setup-input');
+  const raw = (input?.value || '').trim();
+  const username = _sanitizeName(raw, 20);
+  if (!username || username.length < 2) {
+    input && (input.style.borderColor = 'var(--red)');
+    return;
+  }
+  if (!_currentUser) return;
+  _currentProfile = { ...(_currentProfile || {}), username, avatarId: _currentProfile?.avatarId || 'goblin' };
+  try {
+    await _db.doc(`users/${_currentUser.uid}/data/profile`).set(_currentProfile, { merge: true });
+  } catch(e) {}
+  try { localStorage.setItem('tk_profile', JSON.stringify(_currentProfile)); } catch(e) {}
+  _hideUsernameSetup();
+  _showProfileBadge();
+  _touchUserStats();
+};
 
 // Write username/avatarId/lastSeen to userStats on login/load
 async function _touchUserStats() {
