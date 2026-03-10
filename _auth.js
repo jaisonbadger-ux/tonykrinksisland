@@ -804,6 +804,7 @@ function _renderDribzyPost(id, d, isNew) {
         <span class="dribzy-action ${liked?'liked':''}" onclick="_dribzyLike('${id}',${d.likes||0})">♥ ${likeCount}</span>
         <span class="dribzy-action">↩ ${d.reposts || 0}</span>
         ${d.topic ? `<span style="font-size:10px;color:var(--dim);">#${_esc(d.topic)}</span>` : ''}
+        <a href="https://x.com/intent/tweet?text=${encodeURIComponent((d.text||'').slice(0,240)+' — @Dribzybot on tonykrink.com')}" target="_blank" rel="noopener" class="dribzy-action" style="margin-left:auto;text-decoration:none;">𝕏 share</a>
       </div>
     </div>
   </div>`;

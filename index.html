@@ -1870,9 +1870,12 @@ input.field:focus, textarea.field:focus { border-color: var(--blue); }
     <div>
       <div style="font-family:'Press Start 2P',monospace;font-size:11px;color:var(--gold);letter-spacing:2px;">DRIBZY REACTS</div>
       <div style="font-size:11px;color:var(--muted);margin-top:4px;">@Dribzybot &mdash; philosophical takes on whatever is happening out there</div>
-      <div style="display:flex;align-items:center;gap:6px;margin-top:6px;">
-        <span id="dribzy-live-dot" style="width:7px;height:7px;border-radius:50%;background:var(--green);display:inline-block;animation:pulse 2s infinite;"></span>
-        <span style="font-size:10px;color:var(--green);">LIVE &mdash; posting throughout the day</span>
+      <div style="display:flex;align-items:center;gap:10px;margin-top:6px;flex-wrap:wrap;">
+        <span style="display:flex;align-items:center;gap:6px;">
+          <span id="dribzy-live-dot" style="width:7px;height:7px;border-radius:50%;background:var(--green);display:inline-block;animation:pulse 2s infinite;"></span>
+          <span style="font-size:10px;color:var(--green);">LIVE &mdash; posting throughout the day</span>
+        </span>
+        <a href="https://x.com/Dribzybot" target="_blank" rel="noopener" style="font-size:10px;color:var(--blue);border:1px solid var(--border);padding:2px 8px;text-decoration:none;letter-spacing:1px;">𝕏 @Dribzybot</a>
       </div>
     </div>
   </div>
@@ -2467,6 +2470,7 @@ function showTab(id, btn) {
   document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
   document.getElementById('page-' + id).classList.add('active');
   if (btn) btn.classList.add('active');
+  if (id === 'home')   { _sfxFillQueue(); }
   if (id === 'board')  { renderBoard('full-msgs'); if (typeof _loadReactions === 'function') _loadReactions(); }
   if (id === 'seinfeld') { newDialogue('main-sf', true); }
   if (id === 'mining') { pollCkpool(); }
@@ -2709,27 +2713,27 @@ let _sfxFilling = false;
 
 async function _frinkiacFetch() {
   const RAW = 'https://frinkiac.com/api/random';
-  // Try corsproxy.io first (fast), fall back to allorigins
-  for (const proxy of [
-    'https://corsproxy.io/?' + RAW,
-    'https://api.allorigins.win/get?url=' + encodeURIComponent(RAW),
-  ]) {
+  const proxies = [
+    { url: 'https://corsproxy.io/?' + RAW,                                  wrap: false },
+    { url: 'https://api.codetabs.com/v1/proxy?quest=' + RAW,                wrap: false },
+    { url: 'https://api.allorigins.win/get?url=' + encodeURIComponent(RAW), wrap: true  },
+  ];
+  proxies.sort(() => Math.random() - 0.5);
+  for (const p of proxies) {
     try {
-      const r = await fetch(proxy, {signal: AbortSignal.timeout(5000)});
+      const r = await fetch(p.url, {signal: AbortSignal.timeout(3000)});
       if (!r.ok) continue;
       const raw = await r.json();
-      // allorigins wraps in {contents:...}, corsproxy returns JSON directly
-      return raw.contents ? JSON.parse(raw.contents) : raw;
+      return p.wrap ? JSON.parse(raw.contents) : raw;
     } catch(_) {}
   }
   return null;
 }
 
 async function _sfxFillQueue() {
-  if (_sfxFilling || _sfxQueue.length >= 3) return;
+  if (_sfxFilling || _sfxQueue.length >= 5) return;
   _sfxFilling = true;
-  // Fetch up to 3 frames in parallel
-  const needed = 3 - _sfxQueue.length;
+  const needed = 5 - _sfxQueue.length;
   const results = await Promise.allSettled(
     Array.from({length: needed}, () => _frinkiacFetch())
   );
@@ -3170,7 +3174,7 @@ function updateDisplay() {
   const _statUpg = document.getElementById('stat-upgrades');
   if (_statUpg) _statUpg.textContent = Object.keys(bought).length + Object.keys(pacts).length;
   const _statCas = document.getElementById('stat-casino-won');
-  if (_statCas) { const _cas = JSON.parse(localStorage.getItem('tk_casino')||'{}'); _statCas.textContent = fmt(_cas.totalWon||0); }
+  if (_statCas) _statCas.textContent = fmt(_cachedCasinoWon);
   document.getElementById('qc-coins').textContent     = fmt(coins);
   document.getElementById('qc-power').textContent     = fmt(clickPow);
   const islandInline = document.getElementById('coin-island-inline');
@@ -3293,12 +3297,20 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // ─── PASSIVE TICK ───
+let _cachedCasinoWon = 0, _lastCasinoCheck = 0, _lastDisplayTime = 0;
 setInterval(function() {
   if (cps > 0) {
     const tickMult = pacts.pac4 ? 2 : 1;
     const gain = cps * tickMult / 20;
     coins += gain; totalEarned += gain;
-    checkMs(); updateDisplay(); maybeRender();
+    checkMs();
+    const now = Date.now();
+    if (now - _lastCasinoCheck > 3000) {
+      _lastCasinoCheck = now;
+      try { _cachedCasinoWon = JSON.parse(localStorage.getItem('tk_casino')||'{}').totalWon||0; } catch(e) {}
+    }
+    if (now - _lastDisplayTime >= 100) { _lastDisplayTime = now; updateDisplay(); }
+    maybeRender();
   }
 }, 50);
 
@@ -3989,7 +4001,6 @@ window._jap     = { get: () => jap, set: v => { jap = v; }, render, applyOffline
 window._japShop = SHOP;
 
 })();
-// ═══════════════════════════════════════════════
 // ═══════════════════════════════════════════════
 // FIREBASE AUTH + COMMUNAL CLOUD SYNC
 // Tony Krink's Island
@@ -4796,6 +4807,7 @@ function _renderDribzyPost(id, d, isNew) {
         <span class="dribzy-action ${liked?'liked':''}" onclick="_dribzyLike('${id}',${d.likes||0})">♥ ${likeCount}</span>
         <span class="dribzy-action">↩ ${d.reposts || 0}</span>
         ${d.topic ? `<span style="font-size:10px;color:var(--dim);">#${_esc(d.topic)}</span>` : ''}
+        <a href="https://x.com/intent/tweet?text=${encodeURIComponent((d.text||'').slice(0,240)+' — @Dribzybot on tonykrink.com')}" target="_blank" rel="noopener" class="dribzy-action" style="margin-left:auto;text-decoration:none;">𝕏 share</a>
       </div>
     </div>
   </div>`;
