@@ -91,11 +91,13 @@ let _casino = {
     try { localStorage.setItem('tk_firebase_cfg', JSON.stringify(FIREBASE_CONFIG)); } catch(e) {}
     _auth = firebase.auth();
     _db   = firebase.firestore();
+    window._db = _db; // expose for inline handlers
     _auth.onAuthStateChanged(_onAuthChanged);
     _startGameSync();
     _startJapingusSync();
     _startStatsSync();
     _startMsgSync();
+    _startReactionsSync();
     _startEventsSync();
     _incrementVisitCount();
   } catch(e) {
@@ -425,7 +427,7 @@ function _startMsgSync() {
     .orderBy('time', 'desc')
     .limit(100)
     .onSnapshot(snap => {
-      _msgCache = snap.docs.map(doc => doc.data());
+      _msgCache = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       if (typeof renderBoard === 'function') {
         renderBoard('home-msgs');
         renderBoard('full-msgs');
@@ -470,6 +472,27 @@ function _startMsgSync() {
       renderBoard('full-msgs');
     }
   };
+}
+
+// ──────────────────────────────────────────────
+// REACTIONS SYNC  —  reactions/{msgId} collection
+// ──────────────────────────────────────────────
+function _startReactionsSync() {
+  if (!_db) return;
+  _db.collection('reactions').onSnapshot(snap => {
+    snap.docChanges().forEach(change => {
+      if (change.type === 'removed') {
+        delete window._rxCache[change.doc.id];
+      } else {
+        window._rxCache[change.doc.id] = change.doc.data();
+      }
+    });
+    if (typeof renderBoard === 'function') {
+      renderBoard('home-msgs');
+      renderBoard('full-msgs');
+    }
+  }, () => {});
+  window._loadReactions = () => {}; // already listening via onSnapshot
 }
 
 // ──────────────────────────────────────────────
@@ -540,7 +563,7 @@ function _pushJapState(suffix) {
 
 function _updateFedByDisplay(name) {
   const el = document.getElementById('jap-lastfed');
-  if (el) el.textContent = name ? 'last fed: ' + name : '';
+  if (el) el.textContent = name ? '🍺 last fed by: ' + _esc(name) : '';
 }
 
 // ──────────────────────────────────────────────
@@ -827,8 +850,8 @@ window._dribzyLike = function(id, baseLikes) {
 
 window._loadDribzyFeed = function() {
   if (!_db) {
-    const el = document.getElementById('dribzy-feed');
-    if (el) el.innerHTML = '<div style="padding:30px;text-align:center;color:var(--dim);">firebase not connected — dribzy is offline</div>';
+    // Retry once Firebase has had a chance to init
+    setTimeout(() => { if (_db && !_dribzyUnsub) window._loadDribzyFeed(); }, 2000);
     return;
   }
   if (_dribzyUnsub) return; // already listening
