@@ -8,8 +8,22 @@ import { initializeApp, cert } from "firebase-admin/app";
 import { getFirestore, FieldValue } from "firebase-admin/firestore";
 
 // ── Init ──
-const _svcRaw = process.env.FIREBASE_SERVICE_ACCOUNT.trim().replace(/^['"]|['"]$/g, '');
-initializeApp({ credential: cert(JSON.parse(_svcRaw)) });
+function parseServiceAccount(raw) {
+  if (!raw) throw new Error('FIREBASE_SERVICE_ACCOUNT secret is empty');
+  let s = raw.trim();
+  // Strip surrounding single or double quotes if present
+  s = s.replace(/^["']|["']$/g, '');
+  // Attempt 1: direct parse
+  try { return JSON.parse(s); } catch(e) {}
+  // Attempt 2: double-stringified (parsed value is itself a JSON string)
+  try { const inner = JSON.parse(s); if (typeof inner === 'string') return JSON.parse(inner); } catch(e) {}
+  // Attempt 3: replace literal newlines in private_key with \n
+  try { return JSON.parse(s.replace(/\n/g, '\\n')); } catch(e) {}
+  // Attempt 4: strip BOM
+  try { return JSON.parse(s.replace(/^\uFEFF/, '')); } catch(e) {}
+  throw new Error('Could not parse FIREBASE_SERVICE_ACCOUNT. Make sure you pasted the ENTIRE contents of the .json file as the secret value — nothing more, nothing less.');
+}
+initializeApp({ credential: cert(parseServiceAccount(process.env.FIREBASE_SERVICE_ACCOUNT)) });
 const db         = getFirestore();
 const anthropic  = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
