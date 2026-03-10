@@ -14,18 +14,18 @@ const FIREBASE_CONFIG = {
 
 // ──────────────────────────────────────────────
 const AVATARS = [
-  { id:'goblin',     emoji:'👾',           label:'GOBLIN',  bg:'#1a3a1a' },
-  { id:'brown-guy',  emoji:'👦🏽',          label:'MATE',    bg:'#3a1a00' },
-  { id:'dark-girl',  emoji:'👧🏿',          label:'LEGEND',  bg:'#1a0a2a' },
-  { id:'beardo',     emoji:'🧔🏻',          label:'BEARDO',  bg:'#0a1a2a' },
-  { id:'hijab',      emoji:'🧕🏽',          label:'BOSS',    bg:'#2a1a0a' },
-  { id:'wheelchair', emoji:'🧑🏻\u200d🦽',  label:'ROLLIN',  bg:'#0a2a2a' },
-  { id:'cane',       emoji:'🧑🏿\u200d🦯',  label:'VIBE',    bg:'#1a1a3a' },
-  { id:'nonbinary',  emoji:'🧑🏾',          label:'ENTITY',  bg:'#2a0a2a' },
-  { id:'silver',     emoji:'👨\u200d🦳',    label:'OG',      bg:'#1a2a1a' },
-  { id:'trans',      emoji:'🏳️\u200d⚧️',   label:'VALID',   bg:'#0a1a3a' },
-  { id:'curly',      emoji:'👩🏻\u200d🦱',  label:'CHAOS',   bg:'#2a1a1a' },
-  { id:'bald',       emoji:'🧑🏽\u200d🦲',  label:'CHROME',  bg:'#1a1a1a' },
+  { id:'goblin',     emoji:'\uD83D\uDC7E',                                      label:'GOBLIN',  bg:'#1a3a1a' },
+  { id:'brown-guy',  emoji:'\uD83D\uDC66\uD83C\uDFFD',                          label:'MATE',    bg:'#3a1a00' },
+  { id:'dark-girl',  emoji:'\uD83D\uDC67\uD83C\uDFFF',                          label:'LEGEND',  bg:'#1a0a2a' },
+  { id:'beardo',     emoji:'\uD83E\uDDD4\uD83C\uDFFB',                          label:'BEARDO',  bg:'#0a1a2a' },
+  { id:'hijab',      emoji:'\uD83E\uDDD5\uD83C\uDFFD',                          label:'BOSS',    bg:'#2a1a0a' },
+  { id:'wheelchair', emoji:'\uD83E\uDDD1\uD83C\uDFFB\u200D\uD83E\uDDBD',        label:'ROLLIN',  bg:'#0a2a2a' },
+  { id:'cane',       emoji:'\uD83E\uDDD1\uD83C\uDFFF\u200D\uD83E\uDDAF',        label:'VIBE',    bg:'#1a1a3a' },
+  { id:'nonbinary',  emoji:'\uD83E\uDDD1\uD83C\uDFFE',                          label:'ENTITY',  bg:'#2a0a2a' },
+  { id:'silver',     emoji:'\uD83D\uDC68\u200D\uD83E\uDDB3',                    label:'OG',      bg:'#1a2a1a' },
+  { id:'trans',      emoji:'\uD83C\uDFF3\uFE0F\u200D\u26A7\uFE0F',              label:'VALID',   bg:'#0a1a3a' },
+  { id:'curly',      emoji:'\uD83D\uDC69\uD83C\uDFFB\u200D\uD83E\uDDB1',        label:'CHAOS',   bg:'#2a1a1a' },
+  { id:'bald',       emoji:'\uD83E\uDDD1\uD83C\uDFFD\u200D\uD83E\uDDB2',        label:'CHROME',  bg:'#1a1a1a' },
 ];
 
 let _auth, _db;
@@ -563,18 +563,18 @@ function _pushJapState(suffix) {
 
 function _updateFedByDisplay(name) {
   const el = document.getElementById('jap-lastfed');
-  if (el) el.textContent = name ? '🍺 last fed by: ' + _esc(name) : '';
+  if (el) el.textContent = name ? '\uD83C\uDF7A last fed by: ' + _esc(name) : '';
 }
 
 // ──────────────────────────────────────────────
 // GLOBAL EVENTS SYSTEM  —  shared/events
 // ──────────────────────────────────────────────
 const _EVENT_TYPES = [
-  { type:'bajookie_surge',  label:'⚡ BAJOOKIE SURGE',    cps:2,   click:1,   dur:90000 },
-  { type:'void_storm',      label:'🌀 VOID STORM',         cps:5,   click:0.1, dur:60000 },
-  { type:'island_festival', label:'🎉 ISLAND FESTIVAL',   cps:3,   click:3,   dur:60000 },
-  { type:'newman_incident', label:'📬 NEWMAN INCIDENT',   cps:0.1, click:1,   dur:30000 },
-  { type:'bajookie_tide',   label:'🌊 BAJOOKIE TIDE',      cps:1,   click:10,  dur:45000 },
+  { type:'bajookie_surge',  label:'\u26A1 BAJOOKIE SURGE',                    cps:2,   click:1,   dur:90000 },
+  { type:'void_storm',      label:'\uD83C\uDF00 VOID STORM',                  cps:5,   click:0.1, dur:60000 },
+  { type:'island_festival', label:'\uD83C\uDF89 ISLAND FESTIVAL',              cps:3,   click:3,   dur:60000 },
+  { type:'newman_incident', label:'\uD83D\uDCEC NEWMAN INCIDENT',              cps:0.1, click:1,   dur:30000 },
+  { type:'bajookie_tide',   label:'\uD83C\uDF0A BAJOOKIE TIDE',                cps:1,   click:10,  dur:45000 },
 ];
 
 function _startEventsSync() {
@@ -601,7 +601,7 @@ function _applyEvent(d) {
     const icon  = document.getElementById('event-icon');
     const name  = document.getElementById('event-name');
     const desc  = document.getElementById('event-desc');
-    if (icon) icon.textContent = d.icon  || '⚡';
+    if (icon) icon.textContent = d.icon  || '\u26A1';
     if (name) name.textContent = d.label || 'EVENT';
     if (desc) desc.textContent = `CPS ×${d.multiplierCps} · Click ×${d.multiplierClick}`;
   }
@@ -752,7 +752,7 @@ window._loadLeaderboard = async function(tab) {
       .get();
 
     const fmtFn = typeof fmt === 'function' ? fmt : (v => String(Math.floor(v)));
-    const medals = ['🥇','🥈','🥉'];
+    const medals = ['\uD83E\uDD47','\uD83E\uDD48','\uD83E\uDD49'];
     const myUid  = _currentUser?.uid;
 
     el.innerHTML = snap.docs.map((doc, i) => {
@@ -777,7 +777,7 @@ window._loadLeaderboard = async function(tab) {
         const m = mySnap.data();
         const fN = fmtFn;
         myEl.style.display = 'block';
-        myEl.innerHTML = `<div class="box-header"><span>📊 your stats</span></div>
+        myEl.innerHTML = `<div class="box-header"><span>\uD83D\uDCCA your stats</span></div>
           <div style="padding:12px 14px;display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:11px;">
             <div>coins earned: <span style="color:var(--gold);">${fN(m.coinsEarned||0)}</span></div>
             <div>clicks: <span style="color:var(--blue2);">${fN(m.totalClicks||0)}</span></div>
@@ -830,9 +830,9 @@ function _renderDribzyPost(id, d, isNew) {
       ${d.headline ? `<div class="dribzy-source">↳ re: ${_escT(d.headline)}</div>` : ''}
       <div class="dribzy-footer">
         <span class="dribzy-action ${liked?'liked':''}" onclick="_dribzyLike('${id}',${d.likes||0})">♥ ${likeCount}</span>
-        <span class="dribzy-action">↩ ${d.reposts || 0}</span>
+        <span class="dribzy-action" onclick="_dribzyRepost('${id}',${d.reposts||0},this)">↩ <span class="repost-count">${d.reposts || 0}</span></span>
         ${d.topic ? `<span style="font-size:10px;color:var(--dim);">#${_escT(d.topic)}</span>` : ''}
-        <a href="https://x.com/intent/tweet?text=${encodeURIComponent((d.text||'').slice(0,240)+' — @Dribzybot on tonykrink.com')}" target="_blank" rel="noopener" class="dribzy-action" style="margin-left:auto;text-decoration:none;">𝕏 share</a>
+        <a href="https://x.com/intent/tweet?text=${encodeURIComponent((d.text||'').slice(0,220))}&via=Dribzybot&url=${encodeURIComponent('https://tonykrink.com')}" target="_blank" rel="noopener" class="dribzy-action" style="margin-left:auto;text-decoration:none;" title="quote tweet this on X">\uD835\uDD4F retweet</a>
       </div>
     </div>
   </div>`;
@@ -851,6 +851,25 @@ window._dribzyLike = function(id, baseLikes) {
     el.textContent = '♥ ' + (baseLikes + 1);
   }
   try { localStorage.setItem('tk_dribzy_likes', JSON.stringify(_dribzyLikes)); } catch(e) {}
+};
+
+// Repost — increments local count + opens X to quote tweet
+let _dribzyReposts = {};
+try { _dribzyReposts = JSON.parse(localStorage.getItem('tk_dribzy_reposts') || '{}'); } catch(e) {}
+
+window._dribzyRepost = function(id, baseReposts, btn) {
+  if (_dribzyReposts[id]) return; // already reposted this session
+  _dribzyReposts[id] = true;
+  try { localStorage.setItem('tk_dribzy_reposts', JSON.stringify(_dribzyReposts)); } catch(e) {}
+  const countEl = btn ? btn.querySelector('.repost-count') : null;
+  if (countEl) countEl.textContent = baseReposts + 1;
+  btn && btn.classList.add('liked');
+  // Write increment to Firestore
+  if (_db) {
+    _db.collection('dribzybot_posts').doc(id)
+      .update({ reposts: firebase.firestore.FieldValue.increment(1) })
+      .catch(() => {});
+  }
 };
 
 window._loadDribzyFeed = function() {
@@ -893,14 +912,14 @@ window._loadDribzyFeed = function() {
 // CASINO
 // ──────────────────────────────────────────────
 const _SYMBOLS = [
-  { icon:'🟡', name:'Bajookie',        mult:2,   weight:25 },
-  { icon:'🥸',  name:'Jerry',           mult:3,   weight:22 },
-  { icon:'🐾',  name:'Japingus',        mult:5,   weight:16 },
-  { icon:'🍇',  name:'Drain Gang',      mult:8,   weight:12 },
-  { icon:'📬',  name:'Newman',          mult:15,  weight:8  },
-  { icon:'💥',  name:'Kramer',          mult:20,  weight:6  },
-  { icon:'🕳️', name:'Void',            mult:50,  weight:3  },
-  { icon:'⭐',  name:'BAJOOKIE JACKPOT',mult:500, weight:1  },
+  { icon:'\uD83D\uDFE1', name:'Bajookie',        mult:2,   weight:25 },
+  { icon:'\uD83E\uDD78', name:'Jerry',           mult:3,   weight:22 },
+  { icon:'\uD83D\uDC3E', name:'Japingus',        mult:5,   weight:16 },
+  { icon:'\uD83C\uDF47', name:'Drain Gang',      mult:8,   weight:12 },
+  { icon:'\uD83D\uDCEC', name:'Newman',          mult:15,  weight:8  },
+  { icon:'\uD83D\uDCA5', name:'Kramer',          mult:20,  weight:6  },
+  { icon:'\uD83D\uDD73\uFE0F', name:'Void',      mult:50,  weight:3  },
+  { icon:'\u2B50',       name:'BAJOOKIE JACKPOT',mult:500, weight:1  },
 ];
 
 // Build weighted reel pool
@@ -950,7 +969,7 @@ function _updateCasinoDisplay() {
   if (profitEl) profitEl.style.color = profit >= 0 ? 'var(--green)' : 'var(--red)';
 
   const freeEl = document.getElementById('free-spins-display');
-  if (freeEl) freeEl.textContent = _casino.freeSpins > 0 ? '🎁 free spins: ' + _casino.freeSpins : '';
+  if (freeEl) freeEl.textContent = _casino.freeSpins > 0 ? '\uD83C\uDF81 free spins: ' + _casino.freeSpins : '';
 
   const balEl = document.getElementById('slot-balance-display');
   if (balEl) balEl.textContent = fmtFn(typeof coins !== 'undefined' ? coins : 0) + ' coins';
@@ -958,7 +977,7 @@ function _updateCasinoDisplay() {
   // Tier display
   const tier = _getCasinoTier();
   const tierEl = document.getElementById('slot-tier-label');
-  if (tierEl) tierEl.textContent = tier === 'void' ? '🕳️ VOID SLOT' : tier === 'drain' ? '🍇 DRAIN GANG MACHINE' : '🎰 CLASSIC SLOT';
+  if (tierEl) tierEl.textContent = tier === 'void' ? '\uD83D\uDD73\uFE0F VOID SLOT' : tier === 'drain' ? '\uD83C\uDF47 DRAIN GANG MACHINE' : '\uD83C\uDFB0 CLASSIC SLOT';
   ['tier-classic','tier-drain','tier-void'].forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
@@ -970,8 +989,8 @@ function _updateCasinoDisplay() {
   const japBonusEl = document.getElementById('slot-jap-bonus');
   if (japBonusEl) {
     const jb = _getJapBonus();
-    if (jb > 1)      japBonusEl.textContent = '🐾 Japingus is thriving! +5% RTP bonus';
-    else if (jb < 1) japBonusEl.textContent = '💀 Japingus is dead... the slots feel cold. -10% RTP';
+    if (jb > 1)      japBonusEl.textContent = '\uD83D\uDC3E Japingus is thriving! +5% RTP bonus';
+    else if (jb < 1) japBonusEl.textContent = '\uD83D\uDC80 Japingus is dead... the slots feel cold. -10% RTP';
     else             japBonusEl.textContent = '';
     japBonusEl.style.color = jb >= 1 ? 'var(--green)' : 'var(--red)';
   }
@@ -993,7 +1012,7 @@ window.spinSlots = async function() {
   if (!isFree) {
     if (typeof coins === 'undefined' || coins < bet) {
       const r = document.getElementById('spin-result');
-      if (r) { r.textContent = '❌ not enough coins!'; r.style.color = 'var(--red)'; }
+      if (r) { r.textContent = 'not enough coins!'; r.style.color = 'var(--red)'; }
       return;
     }
     // Deduct bet
@@ -1063,7 +1082,7 @@ window.spinSlots = async function() {
       if (a.name === 'BAJOOKIE JACKPOT') {
         payout = bet * a.mult * japBonus;
         isJackpot = true;
-        resultText = `⭐ BAJOOKIE JACKPOT! ×${a.mult} = +${Math.floor(payout)} coins!`;
+        resultText = `\u2B50 BAJOOKIE JACKPOT! \xD7${a.mult} = +${Math.floor(payout)} coins!`;
       } else {
         payout = bet * a.mult * japBonus;
         resultText = `${a.icon}${a.icon}${a.icon} ${a.name}! ×${a.mult} = +${Math.floor(payout)} coins`;
@@ -1117,7 +1136,7 @@ window.spinSlots = async function() {
 
     if (freeSpin) {
       _casino.freeSpins++;
-      resultText += ' 🎁 FREE SPIN!';
+      resultText += ' \uD83C\uDF81 FREE SPIN!';
     }
 
     if (isJackpot) {

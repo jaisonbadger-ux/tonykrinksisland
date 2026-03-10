@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -3821,7 +3821,7 @@ function render() {
   // Status badge
   const statusEl = getEl('jap-status');
   if (statusEl) {
-    const labels = { happy:'😈 THRIVING', okay:'😐 FINE', need:'😤 NEEDS SOMETHING', bad:'😰 NOT OK', dying:'💀 CRITICAL', goon:'🫙 GOON MODE', dead:'💀 DEAD' };
+    const labels = { happy:'\uD83D\uDE08 THRIVING', okay:'\uD83D\uDE10 FINE', need:'\uD83D\uDE24 NEEDS SOMETHING', bad:'\uD83D\uDE30 NOT OK', dying:'\uD83D\uDC80 CRITICAL', goon:'\uD83E\uDEB4 GOON MODE', dead:'\uD83D\uDC80 DEAD' };
     const colors = { happy:'var(--green)', okay:'var(--dim)', need:'var(--gold)', bad:'var(--orange)', dying:'var(--red)', goon:'#cc44ff', dead:'#555' };
     statusEl.textContent = labels[state] || state.toUpperCase();
     statusEl.style.color = colors[state] || 'var(--dim)';
@@ -4035,10 +4035,10 @@ window._jap     = { get: () => jap, set: v => { jap = v; }, render, applyOffline
 window._japShop = SHOP;
 
 })();
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════════════════════════════
 // FIREBASE AUTH + COMMUNAL CLOUD SYNC
 // Tony Krink's Island
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════════════════════════════
 
 const FIREBASE_CONFIG = {
   apiKey:            "AIzaSyDpFlMknPObiiH0AAyJ8Hhacla_NIe-lzA",
@@ -4049,20 +4049,20 @@ const FIREBASE_CONFIG = {
   appId:             "1:500681949863:web:90519bf57149e3c6d15182"
 };
 
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ──────────────────────────────────────────────
 const AVATARS = [
-  { id:'goblin',     emoji:'ðŸ‘¾',           label:'GOBLIN',  bg:'#1a3a1a' },
-  { id:'brown-guy',  emoji:'ðŸ‘¦ðŸ½',          label:'MATE',    bg:'#3a1a00' },
-  { id:'dark-girl',  emoji:'ðŸ‘§ðŸ¿',          label:'LEGEND',  bg:'#1a0a2a' },
-  { id:'beardo',     emoji:'ðŸ§”ðŸ»',          label:'BEARDO',  bg:'#0a1a2a' },
-  { id:'hijab',      emoji:'ðŸ§•ðŸ½',          label:'BOSS',    bg:'#2a1a0a' },
-  { id:'wheelchair', emoji:'ðŸ§‘ðŸ»\u200dðŸ¦½',  label:'ROLLIN',  bg:'#0a2a2a' },
-  { id:'cane',       emoji:'ðŸ§‘ðŸ¿\u200dðŸ¦¯',  label:'VIBE',    bg:'#1a1a3a' },
-  { id:'nonbinary',  emoji:'ðŸ§‘ðŸ¾',          label:'ENTITY',  bg:'#2a0a2a' },
-  { id:'silver',     emoji:'ðŸ‘¨\u200dðŸ¦³',    label:'OG',      bg:'#1a2a1a' },
-  { id:'trans',      emoji:'ðŸ³ï¸\u200dâš§ï¸',   label:'VALID',   bg:'#0a1a3a' },
-  { id:'curly',      emoji:'ðŸ‘©ðŸ»\u200dðŸ¦±',  label:'CHAOS',   bg:'#2a1a1a' },
-  { id:'bald',       emoji:'ðŸ§‘ðŸ½\u200dðŸ¦²',  label:'CHROME',  bg:'#1a1a1a' },
+  { id:'goblin',     emoji:'\uD83D\uDC7E',                                      label:'GOBLIN',  bg:'#1a3a1a' },
+  { id:'brown-guy',  emoji:'\uD83D\uDC66\uD83C\uDFFD',                          label:'MATE',    bg:'#3a1a00' },
+  { id:'dark-girl',  emoji:'\uD83D\uDC67\uD83C\uDFFF',                          label:'LEGEND',  bg:'#1a0a2a' },
+  { id:'beardo',     emoji:'\uD83E\uDDD4\uD83C\uDFFB',                          label:'BEARDO',  bg:'#0a1a2a' },
+  { id:'hijab',      emoji:'\uD83E\uDDD5\uD83C\uDFFD',                          label:'BOSS',    bg:'#2a1a0a' },
+  { id:'wheelchair', emoji:'\uD83E\uDDD1\uD83C\uDFFB\u200D\uD83E\uDDBD',        label:'ROLLIN',  bg:'#0a2a2a' },
+  { id:'cane',       emoji:'\uD83E\uDDD1\uD83C\uDFFF\u200D\uD83E\uDDAF',        label:'VIBE',    bg:'#1a1a3a' },
+  { id:'nonbinary',  emoji:'\uD83E\uDDD1\uD83C\uDFFE',                          label:'ENTITY',  bg:'#2a0a2a' },
+  { id:'silver',     emoji:'\uD83D\uDC68\u200D\uD83E\uDDB3',                    label:'OG',      bg:'#1a2a1a' },
+  { id:'trans',      emoji:'\uD83C\uDFF3\uFE0F\u200D\u26A7\uFE0F',              label:'VALID',   bg:'#0a1a3a' },
+  { id:'curly',      emoji:'\uD83D\uDC69\uD83C\uDFFB\u200D\uD83E\uDDB1',        label:'CHAOS',   bg:'#2a1a1a' },
+  { id:'bald',       emoji:'\uD83E\uDDD1\uD83C\uDFFD\u200D\uD83E\uDDB2',        label:'CHROME',  bg:'#1a1a1a' },
 ];
 
 let _auth, _db;
@@ -4080,7 +4080,7 @@ let _pendingClickReward = 0;
 let _pendingClickCount  = 0;
 let _clickFlushTimer    = null;
 
-// Message board cache (Firestore â†’ local array)
+// Message board cache (Firestore → local array)
 let _msgCache = [];
 
 // Per-user cumulative accumulators (flushed with clicks)
@@ -4090,14 +4090,14 @@ let _pendingUserClicks = 0;
 // Milestones already crossed for event triggers
 let _crossedMilestones = {};
 
-// â”€â”€ SECURITY HELPERS â”€â”€
+// ── SECURITY HELPERS ──
 // Escape HTML so user data can never inject markup
 function _esc(s) {
   return String(s ?? '')
     .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
     .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
-// Only allow alphanumeric, spaces, underscores, hyphens, dots, ! â€” no HTML chars
+// Only allow alphanumeric, spaces, underscores, hyphens, dots, ! — no HTML chars
 function _sanitizeName(s, max) {
   return String(s ?? '').replace(/[^a-zA-Z0-9 _\-\.!]/g,'').trim().slice(0, max || 20) || 'anon';
 }
@@ -4119,9 +4119,9 @@ let _casino = {
   spinning:    false,
 };
 
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ──────────────────────────────────────────────
 // INIT
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ──────────────────────────────────────────────
 (function _initFirebase() {
   try {
     firebase.initializeApp(FIREBASE_CONFIG);
@@ -4143,9 +4143,9 @@ let _casino = {
   }
 })();
 
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ──────────────────────────────────────────────
 // AUTH STATE
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ──────────────────────────────────────────────
 async function _onAuthChanged(user) {
   if (user) {
     _currentUser = user;
@@ -4182,9 +4182,9 @@ async function _touchUserStats() {
   } catch(e) {}
 }
 
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-// COMMUNAL GAME SYNC  â€”  shared/game
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ──────────────────────────────────────────────
+// COMMUNAL GAME SYNC  —  shared/game
+// ──────────────────────────────────────────────
 function _startGameSync() {
   if (!_db) return;
 
@@ -4239,9 +4239,9 @@ function _mergeGameState(d) {
   if (changed && typeof recalc === 'function') recalc();
 }
 
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ──────────────────────────────────────────────
 // CLICK BATCHING + USER STATS FLUSH
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ──────────────────────────────────────────────
 function _patchDoClick() {
   const _orig = window.doClick;
 
@@ -4260,7 +4260,7 @@ function _patchDoClick() {
     } else {
       window._comboCount = 0;
     }
-    window._comboMult = 1 + window._comboCount * 0.1; // max Ã—3 at 20 combo
+    window._comboMult = 1 + window._comboCount * 0.1; // max ×3 at 20 combo
 
     // Apply combo to reward BEFORE calling orig (which uses raw clickPow)
     const baseReward = (typeof clickPow !== 'undefined') ? clickPow : 1;
@@ -4299,7 +4299,7 @@ function _updateComboBar() {
   else if (pct < 75)  bar.style.background = 'var(--gold)';
   else                bar.style.background = 'var(--red)';
   if (window._comboCount > 0) {
-    label.textContent = 'COMBO Ã—' + window._comboMult.toFixed(1) + '  [' + window._comboCount + '/20]';
+    label.textContent = 'COMBO ×' + window._comboMult.toFixed(1) + '  [' + window._comboCount + '/20]';
     label.style.color = pct > 75 ? 'var(--red)' : pct > 40 ? 'var(--gold)' : 'var(--green)';
   } else {
     label.textContent = '';
@@ -4390,9 +4390,9 @@ async function _doCloudSave() {
   }
 }
 
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-// VISITOR COUNTER  â€”  shared/stats.totalVisits
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ──────────────────────────────────────────────
+// VISITOR COUNTER  —  shared/stats.totalVisits
+// ──────────────────────────────────────────────
 function _incrementVisitCount() {
   if (!_db) return;
   _db.doc('shared/stats').update({
@@ -4410,9 +4410,9 @@ function _updateVisitorDisplay(n) {
   ['home-visitor-num','hdr-views'].forEach(id => { const el = document.getElementById(id); if (el) el.textContent = n; });
 }
 
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-// ISLAND STATS DISPLAY  â€”  shared/stats
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ──────────────────────────────────────────────
+// ISLAND STATS DISPLAY  —  shared/stats
+// ──────────────────────────────────────────────
 function _startStatsSync() {
   if (!_db) return;
   _statsSnapUnsub = _db.doc('shared/stats').onSnapshot(snap => {
@@ -4454,9 +4454,9 @@ function _updateLbIslandStats(data) {
   });
 }
 
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-// MESSAGE BOARD  â€”  messages collection
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ──────────────────────────────────────────────
+// MESSAGE BOARD  —  messages collection
+// ──────────────────────────────────────────────
 function _startMsgSync() {
   if (!_db) return;
 
@@ -4511,9 +4511,9 @@ function _startMsgSync() {
   };
 }
 
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-// REACTIONS SYNC  â€”  reactions/{msgId} collection
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ──────────────────────────────────────────────
+// REACTIONS SYNC  —  reactions/{msgId} collection
+// ──────────────────────────────────────────────
 function _startReactionsSync() {
   if (!_db) return;
   _db.collection('reactions').onSnapshot(snap => {
@@ -4532,9 +4532,9 @@ function _startReactionsSync() {
   window._loadReactions = () => {}; // already listening via onSnapshot
 }
 
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ──────────────────────────────────────────────
 // SHARED JAPINGUS
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ──────────────────────────────────────────────
 function _startJapingusSync() {
   if (!_db) return;
 
@@ -4600,18 +4600,18 @@ function _pushJapState(suffix) {
 
 function _updateFedByDisplay(name) {
   const el = document.getElementById('jap-lastfed');
-  if (el) el.textContent = name ? 'ðŸº last fed by: ' + _esc(name) : '';
+  if (el) el.textContent = name ? '\uD83C\uDF7A last fed by: ' + _esc(name) : '';
 }
 
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-// GLOBAL EVENTS SYSTEM  â€”  shared/events
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ──────────────────────────────────────────────
+// GLOBAL EVENTS SYSTEM  —  shared/events
+// ──────────────────────────────────────────────
 const _EVENT_TYPES = [
-  { type:'bajookie_surge',  label:'âš¡ BAJOOKIE SURGE',    cps:2,   click:1,   dur:90000 },
-  { type:'void_storm',      label:'ðŸŒ€ VOID STORM',         cps:5,   click:0.1, dur:60000 },
-  { type:'island_festival', label:'ðŸŽ‰ ISLAND FESTIVAL',   cps:3,   click:3,   dur:60000 },
-  { type:'newman_incident', label:'ðŸ“¬ NEWMAN INCIDENT',   cps:0.1, click:1,   dur:30000 },
-  { type:'bajookie_tide',   label:'ðŸŒŠ BAJOOKIE TIDE',      cps:1,   click:10,  dur:45000 },
+  { type:'bajookie_surge',  label:'\u26A1 BAJOOKIE SURGE',                    cps:2,   click:1,   dur:90000 },
+  { type:'void_storm',      label:'\uD83C\uDF00 VOID STORM',                  cps:5,   click:0.1, dur:60000 },
+  { type:'island_festival', label:'\uD83C\uDF89 ISLAND FESTIVAL',              cps:3,   click:3,   dur:60000 },
+  { type:'newman_incident', label:'\uD83D\uDCEC NEWMAN INCIDENT',              cps:0.1, click:1,   dur:30000 },
+  { type:'bajookie_tide',   label:'\uD83C\uDF0A BAJOOKIE TIDE',                cps:1,   click:10,  dur:45000 },
 ];
 
 function _startEventsSync() {
@@ -4638,9 +4638,9 @@ function _applyEvent(d) {
     const icon  = document.getElementById('event-icon');
     const name  = document.getElementById('event-name');
     const desc  = document.getElementById('event-desc');
-    if (icon) icon.textContent = d.icon  || 'âš¡';
+    if (icon) icon.textContent = d.icon  || '\u26A1';
     if (name) name.textContent = d.label || 'EVENT';
-    if (desc) desc.textContent = `CPS Ã—${d.multiplierCps} Â· Click Ã—${d.multiplierClick}`;
+    if (desc) desc.textContent = `CPS ×${d.multiplierCps} · Click ×${d.multiplierClick}`;
   }
 
   // Start countdown
@@ -4689,9 +4689,9 @@ function _maybeFireEvent(totalClicks) {
   }).catch(() => {});
 }
 
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ──────────────────────────────────────────────
 // PRESTIGE / ISLAND ASCENSION
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ──────────────────────────────────────────────
 const _ERA_THRESHOLDS = [0, 0, 1e12, 1e14, 1e16, 1e18, 1e20, 1e22, 1e24, 1e26, 1e28];
 
 function _checkAscension(data) {
@@ -4705,7 +4705,7 @@ function _checkAscension(data) {
 
   if (threshold && totalCoins >= threshold && _currentUser && era < 10) {
     btn.style.display = 'block';
-    btn.textContent   = 'â¬† ASCEND THE ISLAND (Era ' + nextEra + ')';
+    btn.textContent   = '⬆ ASCEND THE ISLAND (Era ' + nextEra + ')';
   } else {
     btn.style.display = 'none';
   }
@@ -4741,7 +4741,7 @@ window.triggerAscension = async function() {
   const totalCoins = statsSnap?.data()?.totalCoins || 0;
   if (totalCoins < threshold) { alert('Island has not earned enough coins yet.'); return; }
 
-  if (!confirm(`ISLAND ASCENSION to Era ${era}!\n\nThis resets ALL coins, producers and upgrades for everyone on the island.\nThe island gains a permanent Ã—${(1.5**era).toFixed(2)} multiplier.\n\nAre you sure?`)) return;
+  if (!confirm(`ISLAND ASCENSION to Era ${era}!\n\nThis resets ALL coins, producers and upgrades for everyone on the island.\nThe island gains a permanent ×${(1.5**era).toFixed(2)} multiplier.\n\nAre you sure?`)) return;
 
   const newGmult = Math.pow(1.5, era);
   try {
@@ -4753,15 +4753,15 @@ window.triggerAscension = async function() {
       ascendedAt: firebase.firestore.FieldValue.serverTimestamp(),
     });
     await _db.doc('shared/stats').update({ era });
-    alert(`The island has ascended to Era ${era}! Ã—${newGmult.toFixed(2)} permanent bonus applied.`);
+    alert(`The island has ascended to Era ${era}! ×${newGmult.toFixed(2)} permanent bonus applied.`);
   } catch(e) {
     alert('Ascension failed: ' + e.message);
   }
 };
 
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ──────────────────────────────────────────────
 // LEADERBOARD
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ──────────────────────────────────────────────
 const _LB_FIELDS = {
   earners:  { field: 'coinsEarned',  label: 'coins earned' },
   clickers: { field: 'totalClicks',  label: 'clicks' },
@@ -4789,7 +4789,7 @@ window._loadLeaderboard = async function(tab) {
       .get();
 
     const fmtFn = typeof fmt === 'function' ? fmt : (v => String(Math.floor(v)));
-    const medals = ['ðŸ¥‡','ðŸ¥ˆ','ðŸ¥‰'];
+    const medals = ['\uD83E\uDD47','\uD83E\uDD48','\uD83E\uDD49'];
     const myUid  = _currentUser?.uid;
 
     el.innerHTML = snap.docs.map((doc, i) => {
@@ -4814,7 +4814,7 @@ window._loadLeaderboard = async function(tab) {
         const m = mySnap.data();
         const fN = fmtFn;
         myEl.style.display = 'block';
-        myEl.innerHTML = `<div class="box-header"><span>ðŸ“Š your stats</span></div>
+        myEl.innerHTML = `<div class="box-header"><span>\uD83D\uDCCA your stats</span></div>
           <div style="padding:12px 14px;display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:11px;">
             <div>coins earned: <span style="color:var(--gold);">${fN(m.coinsEarned||0)}</span></div>
             <div>clicks: <span style="color:var(--blue2);">${fN(m.totalClicks||0)}</span></div>
@@ -4830,9 +4830,9 @@ window._loadLeaderboard = async function(tab) {
   }
 };
 
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ──────────────────────────────────────────────
 // DRIBZYBOT FEED
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ──────────────────────────────────────────────
 let _dribzyUnsub = null;
 let _dribzyLikes = {};
 try { _dribzyLikes = JSON.parse(localStorage.getItem('tk_dribzy_likes') || '{}'); } catch(e) {}
@@ -4846,7 +4846,7 @@ function _relTime(ts) {
   return Math.floor(secs/86400) + 'd';
 }
 
-// Text-safe escaper for innerHTML content â€” only escapes < > & (not quotes, which avoids &#39; mangling)
+// Text-safe escaper for innerHTML content — only escapes < > & (not quotes, which avoids &#39; mangling)
 function _escT(s) {
   return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
@@ -4864,12 +4864,12 @@ function _renderDribzyPost(id, d, isNew) {
         <span class="dribzy-time">${_relTime(d.timestamp)}</span>
       </div>
       <div class="dribzy-text">${text}</div>
-      ${d.headline ? `<div class="dribzy-source">â†³ re: ${_escT(d.headline)}</div>` : ''}
+      ${d.headline ? `<div class="dribzy-source">↳ re: ${_escT(d.headline)}</div>` : ''}
       <div class="dribzy-footer">
-        <span class="dribzy-action ${liked?'liked':''}" onclick="_dribzyLike('${id}',${d.likes||0})">â™¥ ${likeCount}</span>
-        <span class="dribzy-action">â†© ${d.reposts || 0}</span>
+        <span class="dribzy-action ${liked?'liked':''}" onclick="_dribzyLike('${id}',${d.likes||0})">♥ ${likeCount}</span>
+        <span class="dribzy-action" onclick="_dribzyRepost('${id}',${d.reposts||0},this)">↩ <span class="repost-count">${d.reposts || 0}</span></span>
         ${d.topic ? `<span style="font-size:10px;color:var(--dim);">#${_escT(d.topic)}</span>` : ''}
-        <a href="https://x.com/intent/tweet?text=${encodeURIComponent((d.text||'').slice(0,240)+' â€” @Dribzybot on tonykrink.com')}" target="_blank" rel="noopener" class="dribzy-action" style="margin-left:auto;text-decoration:none;">ð• share</a>
+        <a href="https://x.com/intent/tweet?text=${encodeURIComponent((d.text||'').slice(0,220))}&via=Dribzybot&url=${encodeURIComponent('https://tonykrink.com')}" target="_blank" rel="noopener" class="dribzy-action" style="margin-left:auto;text-decoration:none;" title="quote tweet this on X">\uD835\uDD4F retweet</a>
       </div>
     </div>
   </div>`;
@@ -4881,13 +4881,32 @@ window._dribzyLike = function(id, baseLikes) {
   if (_dribzyLikes[id]) {
     delete _dribzyLikes[id];
     el.classList.remove('liked');
-    el.textContent = 'â™¥ ' + baseLikes;
+    el.textContent = '♥ ' + baseLikes;
   } else {
     _dribzyLikes[id] = true;
     el.classList.add('liked');
-    el.textContent = 'â™¥ ' + (baseLikes + 1);
+    el.textContent = '♥ ' + (baseLikes + 1);
   }
   try { localStorage.setItem('tk_dribzy_likes', JSON.stringify(_dribzyLikes)); } catch(e) {}
+};
+
+// Repost — increments local count + opens X to quote tweet
+let _dribzyReposts = {};
+try { _dribzyReposts = JSON.parse(localStorage.getItem('tk_dribzy_reposts') || '{}'); } catch(e) {}
+
+window._dribzyRepost = function(id, baseReposts, btn) {
+  if (_dribzyReposts[id]) return; // already reposted this session
+  _dribzyReposts[id] = true;
+  try { localStorage.setItem('tk_dribzy_reposts', JSON.stringify(_dribzyReposts)); } catch(e) {}
+  const countEl = btn ? btn.querySelector('.repost-count') : null;
+  if (countEl) countEl.textContent = baseReposts + 1;
+  btn && btn.classList.add('liked');
+  // Write increment to Firestore
+  if (_db) {
+    _db.collection('dribzybot_posts').doc(id)
+      .update({ reposts: firebase.firestore.FieldValue.increment(1) })
+      .catch(() => {});
+  }
 };
 
 window._loadDribzyFeed = function() {
@@ -4909,11 +4928,11 @@ window._loadDribzyFeed = function() {
         return;
       }
       const changes = snap.docChanges();
-      // First load â€” render all
+      // First load — render all
       if (changes.every(c => c.type === 'added') && feed.querySelector('.dribzy-post') === null) {
         feed.innerHTML = snap.docs.map((doc, i) => _renderDribzyPost(doc.id, doc.data(), i === 0 && snap.docs.length > 0)).join('');
       } else {
-        // Incremental â€” prepend new posts
+        // Incremental — prepend new posts
         changes.filter(c => c.type === 'added').forEach(c => {
           feed.insertAdjacentHTML('afterbegin', _renderDribzyPost(c.doc.id, c.doc.data(), true));
           // Remove NEW badge after 8s
@@ -4926,18 +4945,18 @@ window._loadDribzyFeed = function() {
     }, err => console.warn('Dribzy feed error:', err));
 };
 
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ──────────────────────────────────────────────
 // CASINO
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ──────────────────────────────────────────────
 const _SYMBOLS = [
-  { icon:'ðŸŸ¡', name:'Bajookie',        mult:2,   weight:25 },
-  { icon:'ðŸ¥¸',  name:'Jerry',           mult:3,   weight:22 },
-  { icon:'ðŸ¾',  name:'Japingus',        mult:5,   weight:16 },
-  { icon:'ðŸ‡',  name:'Drain Gang',      mult:8,   weight:12 },
-  { icon:'ðŸ“¬',  name:'Newman',          mult:15,  weight:8  },
-  { icon:'ðŸ’¥',  name:'Kramer',          mult:20,  weight:6  },
-  { icon:'ðŸ•³ï¸', name:'Void',            mult:50,  weight:3  },
-  { icon:'â­',  name:'BAJOOKIE JACKPOT',mult:500, weight:1  },
+  { icon:'\uD83D\uDFE1', name:'Bajookie',        mult:2,   weight:25 },
+  { icon:'\uD83E\uDD78', name:'Jerry',           mult:3,   weight:22 },
+  { icon:'\uD83D\uDC3E', name:'Japingus',        mult:5,   weight:16 },
+  { icon:'\uD83C\uDF47', name:'Drain Gang',      mult:8,   weight:12 },
+  { icon:'\uD83D\uDCEC', name:'Newman',          mult:15,  weight:8  },
+  { icon:'\uD83D\uDCA5', name:'Kramer',          mult:20,  weight:6  },
+  { icon:'\uD83D\uDD73\uFE0F', name:'Void',      mult:50,  weight:3  },
+  { icon:'\u2B50',       name:'BAJOOKIE JACKPOT',mult:500, weight:1  },
 ];
 
 // Build weighted reel pool
@@ -4987,7 +5006,7 @@ function _updateCasinoDisplay() {
   if (profitEl) profitEl.style.color = profit >= 0 ? 'var(--green)' : 'var(--red)';
 
   const freeEl = document.getElementById('free-spins-display');
-  if (freeEl) freeEl.textContent = _casino.freeSpins > 0 ? 'ðŸŽ free spins: ' + _casino.freeSpins : '';
+  if (freeEl) freeEl.textContent = _casino.freeSpins > 0 ? '\uD83C\uDF81 free spins: ' + _casino.freeSpins : '';
 
   const balEl = document.getElementById('slot-balance-display');
   if (balEl) balEl.textContent = fmtFn(typeof coins !== 'undefined' ? coins : 0) + ' coins';
@@ -4995,20 +5014,20 @@ function _updateCasinoDisplay() {
   // Tier display
   const tier = _getCasinoTier();
   const tierEl = document.getElementById('slot-tier-label');
-  if (tierEl) tierEl.textContent = tier === 'void' ? 'ðŸ•³ï¸ VOID SLOT' : tier === 'drain' ? 'ðŸ‡ DRAIN GANG MACHINE' : 'ðŸŽ° CLASSIC SLOT';
+  if (tierEl) tierEl.textContent = tier === 'void' ? '\uD83D\uDD73\uFE0F VOID SLOT' : tier === 'drain' ? '\uD83C\uDF47 DRAIN GANG MACHINE' : '\uD83C\uDFB0 CLASSIC SLOT';
   ['tier-classic','tier-drain','tier-void'].forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
     el.style.color = (id === 'tier-' + tier) ? 'var(--green)' : 'var(--dim)';
-    el.textContent = (id === 'tier-' + tier ? 'â˜… ' : 'â˜† ') + el.textContent.replace(/^[â˜…â˜†] /, '');
+    el.textContent = (id === 'tier-' + tier ? '★ ' : '☆ ') + el.textContent.replace(/^[★☆] /, '');
   });
 
   // Japingus bonus display
   const japBonusEl = document.getElementById('slot-jap-bonus');
   if (japBonusEl) {
     const jb = _getJapBonus();
-    if (jb > 1)      japBonusEl.textContent = 'ðŸ¾ Japingus is thriving! +5% RTP bonus';
-    else if (jb < 1) japBonusEl.textContent = 'ðŸ’€ Japingus is dead... the slots feel cold. -10% RTP';
+    if (jb > 1)      japBonusEl.textContent = '\uD83D\uDC3E Japingus is thriving! +5% RTP bonus';
+    else if (jb < 1) japBonusEl.textContent = '\uD83D\uDC80 Japingus is dead... the slots feel cold. -10% RTP';
     else             japBonusEl.textContent = '';
     japBonusEl.style.color = jb >= 1 ? 'var(--green)' : 'var(--red)';
   }
@@ -5030,7 +5049,7 @@ window.spinSlots = async function() {
   if (!isFree) {
     if (typeof coins === 'undefined' || coins < bet) {
       const r = document.getElementById('spin-result');
-      if (r) { r.textContent = 'âŒ not enough coins!'; r.style.color = 'var(--red)'; }
+      if (r) { r.textContent = 'not enough coins!'; r.style.color = 'var(--red)'; }
       return;
     }
     // Deduct bet
@@ -5100,10 +5119,10 @@ window.spinSlots = async function() {
       if (a.name === 'BAJOOKIE JACKPOT') {
         payout = bet * a.mult * japBonus;
         isJackpot = true;
-        resultText = `â­ BAJOOKIE JACKPOT! Ã—${a.mult} = +${Math.floor(payout)} coins!`;
+        resultText = `\u2B50 BAJOOKIE JACKPOT! \xD7${a.mult} = +${Math.floor(payout)} coins!`;
       } else {
         payout = bet * a.mult * japBonus;
-        resultText = `${a.icon}${a.icon}${a.icon} ${a.name}! Ã—${a.mult} = +${Math.floor(payout)} coins`;
+        resultText = `${a.icon}${a.icon}${a.icon} ${a.name}! ×${a.mult} = +${Math.floor(payout)} coins`;
       }
       _casino.wins++;
     }
@@ -5111,11 +5130,11 @@ window.spinSlots = async function() {
     else if (a.name === b.name || b.name === c.name || a.name === c.name) {
       const matched = a.name === b.name ? a : (b.name === c.name ? b : a);
       payout = bet * matched.mult * 0.5 * japBonus;
-      resultText = `${matched.icon}${matched.icon} two ${matched.name} â€” Ã—${matched.mult / 2} = +${Math.floor(payout)} coins`;
+      resultText = `${matched.icon}${matched.icon} two ${matched.name} — ×${matched.mult / 2} = +${Math.floor(payout)} coins`;
       _casino.wins++;
     }
     else {
-      resultText = 'â€” no match. try again.';
+      resultText = '— no match. try again.';
     }
 
     // Scatter: 3 Japingus anywhere = free spin
@@ -5135,7 +5154,7 @@ window.spinSlots = async function() {
       if (_db && _currentUser) {
         const updates = {
           totalWon:   firebase.firestore.FieldValue.increment(payout),
-          biggestWin: payout, // will overwrite â€” not ideal but simple
+          biggestWin: payout, // will overwrite — not ideal but simple
         };
         if (isJackpot) {
           updates.jackpotsHit = firebase.firestore.FieldValue.increment(1);
@@ -5154,7 +5173,7 @@ window.spinSlots = async function() {
 
     if (freeSpin) {
       _casino.freeSpins++;
-      resultText += ' ðŸŽ FREE SPIN!';
+      resultText += ' \uD83C\uDF81 FREE SPIN!';
     }
 
     if (isJackpot) {
@@ -5178,9 +5197,9 @@ window._initCasino = function() {
   _updateCasinoDisplay();
 };
 
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ──────────────────────────────────────────────
 // AUTH UI
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ──────────────────────────────────────────────
 function _showLoginOverlay() {
   const el = document.getElementById('login-overlay');
   if (el) el.style.display = 'flex';
@@ -5226,9 +5245,9 @@ function _showProfileBadge() {
 window.authShowLogin = function() { _clearAuthError(); _showLoginOverlay(); };
 window.authHideLogin = function() { _hideLoginOverlay(); };
 
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ──────────────────────────────────────────────
 // AUTH ACTIONS
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ──────────────────────────────────────────────
 window.authSwitchTab = function(tab) {
   document.getElementById('auth-login-form').style.display = tab === 'login'    ? 'block' : 'none';
   document.getElementById('auth-reg-form').style.display   = tab === 'register' ? 'block' : 'none';
@@ -5286,9 +5305,9 @@ window.authSelectAvatar = function(id) {
   });
 };
 
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ──────────────────────────────────────────────
 // AVATAR GRID
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ──────────────────────────────────────────────
 function _renderAvatarGrid() {
   const grid = document.getElementById('avatar-grid');
   if (!grid) return;
