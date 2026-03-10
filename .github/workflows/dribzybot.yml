@@ -1,0 +1,29 @@
+name: Dribzybot — Post to Firestore
+
+on:
+  schedule:
+    - cron: "0 */3 * * *"   # every 3 hours  (change to "0 */2 * * *" for every 2h, "0 * * * *" for every hour)
+  workflow_dispatch:         # lets you trigger manually from the Actions tab anytime
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        working-directory: dribzybot
+        run: npm install
+
+      - name: Run Dribzybot
+        working-directory: dribzybot
+        env:
+          ANTHROPIC_API_KEY:        ${{ secrets.ANTHROPIC_API_KEY }}
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: node runner.mjs
