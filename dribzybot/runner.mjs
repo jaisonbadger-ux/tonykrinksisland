@@ -8,7 +8,8 @@ import { initializeApp, cert } from "firebase-admin/app";
 import { getFirestore, FieldValue } from "firebase-admin/firestore";
 
 // ── Init ──
-initializeApp({ credential: cert(JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT)) });
+const _svcRaw = process.env.FIREBASE_SERVICE_ACCOUNT.trim().replace(/^['"]|['"]$/g, '');
+initializeApp({ credential: cert(JSON.parse(_svcRaw)) });
 const db         = getFirestore();
 const anthropic  = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
