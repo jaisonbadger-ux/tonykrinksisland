@@ -1303,6 +1303,13 @@ function handleObjectClick(obj) {
       addSystemMessage(pints[Math.floor(Math.random()*pints.length)]);
       myPlayer.chatMsg='*pulls a pint*';myPlayer.chatTimer=4000;
       addChatMessage(myPlayer.name,'*pulls a pint*',myPlayer.color,true);
+      setTimeout(()=>{
+        if(!robboPlayer||robboPlayer.chatTimer>500)return;
+        const rTap=['careful with the tap the seal\'s a bit dodgy','that one\'s bungalow bitter. good choice. finally.','yeah help yourself. nobody ever asks. just take it.','go easy on the experimental batch seriously'];
+        robboPlayer.chatMsg=rTap[Math.floor(Math.random()*rTap.length)];
+        robboPlayer.chatTimer=5000;
+        addChatMessage('ROBBO',robboPlayer.chatMsg,ROBBO_COLOR,false,false);
+      },1000);
       break;
     }
     case 'door': {
@@ -1324,7 +1331,7 @@ function handleObjectClick(obj) {
   }
 }
 
-// ── CAL NPC — tall ski bro, perpetually stoned ──
+// ── CAL NPC — tall ski bro, perpetually stoned, substitute teacher ──
 const CAL_COLOR = '#1a88cc';
 const CAL_QUOTES = [
   "oh man I lost my car im so high",
@@ -1349,6 +1356,23 @@ const CAL_QUOTES = [
   "can someone check if the lifts are open. I can't read right now.",
   "I'm fine. I'm a professional skier. I just can't stand up.",
   "is there a late checkout. I think I'm still on the mountain.",
+  // japan skiing
+  "niseko is the greatest place on earth. I cried in a gondola there.",
+  "hakuba powder is different. it has a spiritual quality. or I was just fully cooked.",
+  "I was a substitute teacher in nagano once. the kids loved me. I think.",
+  "japanese convenience store onigiri at 2am after a powder day. nothing better.",
+  "I told my students in japan to open their textbooks and then I fell asleep standing up.",
+  "bro the lifts in hokkaido open at 8am. I was there at 6am. still high from the night before.",
+  "I asked a japanese kid what 8 times 7 is and he told me and then I said yep and moved on.",
+  // substitute teacher
+  "I'm a substitute teacher. the kids call me mr cal. I let them.",
+  "I put on a documentary about penguins and had a nap. educational.",
+  "a kid asked me if I was okay and I said are ANY of us okay and then I sat down.",
+  "I told year 7 maths class that numbers are a social construct. they seemed into it.",
+  "I was supposed to teach PE but I just watched from the bench and gave thumbs up.",
+  "the principal called me in. I thought it was about the gummy incident. it wasn't. still worried.",
+  "I genuinely forgot what subject I was meant to be teaching by period 3.",
+  "a kid threw a spitball and I said nice arc and gave him a gold star.",
 ];
 let calPlayer = null;
 let _calMsgTimer = 0;
@@ -1472,31 +1496,44 @@ function drawCalGoblin(x, y, dir, frame, chatMsg, sitting) {
   }
 }
 
-// ── FARROW NPC — bitcoin stoner, always at the pc ──
+// ── FARROW NPC — bitcoin genius, permanently cooked, always hungover ──
 const FARROW_COLOR = '#f7931a'; // bitcoin orange
 const FARROW_QUOTES = [
   "bitcoin is just math bro. BEAUTIFUL math.",
-  "I've eaten nothing but twiggy sticks for 3 days and I feel incredible",
+  "the only food I've eaten in 3 days is twiggy sticks and I've never felt more alive",
   "what if... blockchain but for skiing. hear me out.",
   "this carlton hits different when BTC is up 8%",
   "I'm not addicted to coding I just can't stop",
   "I wrote a script that buys btc every time I eat a twiggy stick",
   "the whitepaper changed my life. also these gummies.",
-  "bro satoshi was definitely a stoner. just look at the timestamp on the genesis block",
+  "bro satoshi was definitely a stoner. look at the genesis block timestamp.",
   "I compiled this at 3am and it works. I don't know why it works.",
   "stack sats. eat twiggy sticks. sleep eventually.",
-  "my node went down and I cried a little. the twiggy sticks helped.",
+  "my node went down and I cried. the twiggy sticks helped. barely.",
   "proof of work is basically just... vibes but mathematically",
   "I haven't seen sunlight but I've seen the mempool and it's beautiful",
   "lightning network goes brrr. also this carlton goes brrr.",
   "I am SO high and this code is SO elegant",
   "decentralised. permissionless. COOKED.",
   "twiggy sticks are the bitcoin of snacks. finite supply. incredible taste.",
-  "bro the block reward just halved. I need a beer.",
+  "bro the block reward just halved. I need like four beers.",
   "I wrote 400 lines today and can't remember any of them",
-  "when btc moons I'm buying a ski lodge. that's the plan. that's always been the plan.",
+  "when btc moons I'm buying a ski lodge. that's the plan. always been the plan.",
   "the hash rate is up. I am also up. we are all up.",
   "I think I accidentally wrote a virus but it's a very efficient one",
+  // hangover quotes
+  "it feels like I've been shot out of a cannon mate",
+  "you gotta help me mate. I can't feel my face and that's probably fine.",
+  "I had 14 carltons last night and wrote the most beautiful code of my life and now I feel like death",
+  "my head. oh no. my head.",
+  "I think I blacked out and kept coding. the git commits don't lie.",
+  "someone bring me a twiggy stick I can't stand up",
+  "the carlton longnecks were a mistake. the code was not a mistake.",
+  "I need water. or a beer. one of those. both probably.",
+  "bro I am so dusty. completely dusty. send help.",
+  "I woke up at the desk again. the code was still compiling. respect.",
+  "my body is 40% twiggy sticks 40% carlton and 20% genius right now",
+  "I can't tell if I'm still high or just that hungover",
 ];
 let farrowPlayer = null;
 let _farrowMsgTimer = 5000 + Math.random()*8000; // offset from cal
@@ -1617,6 +1654,188 @@ function drawFarrowGoblin(x, y, dir, frame, chatMsg, sitting) {
   }
 }
 
+// ── JACK ROBBO NPC — brewer, kush beggar, best mates with cal, massive whinger ──
+const ROBBO_COLOR = '#8B4513'; // brewery brown
+const ROBBO_QUOTES = [
+  // brewing
+  "the pale ale is coming along. three more days. maybe two. maybe five.",
+  "I need more hops. someone go to the shops. actually I'll go. no I won't.",
+  "the fermentor is doing something weird. I'll deal with it later.",
+  "bungalow bitter batch 7 is going to be the best one. I say that every time.",
+  "I've been brewing for six years and I still don't fully understand yeast.",
+  "the keg exploded once. not today though. probably.",
+  // begging for kush
+  "anyone got any kush? asking for me. it's for me.",
+  "cal have you got any green mate. seriously. I've got nothing.",
+  "I would kill for a cone right now. not literally. maybe literally.",
+  "I've been dry for four days and I'm not handling it well as you can see.",
+  "farrow have you got any? no? typical. absolute typical.",
+  "I'll swap you a fresh pint for a cone. that's a great deal. that's a steal.",
+  "someone on this island has to have some kush. statistically.",
+  // complaining
+  "this is a nightmare. everything about today is a nightmare.",
+  "nobody helps. I ask for one thing and nobody helps.",
+  "the helmet was my dad's idea and now I can't take it off emotionally.",
+  "why does cal have skis inside. WHY are there skis inside.",
+  "I've been standing at this fermentor for six hours and nobody cared once.",
+  "the yeast went bad. the YEAST went BAD. do you understand what I'm dealing with.",
+  "I cooked the hops wrong. again. I always cook the hops wrong.",
+  "nobody drinks my beer and says it's good. they drink it and go quiet. that's something.",
+  "I'm doing everything myself. always. every time.",
+  // fighting with cal (but love him really)
+  "cal you dropped a zyn in the mash tun again didn't you. I can TELL.",
+  "if cal skis into the brewery one more time I'm going to lose my mind.",
+  "me and cal had a fight earlier. he was wrong. I was also slightly wrong. he was more wrong.",
+  "cal's my best mate but he is genuinely the most annoying person on earth.",
+  "I love cal like a brother and I want to throw him into the fermentor.",
+];
+
+// Cal and Robbo bicker — triggered periodically
+const ROBBO_CAL_FIGHTS = [
+  { robbo:"cal stop leaving ski wax on the couch",       cal:"that could be anyone's ski wax robbo" },
+  { robbo:"cal you ate my last twiggy stick",            cal:"I thought it was a community twiggy stick" },
+  { robbo:"you promised to help in the brewery",        cal:"I was going to. then I sat down." },
+  { robbo:"cal why are your skis in the fermentor room",cal:"they needed somewhere to live robbo" },
+  { robbo:"you never have any kush cal",                cal:"bro I'm high right now look at me" },
+  { robbo:"stop teaching kids on school nights you're a mess the next day", cal:"the kids need me robbo. also yeah fair." },
+];
+let _robboCal_timer = 35000 + Math.random()*30000; // first fight after 35-65s
+
+let robboPlayer = null;
+let _robboMsgTimer = 8000 + Math.random()*10000; // offset from others
+const ROBBO_HOME = { c:18, r:16 }; // near the tap counter in brewery
+
+function initRobbo() {
+  robboPlayer = {
+    id:'robbo', name:'ROBBO', color:ROBBO_COLOR,
+    x: ROBBO_HOME.c*TILE+TILE/2, y: ROBBO_HOME.r*TILE+TILE/2,
+    tx: ROBBO_HOME.c*TILE+TILE/2, ty: ROBBO_HOME.r*TILE+TILE/2,
+    dir:'idle', frame:0, chatMsg:'', chatTimer:0,
+    isYou:false, path:[], sitting:false,
+  };
+  players['robbo'] = robboPlayer;
+  _robboMsgTimer = 8000 + Math.random()*10000;
+}
+
+function updateRobbo(dt) {
+  if(!robboPlayer) return;
+  const p = robboPlayer;
+  // wanders between fermentors, tap counter, occasionally to beg farrow/cal for kush
+  if(p.path.length===0 && Math.random()<0.002) {
+    const distFromHome = Math.hypot(p.x-(ROBBO_HOME.c*TILE+TILE/2), p.y-(ROBBO_HOME.r*TILE+TILE/2));
+    if(distFromHome > TILE*5) {
+      p.path=[{x:ROBBO_HOME.c*TILE+TILE/2, y:ROBBO_HOME.r*TILE+TILE/2}];
+    } else {
+      const spots=[
+        {c:17,r:15},{c:20,r:15},{c:16,r:14},{c:19,r:14}, // brewery area
+        {c:8,r:7},  // beg cal for kush
+        {c:26,r:9}, // beg farrow for kush
+      ];
+      const sp=spots[Math.floor(Math.random()*spots.length)];
+      p.path=[{x:sp.c*TILE+TILE/2, y:sp.r*TILE+TILE/2}];
+    }
+  }
+  // quotes
+  _robboMsgTimer -= dt;
+  if(_robboMsgTimer <= 0) {
+    _robboMsgTimer = 15000 + Math.random()*25000;
+    const quote = ROBBO_QUOTES[Math.floor(Math.random()*ROBBO_QUOTES.length)];
+    p.chatMsg = quote; p.chatTimer = 6500;
+    addChatMessage('ROBBO', quote, ROBBO_COLOR, false, false);
+  }
+  // cal/robbo bicker
+  _robboCal_timer -= dt;
+  if(_robboCal_timer <= 0) {
+    _robboCal_timer = 40000 + Math.random()*40000;
+    if(calPlayer && robboPlayer) {
+      const fight = ROBBO_CAL_FIGHTS[Math.floor(Math.random()*ROBBO_CAL_FIGHTS.length)];
+      robboPlayer.chatMsg = fight.robbo; robboPlayer.chatTimer = 6000;
+      addChatMessage('ROBBO', fight.robbo, ROBBO_COLOR, false, false);
+      setTimeout(()=>{
+        if(!calPlayer) return;
+        calPlayer.chatMsg = fight.cal; calPlayer.chatTimer = 6000;
+        addChatMessage('CAL', fight.cal, CAL_COLOR, false, false);
+      }, 3500);
+    }
+  }
+}
+
+function drawRobboGoblin(x, y, dir, frame, chatMsg, sitting) {
+  const s = ctx;
+  const px=v=>Math.round(v);
+  // shadow
+  s.fillStyle='rgba(0,0,0,0.3)';
+  s.beginPath();s.ellipse(x,y+14,9,3,0,0,Math.PI*2);s.fill();
+  s.save();
+  if(dir==='left'){s.translate(x,y);s.scale(-1,1);s.translate(-x,-y);}
+  // body — brewery apron over a flannel shirt
+  s.fillStyle='#4a2c0a';s.fillRect(px(x-5),px(y-8),10,12); // flannel
+  // apron
+  s.fillStyle='#d4c4a0';s.fillRect(px(x-4),px(y-6),8,10);
+  s.fillStyle='#c8b890';s.fillRect(px(x-1),px(y-8),2,2); // apron neck strap
+  // flannel plaid lines
+  s.fillStyle='rgba(180,40,40,0.4)';s.fillRect(px(x-5),px(y-5),10,1);s.fillRect(px(x-5),px(y-2),10,1);
+  // head
+  s.fillStyle='#c8a060';s.fillRect(px(x-5),px(y-21),10,13);
+  // stubble / scruffy beard
+  s.fillStyle='rgba(80,40,10,0.5)';s.fillRect(px(x-4),px(y-13),8,4);
+  // eyebrows — furrowed (he's always complaining)
+  s.fillStyle='#5a3010';
+  s.fillRect(px(x-4),px(y-18),3,2);s.fillRect(px(x+1),px(y-18),3,2);
+  // worried/annoyed eyes
+  s.fillStyle='#222';s.fillRect(px(x-3),px(y-16),2,2);s.fillRect(px(x+1),px(y-16),2,2);
+  // ears
+  s.fillStyle='#c8a060';s.fillRect(px(x-7),px(y-19),2,4);s.fillRect(px(x+5),px(y-19),2,4);
+  // mouth — slight grimace
+  s.fillStyle='#7a4020';s.fillRect(px(x-2),px(y-12),5,1);s.fillRect(px(x-3),px(y-11),1,1);s.fillRect(px(x+3),px(y-11),1,1);
+  if(sitting) {
+    s.fillStyle='#5a3a1a';s.fillRect(px(x-6),px(y+4),6,8);s.fillRect(px(x),px(y+4),6,8);
+    s.fillStyle='#c8a060';s.fillRect(px(x-8),px(y-6),3,5);s.fillRect(px(x+5),px(y-6),3,5);
+  } else {
+    const legOff=dir!=='idle'?Math.sin(frame*0.3)*3:0;
+    s.fillStyle='#3a2a10';s.fillRect(px(x-5),px(y+4),4,7+legOff);s.fillRect(px(x+1),px(y+4),4,7-legOff);
+    const armOff=dir!=='idle'?Math.sin(frame*0.3)*2:0;
+    s.fillStyle='#4a2c0a';s.fillRect(px(x-8),px(y-7+armOff),3,6);s.fillRect(px(x+5),px(y-7-armOff),3,6);
+  }
+  // HELMET — always on, slightly crooked
+  s.fillStyle='#d4d4d4';s.fillRect(px(x-6),px(y-26),12,8); // shell
+  s.fillStyle='#b0b0b0';s.fillRect(px(x-6),px(y-26),12,3); // top ridge
+  s.fillStyle='#888';
+  s.fillRect(px(x-7),px(y-24),2,5); // left ear flap
+  s.fillRect(px(x+5),px(y-24),2,5); // right ear flap
+  // chin strap
+  s.strokeStyle='#888';s.lineWidth=1;
+  s.beginPath();s.moveTo(px(x-5),px(y-20));s.lineTo(px(x-4),px(y-12));s.stroke();
+  s.beginPath();s.moveTo(px(x+5),px(y-20));s.lineTo(px(x+4),px(y-12));s.stroke();
+  // small vent holes on helmet
+  s.fillStyle='#aaa';s.fillRect(px(x-3),px(y-25),1,2);s.fillRect(px(x),px(y-25),1,2);s.fillRect(px(x+2),px(y-25),1,2);
+  s.restore();
+  // name tag — brewery brown
+  s.font='10px "Press Start 2P"';s.textAlign='center';
+  const nw=s.measureText('ROBBO').width+8;
+  s.fillStyle='rgba(139,69,19,0.2)';s.fillRect(x-nw/2,y-42,nw,13);
+  s.fillStyle=ROBBO_COLOR;s.fillText('ROBBO',x,y-32);
+  // helmet indicator
+  s.font='8px "VT323"';s.fillStyle='rgba(180,140,80,0.7)';
+  s.fillText('[brewer] [sober]',x,y-46);
+  // chat bubble
+  if(chatMsg) {
+    s.font='11px "VT323"';
+    const maxW=130,lines=wrapText(chatMsg,maxW,s);
+    const bh=lines.length*14+10,bw=Math.min(maxW+16,150);
+    const bx=x-bw/2,by=y-60-bh;
+    s.fillStyle='rgba(139,69,19,0.1)';
+    s.strokeStyle=ROBBO_COLOR;s.lineWidth=1;
+    s.beginPath();s.roundRect(bx,by,bw,bh,3);s.fill();s.stroke();
+    s.fillStyle='rgba(139,69,19,0.1)';
+    s.beginPath();s.moveTo(x-4,by+bh);s.lineTo(x,by+bh+6);s.lineTo(x+4,by+bh);s.fill();
+    s.strokeStyle=ROBBO_COLOR;
+    s.beginPath();s.moveTo(x-4,by+bh);s.lineTo(x,by+bh+6);s.lineTo(x+4,by+bh);s.stroke();
+    s.fillStyle='#c9d1d9';s.textAlign='center';
+    lines.forEach((l,i)=>s.fillText(l,x,by+13+i*14));
+  }
+}
+
 // ── PLAYERS ──
 const MOVE_SPEED=80;
 let myPlayer=null;
@@ -1700,6 +1919,14 @@ function _startPresence(name, color) {
           farrowPlayer.chatTimer=5000;
           addChatMessage('FARROW',farrowPlayer.chatMsg,FARROW_COLOR,false,false);
         }, 5500);
+        // Robbo complains about having to be social
+        setTimeout(()=>{
+          if(!robboPlayer||robboPlayer.chatTimer>0)return;
+          const rgreets=['oh great another person. '+d.name+'. hi.',''+d.name+' you got any kush','hello. do you have weed. no? okay.','yeah come in. don\'t touch the fermentors.','welcome. the beer isn\'t ready yet. I know. I know.'];
+          robboPlayer.chatMsg=rgreets[Math.floor(Math.random()*rgreets.length)];
+          robboPlayer.chatTimer=5000;
+          addChatMessage('ROBBO',robboPlayer.chatMsg,ROBBO_COLOR,false,false);
+        }, 8500);
       } else {
         const p = players[id];
         if (Math.hypot((d.x||0) - p.x, (d.y||0) - p.y) > 4) {
@@ -1716,7 +1943,7 @@ function _startPresence(name, color) {
       }
     });
     for (const id of Object.keys(players)) {
-      if (id === 'you' || id === 'cal' || id === 'farrow') continue; // never remove local NPCs
+      if (id === 'you' || id === 'cal' || id === 'farrow' || id === 'robbo') continue; // never remove local NPCs
       if (!activeIds.has(id)) {
         const gone = players[id].name;
         delete players[id];
@@ -1894,14 +2121,15 @@ function updatePlayersList(){
   const all=Object.values(players);
   if(calPlayer && !all.find(p=>p.id==='cal')) all.push(calPlayer);
   if(farrowPlayer && !all.find(p=>p.id==='farrow')) all.push(farrowPlayer);
-  const realCount=all.filter(p=>p.id!=='cal'&&p.id!=='farrow').length;
+  if(robboPlayer && !all.find(p=>p.id==='robbo')) all.push(robboPlayer);
+  const realCount=all.filter(p=>p.id!=='cal'&&p.id!=='farrow'&&p.id!=='robbo').length;
   document.getElementById('online-num').textContent=realCount;
   document.getElementById('online-count').textContent=realCount+' online';
   all.forEach(p=>{
     const div=document.createElement('div');div.className='player-entry';
     const dot=document.createElement('div');dot.className='player-dot';dot.style.background=p.color;
     const name=document.createElement('span');name.className='player-name-tag'+(p.isYou?' you':'');
-    name.textContent=p.name+(p.isYou?' (you)':'')+(p.id==='cal'?' [stoned]':'')+(p.id==='farrow'?' [coding]':'')+(p.sitting?' \u{1F4BA}':'');
+    name.textContent=p.name+(p.isYou?' (you)':'')+(p.id==='cal'?' [stoned]':'')+(p.id==='farrow'?' [coding]':'')+(p.id==='robbo'?' [brewing]':'')+(p.sitting?' \u{1F4BA}':'');
     div.appendChild(dot);div.appendChild(name);
     list.appendChild(div);
   });
@@ -1911,12 +2139,15 @@ function drawPlayers(){
   const allP = Object.values(players);
   if(calPlayer) allP.push(calPlayer);
   if(farrowPlayer) allP.push(farrowPlayer);
+  if(robboPlayer) allP.push(robboPlayer);
   allP.sort((a,b)=>a.y-b.y).forEach(p=>{
     const sp=worldToScreen(p.x,p.y);
     if(p.id==='cal'){
       drawCalGoblin(sp.x,sp.y,p.dir,p.frame,p.chatMsg||'',p.sitting||false);
     } else if(p.id==='farrow'){
       drawFarrowGoblin(sp.x,sp.y,p.dir,p.frame,p.chatMsg||'',p.sitting||false);
+    } else if(p.id==='robbo'){
+      drawRobboGoblin(sp.x,sp.y,p.dir,p.frame,p.chatMsg||'',p.sitting||false);
     } else {
       drawGoblin(sp.x,sp.y,p.color,p.dir,p.frame,p.name,p.chatMsg||'',p.isYou,p.sitting||false);
     }
@@ -1957,12 +2188,16 @@ function enterBungalow(rawName,color){
   addSystemMessage('click on stuff to interact — try the bong, TV, fridge, posters, brewery', true);
   initCal();
   initFarrow();
+  initRobbo();
   setTimeout(()=>{
     if(calPlayer){ calPlayer.chatMsg='oh man those gummies got me'; calPlayer.chatTimer=6000; addChatMessage('CAL','oh man those gummies got me',CAL_COLOR,false,false); }
   }, 2000);
   setTimeout(()=>{
     if(farrowPlayer){ farrowPlayer.chatMsg='yo. stacking sats. don\'t mind me.'; farrowPlayer.chatTimer=6000; addChatMessage('FARROW','yo. stacking sats. don\'t mind me.',FARROW_COLOR,false,false); }
   }, 4000);
+  setTimeout(()=>{
+    if(robboPlayer){ robboPlayer.chatMsg='anyone got any kush.'; robboPlayer.chatTimer=6000; addChatMessage('ROBBO','anyone got any kush.',ROBBO_COLOR,false,false); }
+  }, 6500);
   _initBungalowFirebase();
   setTimeout(()=>_startPresence(name,color), 600);
 }
@@ -1971,7 +2206,7 @@ function enterBungalow(rawName,color){
 let lastTime=0;
 function loop(ts){
   const dt=Math.min(ts-lastTime,100);lastTime=ts;
-  if(myPlayer){movePlayersToTargets(dt);updateCamera();updateSmoke(dt);_syncMyPosition();updateCal(dt);updateFarrow(dt);}
+  if(myPlayer){movePlayersToTargets(dt);updateCamera();updateSmoke(dt);_syncMyPosition();updateCal(dt);updateFarrow(dt);updateRobbo(dt);}
   ctx.clearRect(0,0,canvas.width,canvas.height);
   drawWorld();drawPlayers();drawSmoke();
   const grad=ctx.createRadialGradient(canvas.width/2,canvas.height/2,canvas.height*0.3,canvas.width/2,canvas.height/2,canvas.height*0.85);
