@@ -145,6 +145,7 @@ body{background:var(--bg);color:var(--text);font-family:'Fira Code',monospace;fo
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script>
 // =====================================================
@@ -167,14 +168,18 @@ const COLORS = ['#58a6ff','#3fb950','#f778ba','#d4a017','#39c5cf','#f85149','#a3
 // ── PROFILE ──
 let savedProfile = {};
 try { savedProfile = JSON.parse(localStorage.getItem('tk_profile') || '{}'); } catch(e) {}
-const hasProfile = !!(savedProfile.username && savedProfile.username.trim() && savedProfile.username !== 'anon');
+let hasProfile = !!(savedProfile.username && savedProfile.username.trim() && savedProfile.username !== 'anon');
 let chosenColor = COLORS[Math.floor(Math.random() * COLORS.length)];
-// If logged in, try to use their avatar color index
-if (hasProfile && savedProfile.avatarId) {
+
+function _applyProfile() {
+  hasProfile = !!(savedProfile.username && savedProfile.username.trim() && savedProfile.username !== 'anon');
   const AVATAR_COLORS = ['#58a6ff','#3fb950','#f778ba','#d4a017','#39c5cf','#f85149','#a371f7','#ff8c42','#00d4ff','#c9d1d9','#f85149','#8b949e'];
-  const idx = parseInt(savedProfile.avatarId) || 0;
-  if (AVATAR_COLORS[idx]) chosenColor = AVATAR_COLORS[idx];
+  if (hasProfile && savedProfile.avatarId) {
+    const idx = parseInt(savedProfile.avatarId) || 0;
+    if (AVATAR_COLORS[idx]) chosenColor = AVATAR_COLORS[idx];
+  }
 }
+_applyProfile();
 
 // ── WORLD ──
 const TILE = 32;
@@ -1623,7 +1628,46 @@ function loop(ts){
   requestAnimationFrame(loop);
 }
 
-initModal();
+// ── AUTH CHECK — determine login state before showing modal ──
+(function() {
+  const _BKCFG = {
+    apiKey:    'AIzaSyDpFlMknPObiiH0AAyJ8Hhacla_NIe-lzA',
+    authDomain:'tonykrink-63723.firebaseapp.com',
+    projectId: 'tonykrink-63723',
+  };
+  let _bkApp;
+  try { _bkApp = firebase.app('bungalow'); } catch(e) { _bkApp = firebase.initializeApp(_BKCFG, 'bungalow'); }
+  const _bkAuth = firebase.auth(_bkApp);
+  const _bkDb2  = firebase.firestore(_bkApp);
+
+  // Show a subtle "checking..." state
+  const nameBox = document.getElementById('name-box');
+  const checkEl = document.createElement('div');
+  checkEl.style.cssText = 'font-family:"Fira Code",monospace;font-size:10px;color:#484f58;text-align:center;padding:8px 0;';
+  checkEl.textContent = '// checking login...';
+  nameBox.prepend(checkEl);
+  document.getElementById('modal-profile-view').style.display = 'none';
+  document.getElementById('modal-guest-view').style.display = 'none';
+
+  // Wait for Firebase to restore auth state
+  const unsub = _bkAuth.onAuthStateChanged(async (user) => {
+    unsub(); // only need first event
+    if (user) {
+      try {
+        const snap = await _bkDb2.doc('users/' + user.uid + '/data/profile').get();
+        if (snap.exists) {
+          savedProfile = snap.data();
+          // cache it for next time
+          try { localStorage.setItem('tk_profile', JSON.stringify(savedProfile)); } catch(e) {}
+        }
+      } catch(e) { /* use whatever we already have from localStorage */ }
+    }
+    _applyProfile();
+    checkEl.remove();
+    initModal();
+  });
+})();
+
 requestAnimationFrame(loop);
 setInterval(updatePlayersList,2000);
 </script>
