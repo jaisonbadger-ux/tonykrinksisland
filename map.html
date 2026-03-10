@@ -208,6 +208,17 @@ buildMap();
 let tvChannel    = 0;
 let _lastBongUse = 0;
 let _lastTapUse  = 0;
+let _recordTrack = 0;
+const RECORDS = [
+  { artist:'Nirvana',       title:'In Bloom',               col:'#1a5055' },
+  { artist:'Soundgarden',   title:'Black Hole Sun',          col:'#1a2c1a' },
+  { artist:'Pearl Jam',     title:'Alive',                   col:'#3a1010' },
+  { artist:'AIC',           title:'Down in a Hole',          col:'#0e0e0e' },
+  { artist:'Smashing Pumpkins', title:'Thru the Eyes of Ruby', col:'#1a1a3a' },
+  { artist:'Pixies',        title:'Where Is My Mind?',       col:'#2a0a10' },
+  { artist:'Dinosaur Jr.',  title:'Feel the Pain',           col:'#0a1a10' },
+  { artist:'Mudhoney',      title:'Touch Me I\'m Sick',      col:'#2a1a08' },
+];
 const TV_CHANNELS = [
   { name:'BAJOOKIE NETWORK', col:'#3fb950' },
   { name:'SEINFELD RERUNS',  col:'#58a6ff' },
@@ -260,8 +271,13 @@ const worldObjects = [
   { type:'beer_cans',    c:9,  r:10, label:'empty tinnies' },
   { type:'bookshelf',    c:1,  r:10, label:'bookshelf' },
   { type:'lava_lamp',    c:11, r:2,  label:'lava lamp' },
-  { type:'lamp',         c:13, r:8,  label:'floor lamp' },
-  { type:'beanbag',      c:14, r:11, label:'beanbag (click to sink in)', interactable:true },
+  { type:'lamp',          c:13, r:8,  label:'floor lamp' },
+  { type:'beanbag',       c:14, r:11, label:'beanbag (click to sink in)', interactable:true },
+  { type:'record_player', c:11, r:9,  label:'record player (click to skip track)', interactable:true },
+  { type:'graffiti',      c:1,  r:7,  text:'stay stoned', col:'#a371f7' },
+  { type:'graffiti',      c:1,  r:14, text:'ROBBO WAS\nHERE', col:'#d4a017' },
+  { type:'skateboard',    c:15, r:6,  label:'broken skateboard' },
+  { type:'junk_pile',     c:13, r:13, label:'pile of junk mail and coupons' },
   // ── Zyns (left by McGann) ──
   { type:'zyn_pile', c:8,  r:4,  label:"used zyn pouches (mcgann's)", interactable:true },
   { type:'zyn_pile', c:10, r:8,  label:"mcgann's spat-out zyns", interactable:true },
@@ -662,6 +678,80 @@ function drawObject(obj,sx,sy) {
     s.beginPath();s.moveTo(sx-7,sy+6);s.lineTo(sx-9,sy-8);s.lineTo(sx-5,sy-28);s.lineTo(sx-3,sy-28);s.lineTo(sx-5,sy-8);s.lineTo(sx-3,sy+6);s.closePath();s.fill();
     s.fillStyle='#1a1020';s.fillRect(sx-6,sy-32,12,4);
 
+  } else if(obj.type==='record_player') {
+    const rec=RECORDS[_recordTrack];
+    // base unit — dark wood box
+    s.fillStyle='rgba(0,0,0,0.25)';s.fillRect(sx-18,sy-6,38,8);
+    s.fillStyle='#1e1408';s.fillRect(sx-20,sy-18,40,22);
+    s.strokeStyle='#2a1c08';s.lineWidth=1;s.strokeRect(sx-20,sy-18,40,22);
+    // spinning platter
+    const spin = (Date.now()/800)%(Math.PI*2);
+    s.fillStyle='#111';s.beginPath();s.arc(sx-4,sy-9,12,0,Math.PI*2);s.fill();
+    // vinyl grooves
+    for(let r2=4;r2<=11;r2+=2){
+      s.strokeStyle=`rgba(60,60,70,${0.6-r2*0.04})`;s.lineWidth=0.5;
+      s.beginPath();s.arc(sx-4,sy-9,r2,0,Math.PI*2);s.stroke();
+    }
+    // label in centre — rotates
+    s.save();s.translate(sx-4,sy-9);s.rotate(spin);
+    s.fillStyle=rec.col||'#1a1a2a';s.beginPath();s.arc(0,0,4,0,Math.PI*2);s.fill();
+    s.fillStyle='rgba(255,255,255,0.3)';s.fillRect(-1,-3,1,3);
+    s.restore();
+    // tonearm
+    s.save();s.translate(sx+12,sy-16);s.rotate(0.5+Math.sin(spin*0.05)*0.05);
+    s.strokeStyle='#888';s.lineWidth=1.5;
+    s.beginPath();s.moveTo(0,0);s.lineTo(-16,12);s.stroke();
+    s.fillStyle='#aaa';s.beginPath();s.arc(-16,12,2,0,Math.PI*2);s.fill();
+    s.restore();
+    // now playing label
+    s.font='4px "Press Start 2P"';s.fillStyle='rgba(212,160,23,0.7)';s.textAlign='center';
+    s.fillText(rec.artist.slice(0,12),sx+8,sy-18);
+    s.fillStyle='rgba(200,200,200,0.5)';
+    s.fillText(rec.title.slice(0,14),sx+8,sy-10);
+
+  } else if(obj.type==='graffiti') {
+    const isLeft=(obj.c<=1);
+    const gx=isLeft?sx-TILE+4:sx+TILE-4;
+    const lines=(obj.text||'').split('\n');
+    s.font='bold 8px "VT323"';s.textAlign=isLeft?'left':'right';
+    s.fillStyle=(obj.col||'#a371f7');s.globalAlpha=0.55+Math.sin(animT.lamp*0.5)*0.05;
+    lines.forEach((l,i)=>s.fillText(l,gx,sy-4+i*10));
+    s.globalAlpha=1;
+
+  } else if(obj.type==='skateboard') {
+    s.save();s.translate(sx,sy);s.rotate(0.18);
+    // deck
+    s.fillStyle='#8b4513';s.fillRect(-22,-5,44,9);
+    s.strokeStyle='#5a2d0c';s.lineWidth=0.5;s.strokeRect(-22,-5,44,9);
+    // grip tape
+    s.fillStyle='rgba(0,0,0,0.4)';s.fillRect(-20,-5,40,5);
+    for(let i=0;i<6;i++){s.fillStyle='rgba(255,255,255,0.07)';s.fillRect(-18+i*7,-4,3,3);}
+    // trucks
+    s.fillStyle='#888';s.fillRect(-18,4,10,4);s.fillRect(8,4,10,4);
+    // wheels (cracked)
+    [[- 14,8],[14,8],[-14,8],[14,8]].forEach(([wx],i2)=>{
+      const wy=8;const wxx=[-14,14,-14,14][i2];
+      s.fillStyle='#444';s.beginPath();s.arc(wxx,wy,4,0,Math.PI*2);s.fill();
+      s.fillStyle='#666';s.beginPath();s.arc(wxx,wy,2,0,Math.PI*2);s.fill();
+    });
+    s.restore();
+
+  } else if(obj.type==='junk_pile') {
+    // pile of flyers, envelopes, junk mail
+    const items=[
+      {dx:-14,dy:2,w:22,h:14,col:'#c8c4b0',rot:-0.15},
+      {dx:-6,dy:-4,w:20,h:13,col:'#d4cca0',rot:0.2},
+      {dx:4,dy:0,w:18,h:12,col:'#b0c4b0',rot:-0.08},
+      {dx:-10,dy:6,w:24,h:10,col:'#c0b8a0',rot:0.25},
+    ];
+    items.forEach(it=>{
+      s.save();s.translate(sx+it.dx,sy+it.dy);s.rotate(it.rot);
+      s.fillStyle=it.col;s.fillRect(0,0,it.w,it.h);
+      s.strokeStyle='rgba(0,0,0,0.1)';s.lineWidth=0.5;s.strokeRect(0,0,it.w,it.h);
+      s.fillStyle='rgba(0,0,0,0.12)';s.fillRect(2,3,it.w-4,2);
+      s.restore();
+    });
+
   } else if(obj.type==='beanbag') {
     s.fillStyle='rgba(0,0,0,0.25)';s.beginPath();s.ellipse(sx+3,sy+14,22,8,0,0,Math.PI*2);s.fill();
     s.fillStyle='#2a1a08';s.beginPath();s.ellipse(sx,sy,20,18,0,0,Math.PI*2);s.fill();
@@ -1040,17 +1130,54 @@ function handleObjectClick(obj) {
       const msg=bongMsgs[Math.floor(Math.random()*bongMsgs.length)];
       myPlayer.chatMsg=msg;myPlayer.chatTimer=5000;
       addChatMessage(myPlayer.name,msg,myPlayer.color,true);
+      // Cal reacts
+      setTimeout(()=>{
+        if(!calPlayer)return;
+        const calBongReacts=['bro same. same energy.','yeah mate. yeah.','I did one of those and thought I was on a chairlift','nice one. pass... wait I already have one','the goat. absolute goat.'];
+        calPlayer.chatMsg=calBongReacts[Math.floor(Math.random()*calBongReacts.length)];
+        calPlayer.chatTimer=5500;
+        addChatMessage('CAL',calPlayer.chatMsg,CAL_COLOR,false,false);
+      }, 1800);
       break;
     }
     case 'tv': {
       tvChannel=(tvChannel+1)%TV_CHANNELS.length;
       const ch=TV_CHANNELS[tvChannel];
       addSystemMessage('changed to: '+ch.name);
+      setTimeout(()=>{
+        if(!calPlayer||calPlayer.chatTimer>500)return;
+        const tvReacts={'BAJOOKIE NETWORK':['oh this channel SLAPS','bajookie network goes hard'],'SEINFELD RERUNS':['I love this show. I don\'t know why. I just do.','nothing happens and I\'m invested'],'MTV STATIC':['is this art. is this art or a technical issue.','same energy as being this stoned honestly'],'ISLAND LIVE':['wait that\'s you. that\'s literally you on the TV.','we\'re all stars bro']};
+        const lines=tvReacts[ch.name]||['sick channel change'];
+        calPlayer.chatMsg=lines[Math.floor(Math.random()*lines.length)];
+        calPlayer.chatTimer=4500;
+        addChatMessage('CAL',calPlayer.chatMsg,CAL_COLOR,false,false);
+      },1200);
+      break;
+    }
+    case 'record_player': {
+      _recordTrack=(_recordTrack+1)%RECORDS.length;
+      const rec=RECORDS[_recordTrack];
+      addSystemMessage('now playing: '+rec.artist+' — '+rec.title);
+      setTimeout(()=>{
+        if(!calPlayer)return;
+        const recs=['oh THIS song. yeah. yeah this is the one.','bro I skied to this at whistler once','this track goes so hard I almost fell off a chairlift',''+rec.artist+'??? valid. very valid.'];
+        calPlayer.chatMsg=recs[Math.floor(Math.random()*recs.length)];
+        calPlayer.chatTimer=5500;
+        addChatMessage('CAL',calPlayer.chatMsg,CAL_COLOR,false,false);
+      },1000);
       break;
     }
     case 'fridge': {
       const beers=['you grab a cold one','nothing left but light beer and sadness','score — last one','beautiful. 12 beers. the cosmos provides.','there\'s a note: "don\'t drink robbo\'s special batch". you don\'t drink robbo\'s special batch.'];
       addSystemMessage(beers[Math.floor(Math.random()*beers.length)]);
+      // Cal really wants one too
+      setTimeout(()=>{
+        if(!calPlayer)return;
+        const calFridgeReacts=['grab me one. please. please grab me one.','did you get a beer. did YOU get a beer.','oh man beer. I need that beer.','bro if there\'s a pale ale in there it\'s mine I called it'];
+        calPlayer.chatMsg=calFridgeReacts[Math.floor(Math.random()*calFridgeReacts.length)];
+        calPlayer.chatTimer=5000;
+        addChatMessage('CAL',calPlayer.chatMsg,CAL_COLOR,false,false);
+      }, 900);
       break;
     }
     case 'sofa': {
@@ -1355,6 +1482,14 @@ function _startPresence(name, color) {
         players[id] = createPlayer(id, d.name, d.color, d.x || 13*TILE, d.y || 14*TILE);
         players[id]._lastChatTime = 0;
         addSystemMessage(d.name+' entered the bungalow');
+        // Cal greets new arrivals
+        setTimeout(()=>{
+          if(!calPlayer||calPlayer.chatTimer>0)return;
+          const greets=['oh sick '+d.name+' made it','ayyyy','welcome to the slopes. there are no slopes.',''+d.name+' you want a gummy. I have gummies.','hell yeah'];
+          calPlayer.chatMsg=greets[Math.floor(Math.random()*greets.length)];
+          calPlayer.chatTimer=5000;
+          addChatMessage('CAL',calPlayer.chatMsg,CAL_COLOR,false,false);
+        }, 2500);
       } else {
         const p = players[id];
         if (Math.hypot((d.x||0) - p.x, (d.y||0) - p.y) > 4) {
@@ -1371,7 +1506,7 @@ function _startPresence(name, color) {
       }
     });
     for (const id of Object.keys(players)) {
-      if (id === 'you') continue;
+      if (id === 'you' || id === 'cal') continue; // never remove local NPCs
       if (!activeIds.has(id)) {
         const gone = players[id].name;
         delete players[id];
@@ -1548,8 +1683,9 @@ function updatePlayersList(){
   const list=document.getElementById('players-list');list.innerHTML='';
   const all=Object.values(players);
   if(calPlayer && !all.find(p=>p.id==='cal')) all.push(calPlayer);
-  document.getElementById('online-num').textContent=all.filter(p=>p.isYou||p.id!=='cal').length;
-  document.getElementById('online-count').textContent=all.filter(p=>p.isYou||p.id!=='cal').length+' online';
+  const realCount=all.filter(p=>p.id!=='cal').length;
+  document.getElementById('online-num').textContent=realCount;
+  document.getElementById('online-count').textContent=realCount+' online';
   all.forEach(p=>{
     const div=document.createElement('div');div.className='player-entry';
     const dot=document.createElement('div');dot.className='player-dot';dot.style.background=p.color;
