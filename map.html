@@ -46,6 +46,7 @@ body{background:var(--bg);color:var(--text);font-family:'Fira Code',monospace;fo
 .chat-msg .body{color:var(--text)}
 .chat-msg.system{color:var(--dim);font-size:11px;font-style:italic}
 .chat-msg.system::before{content:'// ';color:var(--border)}
+.chat-msg.history{opacity:0.5}
 #chat-input-wrap{padding:8px 10px;border-top:1px solid var(--border);display:flex;gap:6px;align-items:center}
 #chat-prefix{color:var(--neon);font-size:14px;flex-shrink:0}
 #chat-input{flex:1;background:var(--bg);border:1px solid var(--border);border-bottom:1px solid var(--neon);color:var(--text);font-family:'Fira Code',monospace;font-size:12px;padding:4px 8px;outline:none;caret-color:var(--neon)}
@@ -56,32 +57,20 @@ body{background:var(--bg);color:var(--text);font-family:'Fira Code',monospace;fo
 #interact-hint{color:var(--gold);font-size:10px;margin-left:auto;opacity:0;transition:opacity .3s}
 #interact-hint.show{opacity:1}
 #name-modal{position:fixed;inset:0;background:rgba(1,4,9,.96);z-index:999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
-#name-box{background:var(--card);border:1px solid var(--border);border-top:2px solid var(--gold);padding:32px;text-align:center;max-width:420px;width:92%;box-shadow:0 0 40px rgba(212,160,23,.1)}
+#name-box{background:var(--card);border:1px solid var(--border);border-top:2px solid var(--gold);padding:32px;text-align:center;max-width:380px;width:92%;box-shadow:0 0 40px rgba(212,160,23,.1)}
 #name-box .modal-title{font-family:'Press Start 2P',monospace;font-size:10px;color:var(--gold);margin-bottom:6px;letter-spacing:3px}
-#name-box .modal-sub{color:var(--muted);font-size:11px;margin-bottom:24px}
+#name-box .modal-sub{color:var(--muted);font-size:11px;margin-bottom:24px;line-height:1.6}
 #modal-profile-view .profile-goblin-wrap{display:flex;justify-content:center;margin-bottom:12px}
 #profile-goblin-preview{image-rendering:pixelated;width:96px;height:120px}
 #profile-username-display{font-family:'Press Start 2P',monospace;font-size:8px;color:var(--gold);letter-spacing:2px;margin-bottom:20px}
 #enter-profile-btn{font-family:'Press Start 2P',monospace;font-size:8px;background:var(--gold);color:#000;border:none;padding:10px 24px;cursor:pointer;letter-spacing:1px;margin-bottom:14px;display:block;width:100%;transition:background .15s}
 #enter-profile-btn:hover{background:#e8c030}
-.modal-alt-link{font-size:10px}
-.modal-alt-link a{color:var(--dim);text-decoration:underline;cursor:pointer}
-.modal-alt-link a:hover{color:var(--muted)}
-.modal-section-label{font-size:9px;color:var(--dim);letter-spacing:1.5px;margin-bottom:8px;text-align:left}
-.avatar-pick{display:flex;gap:10px;justify-content:center;margin-bottom:20px;flex-wrap:wrap}
-.avatar-opt{cursor:pointer;padding:6px;border:1px solid var(--border);background:var(--bg);transition:border-color .1s,box-shadow .1s}
-.avatar-opt:hover{border-color:var(--muted)}
-.avatar-opt.selected{border-color:var(--gold);box-shadow:0 0 8px rgba(212,160,23,.3)}
-#name-input-field{width:100%;background:var(--bg);border:1px solid var(--border);border-bottom:2px solid var(--gold);color:var(--text);font-family:'Fira Code',monospace;font-size:16px;padding:8px 12px;outline:none;text-align:center;margin-bottom:16px;letter-spacing:2px}
-#name-input-field::placeholder{color:var(--dim)}
-#name-input-field:focus{border-color:var(--gold)}
-.modal-note{font-size:10px;color:var(--dim);margin-bottom:16px}
+#enter-guest-btn{font-family:'Press Start 2P',monospace;font-size:8px;background:var(--border);color:var(--muted);border:1px solid var(--dim);padding:10px 28px;cursor:pointer;letter-spacing:1px;transition:background .15s,color .15s;display:block;width:100%}
+#enter-guest-btn:hover{background:#2a2a30;color:var(--text)}
+.modal-note{font-size:10px;color:var(--dim);margin-top:12px;line-height:1.5}
 .modal-note a{color:var(--cyan);text-decoration:underline}
-#enter-btn{font-family:'Press Start 2P',monospace;font-size:8px;background:var(--gold);color:#000;border:none;padding:10px 28px;cursor:pointer;letter-spacing:1px;transition:background .15s}
-#enter-btn:hover{background:#e8c030}
 #tooltip{position:absolute;background:rgba(1,4,9,.94);border:1px solid var(--border);color:var(--text);font-size:11px;font-family:'Fira Code',monospace;padding:3px 10px;pointer-events:none;z-index:50;display:none}
 #tooltip.interactable{border-color:var(--gold);color:var(--gold)}
-.player-role{font-size:9px;color:var(--dim);font-style:italic;margin-left:2px}
 @media(max-width:640px){
   .tb-hint{display:none}
   #main{flex-direction:column}
@@ -99,10 +88,10 @@ body{background:var(--bg);color:var(--text);font-family:'Fira Code',monospace;fo
 <body>
 
 <div id="topbar">
-  <span class="tb-title">🏠 ~/the-bungalow</span>
+  <span class="tb-title">&#127968; ~/the-bungalow</span>
   <a class="tb-tab" href="index.html">~/home</a>
   <a class="tb-tab active" href="#">~/bungalow</a>
-  <span class="tb-hint">click to move &nbsp;·&nbsp; click objects to interact &nbsp;·&nbsp; enter to chat</span>
+  <span class="tb-hint">click to move &nbsp;&middot;&nbsp; click objects to interact &nbsp;&middot;&nbsp; enter to chat</span>
   <div class="tb-spacer"></div>
   <span id="tb-status"><span id="online-num">1</span> in the bungalow</span>
   <span id="tb-name">GUEST</span>
@@ -115,7 +104,7 @@ body{background:var(--bg);color:var(--text);font-family:'Fira Code',monospace;fo
   </div>
   <div id="sidebar">
     <div id="sidebar-header">
-      <span>🏠 BUNGALOW CHAT</span>
+      <span>&#127968; BUNGALOW CHAT</span>
       <span id="online-count">1 online</span>
     </div>
     <div id="players-list"></div>
@@ -131,7 +120,7 @@ body{background:var(--bg);color:var(--text);font-family:'Fira Code',monospace;fo
   <span><span class="con-key">CLICK</span>move</span>
   <span><span class="con-key">CLICK OBJ</span>interact</span>
   <span><span class="con-key">ENTER</span>chat</span>
-  <span style="color:var(--muted)">tony krink's bungalow · goblin hangout</span>
+  <span style="color:var(--muted)">jack robbo's brewing co. &middot; no solicitors &middot; zyns on the floor are mcgann's</span>
   <span id="interact-hint"></span>
 </div>
 
@@ -139,23 +128,18 @@ body{background:var(--bg);color:var(--text);font-family:'Fira Code',monospace;fo
   <div id="name-box">
     <div id="modal-profile-view" style="display:none">
       <div class="modal-title">THE BUNGALOW</div>
-      <div class="modal-sub">welcome back, goblin 🏠</div>
+      <div class="modal-sub">welcome back, goblin &#127968;</div>
       <div class="profile-goblin-wrap">
         <canvas id="profile-goblin-preview" width="48" height="60"></canvas>
       </div>
       <div id="profile-username-display">GOBLIN</div>
       <button id="enter-profile-btn">[ ENTER THE BUNGALOW ]</button>
-      <div class="modal-alt-link"><a id="switch-to-guest">not you? enter as guest</a></div>
     </div>
     <div id="modal-guest-view" style="display:none">
       <div class="modal-title">THE BUNGALOW</div>
-      <div class="modal-sub">pick a goblin. pick a name.</div>
-      <div class="modal-section-label">GOBLIN COLOR</div>
-      <div class="avatar-pick" id="avatar-pick"></div>
-      <div class="modal-section-label">DISPLAY NAME</div>
-      <input id="name-input-field" type="text" maxlength="12" placeholder="your name..." autocomplete="off" />
-      <div class="modal-note"><a href="index.html">log in on the main site</a> to use your profile automatically</div>
-      <button id="enter-btn">[ ENTER THE BUNGALOW ]</button>
+      <div class="modal-sub">you're not logged in.<br>you'll enter as GUEST.</div>
+      <button id="enter-guest-btn">[ ENTER AS GUEST ]</button>
+      <div class="modal-note"><a href="index.html">log in on the main site</a> to use your profile &amp; username automatically</div>
     </div>
   </div>
 </div>
@@ -164,8 +148,9 @@ body{background:var(--bg);color:var(--text);font-family:'Fira Code',monospace;fo
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script>
 // =====================================================
-// TONY KRINK'S BUNGALOW v2 — goblin hangout
-// stoner / grunge / cozy 28yr old vibes
+// TONY KRINK'S BUNGALOW v3 — goblin hangout
+// no npcs. jack robbo's brewery in the back.
+// mcgann left zyns everywhere. grunge forever.
 // =====================================================
 
 const canvas   = document.getElementById('gameCanvas');
@@ -176,22 +161,27 @@ function resize() { canvas.width = gameWrap.clientWidth; canvas.height = gameWra
 resize();
 window.addEventListener('resize', resize);
 
-// ── COLORS (matches main site avatarId indices) ──
-const COLORS = ['#58a6ff','#3fb950','#f778ba','#d4a017','#39c5cf','#f85149','#a371f7'];
+// ── COLORS ──
+const COLORS = ['#58a6ff','#3fb950','#f778ba','#d4a017','#39c5cf','#f85149','#a371f7','#ff8c42','#00d4ff'];
 
 // ── PROFILE ──
 let savedProfile = {};
 try { savedProfile = JSON.parse(localStorage.getItem('tk_profile') || '{}'); } catch(e) {}
-const hasProfile = !!(savedProfile.username && savedProfile.username.trim());
-let chosenColor     = COLORS[savedProfile.avatarId ?? 0] ?? COLORS[0];
-let chosenAvatarIdx = savedProfile.avatarId ?? 0;
+const hasProfile = !!(savedProfile.username && savedProfile.username.trim() && savedProfile.username !== 'anon');
+let chosenColor = COLORS[Math.floor(Math.random() * COLORS.length)];
+// If logged in, try to use their avatar color index
+if (hasProfile && savedProfile.avatarId) {
+  const AVATAR_COLORS = ['#58a6ff','#3fb950','#f778ba','#d4a017','#39c5cf','#f85149','#a371f7','#ff8c42','#00d4ff','#c9d1d9','#f85149','#8b949e'];
+  const idx = parseInt(savedProfile.avatarId) || 0;
+  if (AVATAR_COLORS[idx]) chosenColor = AVATAR_COLORS[idx];
+}
 
 // ── WORLD ──
 const TILE = 32;
 const COLS = 28;
 const ROWS = 20;
 const worldMap = [];
-// 0=wall, 1=wood floor, 2=rug, 3=kitchen tile
+// 0=wall, 1=wood floor, 2=rug, 3=kitchen tile, 4=brewery concrete
 
 function buildMap() {
   for (let r = 0; r < ROWS; r++) {
@@ -204,12 +194,15 @@ function buildMap() {
   for (let r=4; r<=12; r++) for (let c=2; c<=11; c++) worldMap[r][c] = 2;
   // Kitchen tiles — top right
   for (let r=1; r<=6; r++) for (let c=18; c<=26; c++) worldMap[r][c] = 3;
+  // Brewery — bottom right
+  for (let r=14; r<=18; r++) for (let c=14; c<=26; c++) worldMap[r][c] = 4;
 }
 buildMap();
 
 // ── STATE ──
 let tvChannel    = 0;
 let _lastBongUse = 0;
+let _lastTapUse  = 0;
 const TV_CHANNELS = [
   { name:'BAJOOKIE NETWORK', col:'#3fb950' },
   { name:'SEINFELD RERUNS',  col:'#58a6ff' },
@@ -254,37 +247,49 @@ function drawSmoke() {
 const worldObjects = [
   // ── Living room ──
   { type:'sofa',         c:2,  r:6,  w:6, h:2, label:'couch (click to sit)', interactable:true },
-  { type:'tv',           c:3,  r:1,  label:'TV (click to change channel)',    interactable:true },
+  { type:'tv',           c:3,  r:1,  label:'TV (click to change channel)', interactable:true },
   { type:'coffee_table', c:4,  r:5,  label:'coffee table' },
-  { type:'bong',         c:7,  r:5,  label:'the bong (click to rip)',         interactable:true },
-  { type:'ashtray',      c:3,  r:4,  label:'ashtray' },
-  { type:'pizza_box',    c:2,  r:10, label:'leftover pizza (2 days old)' },
+  { type:'bong',         c:7,  r:5,  label:'the bong (click to rip)', interactable:true },
+  { type:'ashtray',      c:3,  r:4,  label:'overflowing ashtray' },
+  { type:'pizza_box',    c:2,  r:10, label:'leftover pizza (4 days old)' },
   { type:'beer_cans',    c:9,  r:10, label:'empty tinnies' },
   { type:'bookshelf',    c:1,  r:10, label:'bookshelf' },
   { type:'lava_lamp',    c:11, r:2,  label:'lava lamp' },
   { type:'lamp',         c:13, r:8,  label:'floor lamp' },
-  { type:'beanbag',      c:14, r:11, label:'beanbag (click to sink in)',      interactable:true },
-  // ── Grunge posters (wall objects) ──
-  { type:'poster', c:0,  r:4,  band:'NIRVANA',     album:'nevermind',     colors:['#1a5055','#f8f040'], label:'Nirvana — Nevermind (1991)',              interactable:true },
-  { type:'poster', c:0,  r:11, band:'SOUNDGARDEN',  album:'superunknown',  colors:['#1a2c1a','#3fb950'], label:'Soundgarden — Superunknown (1994)',        interactable:true },
-  { type:'poster', c:27, r:6,  band:'PEARL JAM',    album:'ten',           colors:['#3a1010','#f85149'], label:'Pearl Jam — Ten (1991)',                   interactable:true },
-  { type:'poster', c:27, r:13, band:'AIC',           album:'dirt',          colors:['#0e0e0e','#8b949e'], label:'Alice In Chains — Dirt (1992)',            interactable:true },
+  { type:'beanbag',      c:14, r:11, label:'beanbag (click to sink in)', interactable:true },
+  // ── Zyns (left by McGann) ──
+  { type:'zyn_pile', c:8,  r:4,  label:"zyn tin (mcgann's)", interactable:true },
+  { type:'zyn_pile', c:10, r:8,  label:"zyn tin, floor", interactable:true },
+  { type:'zyn_pile', c:3,  r:11, label:"another mcgann zyn", interactable:true },
+  { type:'zyn_pile', c:6,  r:12, label:"zyn tin behind the couch", interactable:true },
+  // ── Grunge posters ──
+  { type:'poster', c:0,  r:4,  band:'NIRVANA',     album:'nevermind',     colors:['#1a5055','#f8f040'], label:'Nirvana — Nevermind (1991)', interactable:true },
+  { type:'poster', c:0,  r:11, band:'SOUNDGARDEN',  album:'superunknown',  colors:['#1a2c1a','#3fb950'], label:'Soundgarden — Superunknown (1994)', interactable:true },
+  { type:'poster', c:27, r:6,  band:'PEARL JAM',    album:'ten',           colors:['#3a1010','#f85149'], label:'Pearl Jam — Ten (1991)', interactable:true },
+  { type:'poster', c:27, r:13, band:'AIC',           album:'dirt',          colors:['#0e0e0e','#8b949e'], label:'Alice In Chains — Dirt (1992)', interactable:true },
   // ── Bulletin board ──
-  { type:'bulletin_board', c:0, r:16, label:'island bulletin board (click)',  interactable:true },
+  { type:'bulletin_board', c:0, r:16, label:'island bulletin board', interactable:true },
   // ── Fireplace + windows ──
   { type:'fireplace',    c:12, r:0,  label:'fireplace' },
   { type:'window',       c:7,  r:0,  label:'window (night outside)' },
   { type:'window',       c:17, r:0,  label:'window (night outside)' },
   // ── Kitchen / dining ──
   { type:'kitchen_counter', c:19, r:2, w:7, h:2, label:'kitchen counter' },
-  { type:'fridge',       c:25, r:1,  label:'fridge (click for beer)',         interactable:true },
-  { type:'dining_table', c:19, r:11, w:5, h:3,  label:'dining table' },
+  { type:'fridge',       c:25, r:1,  label:'fridge (click for beer)', interactable:true },
+  { type:'dining_table', c:19, r:11, w:5, h:3, label:'dining table' },
   // ── Plants ──
-  { type:'plant',  c:2,  r:16, label:'plant' },
-  { type:'plant',  c:25, r:15, label:'plant' },
-  { type:'plant',  c:26, r:2,  label:'plant' },
+  { type:'plant', c:2,  r:16, label:'suspicious plant' },
+  { type:'plant', c:26, r:2,  label:'plant' },
   // ── Door ──
-  { type:'door',   c:13, r:19, label:'front door → index.html',              interactable:true },
+  { type:'door',  c:13, r:19, label:'front door → index.html', interactable:true },
+  // ── Brewery (Jack Robbo's) ──
+  { type:'brewery_sign', c:15, r:13, label:"Jack Robbo's Microbrewery", interactable:true },
+  { type:'fermentor',    c:16, r:14, label:'fermenter A — Bungalow Bitter', interactable:true },
+  { type:'fermentor',    c:19, r:14, label:'fermenter B — Robbo Pale Ale', interactable:true },
+  { type:'keg',          c:15, r:17, label:'keg (full)', interactable:true },
+  { type:'keg',          c:17, r:17, label:'keg (smells a bit off)', interactable:true },
+  { type:'keg',          c:20, r:17, label:'keg — "experimental batch"', interactable:true },
+  { type:'tap_counter',  c:22, r:15, w:4, h:2, label:"Robbo's tap — pull for a pint", interactable:true },
 ];
 
 // ── CAMERA ──
@@ -312,19 +317,14 @@ function drawGoblin(x,y,color,dir,frame,name,chatMsg,isYou,sitting=false) {
   s.save();
   if(dir==='left'){s.translate(x,y);s.scale(-1,1);s.translate(-x,-y);}
   const px=v=>Math.round(v);
-  // body
   s.fillStyle=color;s.fillRect(px(x-5),px(y-8),10,10);
-  // head
   s.fillStyle=color;s.fillRect(px(x-5),px(y-18),10,10);
-  // eyes
   s.fillStyle='#fff';s.fillRect(px(x-3),px(y-16),2,2);s.fillRect(px(x+1),px(y-16),2,2);
   if(Date.now()%4000>=200){s.fillStyle='#000';s.fillRect(px(x-3),px(y-15),2,2);s.fillRect(px(x+1),px(y-15),2,2);}
-  // ears + horns
   s.fillStyle=color;s.fillRect(px(x-7),px(y-17),2,4);s.fillRect(px(x+5),px(y-17),2,4);
   s.fillStyle=darken(color,0.65);s.fillRect(px(x-4),px(y-22),2,5);s.fillRect(px(x+2),px(y-22),2,5);
   s.fillStyle='#000';s.fillRect(px(x-2),px(y-12),4,1);
   if(sitting) {
-    // seated legs
     s.fillStyle=darken(color,0.75);
     s.fillRect(px(x-10),px(y+4),8,4);
     s.fillRect(px(x+2),px(y+4),8,4);
@@ -339,14 +339,12 @@ function drawGoblin(x,y,color,dir,frame,name,chatMsg,isYou,sitting=false) {
     s.fillRect(px(x-7),px(y-7+armOff),2,5);s.fillRect(px(x+5),px(y-7-armOff),2,5);
   }
   s.restore();
-  // name tag
   s.font='10px "Press Start 2P"';s.textAlign='center';
   const nw=s.measureText(name).width+8;
   s.fillStyle=isYou?'rgba(212,160,23,0.2)':'rgba(1,4,9,0.6)';
   s.fillRect(x-nw/2,y-32,nw,13);
   s.fillStyle=isYou?'#d4a017':'#8b949e';
   s.fillText(name,x,y-22);
-  // chat bubble
   if(chatMsg) {
     s.font='11px "VT323"';
     const maxW=120,lines=wrapText(chatMsg,maxW,s);
@@ -398,6 +396,12 @@ function drawWorld() {
   lv.addColorStop(0,`rgba(160,40,220,${0.12+Math.sin(animT.lamp*0.7)*0.05})`);
   lv.addColorStop(1,'rgba(160,40,220,0)');
   s.fillStyle=lv;s.fillRect(0,0,canvas.width,canvas.height);
+  // brewery glow (amber light from fermentors)
+  const bsp=worldToScreen(17*TILE+TILE/2,15*TILE+TILE/2);
+  const bg2=s.createRadialGradient(bsp.x,bsp.y,10,bsp.x,bsp.y,200);
+  bg2.addColorStop(0,`rgba(200,100,20,${0.04+Math.sin(animT.lamp*0.3)*0.015})`);
+  bg2.addColorStop(1,'rgba(200,100,20,0)');
+  s.fillStyle=bg2;s.fillRect(0,0,canvas.width,canvas.height);
 
   const sc=Math.max(0,Math.floor((cam.x-canvas.width/2)/TILE)-1);
   const ec=Math.min(COLS-1,Math.ceil((cam.x+canvas.width/2)/TILE)+1);
@@ -432,11 +436,17 @@ function drawWorld() {
       } else if(tile===3) {
         s.fillStyle=chk?'#171d1a':'#1c2420';s.fillRect(tx,ty,TILE+1,TILE+1);
         s.fillStyle='#121618';s.fillRect(tx,ty,TILE,1);s.fillRect(tx,ty,1,TILE);
+      } else if(tile===4) {
+        // brewery concrete
+        s.fillStyle=chk?'#1a1610':'#1e1a14';s.fillRect(tx,ty,TILE+1,TILE+1);
+        s.fillStyle='rgba(200,150,50,0.04)';
+        if((c+r*2)%5===0) s.fillRect(tx,ty,TILE,2);
+        if((c*3+r)%7===0) s.fillRect(tx,ty,2,TILE);
+        s.fillStyle='rgba(200,130,40,0.03)';s.fillRect(tx,ty,TILE,1);s.fillRect(tx,ty,1,TILE);
       }
     }
   }
 
-  // objects sorted by depth
   const vis=worldObjects.filter(o=>{const sp=worldToScreen(o.c*TILE+TILE/2,o.r*TILE+TILE/2);return sp.x>-200&&sp.x<canvas.width+200&&sp.y>-200&&sp.y<canvas.height+200;})
     .sort((a,b)=>(a.r+(a.h||1))-(b.r+(b.h||1)));
   for(const obj of vis){const sp=worldToScreen(obj.c*TILE+TILE/2,obj.r*TILE+TILE/2);drawObject(obj,sp.x,sp.y);}
@@ -467,9 +477,7 @@ function drawObject(obj,sx,sy) {
     s.strokeStyle='#2a2a36';s.lineWidth=2;s.strokeRect(tx,ty,tw,th);
     s.fillStyle='#080b12';s.fillRect(tx+4,ty+4,tw-8,th-8);
     const ch=TV_CHANNELS[tvChannel];
-    // channel-specific screens
     if(tvChannel===0) {
-      // Bajookie network
       const scan=Math.floor(((t*30)%(th-8)));
       s.fillStyle=`rgba(63,185,80,${0.5+Math.sin(t)*0.1})`;
       s.font='6px "Press Start 2P"';s.textAlign='center';
@@ -477,7 +485,6 @@ function drawObject(obj,sx,sy) {
       s.fillStyle=`rgba(63,185,80,${0.12+Math.sin(t*2)*0.04})`;
       s.fillRect(tx+4,ty+4+scan,tw-8,2);
     } else if(tvChannel===1) {
-      // Seinfeld
       s.fillStyle='rgba(88,166,255,0.7)';
       s.font='5px "Press Start 2P"';s.textAlign='center';
       const quotes=['SEINFELD','RERUNS','24/7','NOTHING'];
@@ -485,7 +492,6 @@ function drawObject(obj,sx,sy) {
       s.fillStyle='rgba(88,166,255,0.1)';
       for(let i=0;i<3;i++){s.fillRect(tx+5,ty+5+i*(th-10)/2,tw-10,2);}
     } else if(tvChannel===2) {
-      // MTV static
       for(let i=0;i<30;i++){
         const px=tx+5+Math.random()*(tw-10),py=ty+5+Math.random()*(th-10);
         s.fillStyle=`rgba(${100+Math.random()*155},${Math.random()*80},${100+Math.random()*155},0.7)`;
@@ -495,7 +501,6 @@ function drawObject(obj,sx,sy) {
       s.font='7px "Press Start 2P"';s.textAlign='center';
       s.fillText('MTV',sx,ty+th-16);
     } else {
-      // Island live — shows user profile
       s.fillStyle=`rgba(212,160,23,${0.6+Math.sin(t)*0.1})`;
       s.font='5px "Press Start 2P"';s.textAlign='center';
       s.fillText('ISLAND LIVE',sx,ty+10);
@@ -516,36 +521,27 @@ function drawObject(obj,sx,sy) {
     s.fillStyle='#3d2808';s.fillRect(tx,ty,tw,th);
     s.strokeStyle='#2a1c05';s.lineWidth=1;s.strokeRect(tx,ty,tw,th);
     s.fillStyle='#4a3210';s.fillRect(tx+3,ty+3,tw-6,3);
-    // magazine
     s.fillStyle='#1a2a3a';s.fillRect(tx+5,ty+7,22,14);
     s.fillStyle='#58a6ff';s.fillRect(tx+5,ty+7,22,4);
     s.font='4px "Press Start 2P"';s.fillStyle='#fff';s.textAlign='left';s.fillText('ZINE',tx+7,ty+12);
-    // lighter
     s.fillStyle='#f85149';s.fillRect(tx+tw-20,ty+8,7,12);
     s.fillStyle='#ff8080';s.fillRect(tx+tw-20,ty+8,7,3);
 
   } else if(obj.type==='bong') {
-    // Glass bong
     const sinceUse=(Date.now()-_lastBongUse)/1000;
-    // water chamber base
     s.fillStyle='rgba(30,80,80,0.7)';
     s.beginPath();s.ellipse(sx,sy+8,11,6,0,0,Math.PI*2);s.fill();
     s.fillStyle='rgba(30,80,80,0.65)';s.fillRect(sx-11,sy-12,22,20);
-    // water level
     s.fillStyle=`rgba(0,160,180,${0.3+Math.sin(t*0.5)*0.04})`;
     s.fillRect(sx-10,sy-2,20,10);
-    // neck tube
     s.fillStyle='rgba(30,80,80,0.7)';s.fillRect(sx-4,sy-38,8,28);
-    // mouthpiece
     s.fillStyle='rgba(20,60,60,0.8)';s.fillRect(sx-6,sy-42,12,6);
-    // bowl arm + bowl
     s.save();s.translate(sx,sy-5);s.rotate(-0.45);
     s.fillStyle='rgba(30,80,80,0.7)';s.fillRect(-2,-14,4,14);
     s.restore();
     s.fillStyle='#5a3808';s.beginPath();s.arc(sx-10,sy-9,5,0,Math.PI*2);s.fill();
     s.fillStyle='rgba(40,100,100,0.5)';s.strokeStyle='rgba(100,220,220,0.3)';s.lineWidth=1;
     s.strokeRect(sx-11,sy-12,22,20);
-    // smoke if recently used
     if(sinceUse<5) {
       const fade=1-(sinceUse/5);
       const wt=sinceUse;
@@ -559,16 +555,31 @@ function drawObject(obj,sx,sy) {
     }
 
   } else if(obj.type==='ashtray') {
-    // Round glass ashtray
     s.fillStyle='rgba(100,140,100,0.25)';
     s.beginPath();s.ellipse(sx,sy+2,12,5,0,0,Math.PI*2);s.fill();
     s.strokeStyle='rgba(100,160,100,0.4)';s.lineWidth=1;s.stroke();
     s.fillStyle='#2a2a2a';s.fillRect(sx-7,sy,14,3);
-    // roach
     s.fillStyle='#8b6030';s.fillRect(sx+1,sy-2,7,2);
     s.fillStyle='#e06020';s.fillRect(sx+7,sy-2,2,2);
-    // ash mark
     s.fillStyle='rgba(80,80,80,0.5)';s.beginPath();s.ellipse(sx-3,sy+1,4,2,0,0,Math.PI*2);s.fill();
+
+  } else if(obj.type==='zyn_pile') {
+    // Small cylindrical zyn tins on the floor
+    const offsets=[[-6,0],[0,3],[5,-2],[-2,6]];
+    offsets.slice(0,2+Math.floor(obj.c%3)).forEach(([dx,dy])=>{
+      const cx2=sx+dx,cy2=sy+dy;
+      // tin body
+      s.fillStyle='#d4a017';
+      s.beginPath();s.ellipse(cx2,cy2+3,5,2,0,0,Math.PI*2);s.fill();
+      s.fillStyle='#c8960f';s.fillRect(cx2-5,cy2-4,10,7);
+      s.fillStyle='#d4a017';
+      s.beginPath();s.ellipse(cx2,cy2-4,5,2,0,0,Math.PI*2);s.fill();
+      // label ring
+      s.fillStyle='rgba(255,255,255,0.15)';s.fillRect(cx2-4,cy2-2,8,2);
+      // lid
+      s.fillStyle='#b8840a';
+      s.beginPath();s.ellipse(cx2,cy2-4,5,2,0,0,Math.PI*2);s.fill();
+    });
 
   } else if(obj.type==='pizza_box') {
     const bw=2*TILE,bh=1.2*TILE;
@@ -578,14 +589,11 @@ function drawObject(obj,sx,sy) {
     s.strokeStyle='#1a1008';s.lineWidth=1;s.strokeRect(bx,by,bw,bh);
     s.strokeStyle='#3d2808';s.lineWidth=0.5;
     s.beginPath();s.moveTo(bx,by+4);s.lineTo(bx+bw,by+4);s.stroke();
-    // grease stains
     s.fillStyle='rgba(180,100,10,0.13)';
     s.beginPath();s.ellipse(sx-12,sy,16,9,0,0,Math.PI*2);s.fill();
     s.beginPath();s.ellipse(sx+16,sy-4,10,7,0,0,Math.PI*2);s.fill();
-    // text
     s.font='5px "Press Start 2P"';s.fillStyle='#d4a017';s.textAlign='center';
     s.fillText('PIZZA',sx,by+11);
-    // partial pizza slice visible
     s.fillStyle='#c86020';s.beginPath();
     s.moveTo(sx-8,by+bh-4);s.lineTo(sx+8,by+bh-4);s.lineTo(sx,by+12);s.closePath();s.fill();
     s.fillStyle='#e07030';s.fillRect(sx-4,by+bh-14,4,4);s.fillRect(sx+2,by+bh-18,3,3);
@@ -598,29 +606,24 @@ function drawObject(obj,sx,sy) {
       s.fillStyle=cols[i];s.fillRect(cx2-4,cy2-11,9,14);
       s.fillStyle='#888';s.fillRect(cx2-3,cy2-13,7,3);
       s.fillStyle='rgba(255,255,255,0.08)';s.fillRect(cx2-4,cy2-5,9,3);
-      // ring pull
       if(i%2===0){s.fillStyle='#aaa';s.fillRect(cx2+1,cy2-14,3,2);}
     });
 
   } else if(obj.type==='lava_lamp') {
     const lt=animT.lamp;
-    // Base
     s.fillStyle='#1a1020';s.fillRect(sx-8,sy+8,16,9);
-    // Bottle shape
     s.fillStyle='#0e0a16';
     s.beginPath();
     s.moveTo(sx-8,sy+8);s.lineTo(sx-11,sy-8);
     s.lineTo(sx-9,sy-30);s.lineTo(sx+9,sy-30);
     s.lineTo(sx+11,sy-8);s.lineTo(sx+8,sy+8);
     s.closePath();s.fill();
-    // Fluid interior
     const fluidHue=260+Math.sin(lt*0.4)*30;
     s.fillStyle=`hsl(${fluidHue},60%,18%)`;
     s.beginPath();
     s.moveTo(sx-10,sy-8);s.lineTo(sx-8,sy+6);
     s.lineTo(sx+8,sy+6);s.lineTo(sx+10,sy-8);
     s.closePath();s.fill();
-    // blobs
     for(let b=0;b<4;b++){
       const phase=b*1.8+lt*(0.4+b*0.08);
       const by2=sy-6-Math.abs(Math.sin(phase))*20;
@@ -632,10 +635,8 @@ function drawObject(obj,sx,sy) {
       lg2.addColorStop(1,`hsla(${hue},70%,35%,0)`);
       s.fillStyle=lg2;s.beginPath();s.arc(bx2,by2,br,0,Math.PI*2);s.fill();
     }
-    // glass sheen
     s.fillStyle='rgba(255,255,255,0.04)';
     s.beginPath();s.moveTo(sx-7,sy+6);s.lineTo(sx-9,sy-8);s.lineTo(sx-5,sy-28);s.lineTo(sx-3,sy-28);s.lineTo(sx-5,sy-8);s.lineTo(sx-3,sy+6);s.closePath();s.fill();
-    // cap
     s.fillStyle='#1a1020';s.fillRect(sx-6,sy-32,12,4);
 
   } else if(obj.type==='beanbag') {
@@ -649,21 +650,16 @@ function drawObject(obj,sx,sy) {
     const isLeft=(obj.c===0);
     const px2=isLeft?sx-TILE+5:sx+TILE-pw-5;
     const py2=sy-ph/2;
-    // tape
     s.fillStyle='rgba(200,200,160,0.35)';
     s.fillRect(px2+4,py2-3,12,5);s.fillRect(px2+pw-16,py2-3,12,5);
-    // body
     s.fillStyle=obj.colors[0];s.fillRect(px2,py2,pw,ph);
-    // worn edges
     s.fillStyle='rgba(0,0,0,0.35)';
     s.fillRect(px2,py2,pw,2);s.fillRect(px2,py2+ph-2,pw,2);
     s.fillRect(px2,py2,2,ph);s.fillRect(px2+pw-2,py2,2,ph);
     const cx2=px2+pw/2,cy2=py2+ph*0.35;
     if(obj.band==='NIRVANA') {
-      // Smiley face
       s.strokeStyle=obj.colors[1];s.lineWidth=2;
       s.beginPath();s.arc(cx2,cy2,16,0,Math.PI*2);s.stroke();
-      // X eyes
       s.lineWidth=1.5;
       [[cx2-7,cy2-5],[cx2+4,cy2-5]].forEach(([ex,ey])=>{
         s.beginPath();s.moveTo(ex-3,ey-3);s.lineTo(ex+3,ey+3);s.stroke();
@@ -671,7 +667,6 @@ function drawObject(obj,sx,sy) {
       });
       s.beginPath();s.arc(cx2,cy2+4,9,0.2,Math.PI-0.2);s.stroke();
     } else if(obj.band==='SOUNDGARDEN') {
-      // Black hole sun spiral/circle
       s.strokeStyle=obj.colors[1];s.lineWidth=2;
       s.beginPath();s.arc(cx2,cy2,14,0,Math.PI*2);s.stroke();
       for(let i=0;i<8;i++){
@@ -681,7 +676,6 @@ function drawObject(obj,sx,sy) {
       }
       s.fillStyle=obj.colors[1];s.beginPath();s.arc(cx2,cy2,5,0,Math.PI*2);s.fill();
     } else if(obj.band==='PEARL JAM') {
-      // Lightning bolt
       s.fillStyle=obj.colors[1];
       const lx=cx2-8,ly=cy2-18;
       s.beginPath();
@@ -689,18 +683,15 @@ function drawObject(obj,sx,sy) {
       s.lineTo(lx-2,ly+32);s.lineTo(lx+12,ly+16);s.lineTo(lx+6,ly+16);s.lineTo(lx+14,ly);
       s.closePath();s.fill();
     } else if(obj.band==='AIC') {
-      // Chain
       s.strokeStyle=obj.colors[1];s.lineWidth=2;
       for(let i=0;i<3;i++){
         s.beginPath();s.ellipse(cx2,cy2-16+i*16,7,5,0,0,Math.PI*2);s.stroke();
       }
     }
-    // band name
     s.font='6px "Press Start 2P"';s.fillStyle=obj.colors[1];s.textAlign='center';
     s.fillText(obj.band,cx2,py2+ph*0.82);
     s.font='4px "Press Start 2P"';s.fillStyle=obj.colors[1];s.globalAlpha=0.6;
     s.fillText(obj.album.toUpperCase(),cx2,py2+ph*0.91);s.globalAlpha=1;
-    // hover highlight
     s.strokeStyle='rgba(212,160,23,0.2)';s.lineWidth=1;s.strokeRect(px2,py2,pw,ph);
 
   } else if(obj.type==='bulletin_board') {
@@ -713,8 +704,8 @@ function drawObject(obj,sx,sy) {
     const notes=[
       {x:bx+6,y:by+6,w:30,h:22,col:'#ffffd0',txt:['island','meeting'],pin:'#f85149'},
       {x:bx+bw-36,y:by+4,w:32,h:20,col:'#d0ffd0',txt:['dont eat','my pizza'],pin:'#3fb950'},
-      {x:bx+5,y:by+bh-38,w:34,h:28,col:'#ffd0d0',txt:['bajookie','high score'],pin:'#f85149'},
-      {x:bx+bw-42,y:by+bh-36,w:38,h:28,col:'#d0d0ff',txt:['leaderboard','go to site'],pin:'#58a6ff'},
+      {x:bx+5,y:by+bh-38,w:34,h:28,col:'#ffd0d0',txt:['mcgann','owes $40'],pin:'#f85149'},
+      {x:bx+bw-42,y:by+bh-36,w:38,h:28,col:'#d0d0ff',txt:['robbo','beer fri'],pin:'#58a6ff'},
     ];
     notes.forEach(n=>{
       s.fillStyle=n.col;s.fillRect(n.x,n.y,n.w,n.h);
@@ -723,7 +714,6 @@ function drawObject(obj,sx,sy) {
       s.font='4px "Press Start 2P"';s.fillStyle='#333';s.textAlign='left';
       n.txt.forEach((l,i)=>s.fillText(l,n.x+3,n.y+10+i*8));
     });
-    // profile note if logged in
     if(hasProfile) {
       s.fillStyle='rgba(212,160,23,0.15)';s.fillRect(bx+bw*0.3,by+bh*0.35,bw*0.6,22);
       s.font='4px "Press Start 2P"';s.fillStyle='#d4a017';s.textAlign='left';
@@ -828,13 +818,10 @@ function drawObject(obj,sx,sy) {
     s.fillStyle='#1a1f1c';s.fillRect(cx2,cy2,cw,ch);
     s.strokeStyle='#141918';s.lineWidth=1;s.strokeRect(cx2,cy2,cw,ch);
     s.fillStyle='#22282a';s.fillRect(cx2,cy2,cw,5);
-    // sink
     s.fillStyle='#101414';s.fillRect(cx2+cw*0.3,cy2+7,22,14);
     s.strokeStyle='#1e2824';s.lineWidth=0.5;s.strokeRect(cx2+cw*0.3,cy2+7,22,14);
     s.fillStyle='#0a0c0c';s.fillRect(cx2+cw*0.3+8,cy2+12,6,5);
-    // burners
     for(let i=0;i<2;i++){s.strokeStyle='#2a3030';s.lineWidth=2;s.beginPath();s.arc(cx2+cw*0.72+i*16,cy2+ch*0.5,5,0,Math.PI*2);s.stroke();}
-    // empty bottles
     for(let i=0;i<3;i++){
       const bx2=cx2+cw*0.08+i*10;
       s.fillStyle=i%2===0?'#1a3a1a':'#2a3a1a';s.fillRect(bx2,cy2-14,5,18);
@@ -848,7 +835,6 @@ function drawObject(obj,sx,sy) {
     s.strokeStyle='#141e18';s.lineWidth=1;s.strokeRect(fx,fy,fw,fh);
     s.fillStyle='#141e18';s.fillRect(fx,fy+fh*0.35,fw,2);
     s.fillStyle='#2a3830';s.fillRect(fx+fw-5,fy+10,3,18);s.fillRect(fx+fw-5,fy+fh*0.38+8,3,12);
-    // sticker
     s.fillStyle='#f85149';s.fillRect(fx+4,fy+8,14,8);
     s.font='4px "Press Start 2P"';s.fillStyle='#fff';s.textAlign='left';s.fillText('BEER',fx+5,fy+14);
 
@@ -859,16 +845,14 @@ function drawObject(obj,sx,sy) {
     s.fillStyle='#3d2808';s.fillRect(tx,ty,tw,th);
     s.strokeStyle='#2a1c05';s.lineWidth=1;s.strokeRect(tx,ty,tw,th);
     s.fillStyle='#4a3210';s.fillRect(tx+4,ty+4,tw-8,5);
-    // chairs
     [[tx+tw*0.2,ty-12],[tx+tw*0.6,ty-12],[tx+tw*0.2,ty+th+2],[tx+tw*0.6,ty+th+2],[tx-12,ty+th*0.35],[tx+tw+2,ty+th*0.35]].forEach(([cx2,cy2])=>{
       s.fillStyle='#2a1808';s.fillRect(cx2,cy2,18,10);s.strokeStyle='#1e1005';s.lineWidth=0.5;s.strokeRect(cx2,cy2,18,10);
     });
-    // stuff on table - snacks, cans
-    s.fillStyle='#5a3a1a';s.fillRect(tx+tw*0.15,ty+th*0.2,18,12);// chip bag
+    s.fillStyle='#5a3a1a';s.fillRect(tx+tw*0.15,ty+th*0.2,18,12);
     s.fillStyle='#d4a017';s.fillRect(tx+tw*0.15,ty+th*0.2,18,4);
-    s.fillStyle='#3a5a1a';s.fillRect(tx+tw*0.55,ty+th*0.3,8,12);// can
+    s.fillStyle='#3a5a1a';s.fillRect(tx+tw*0.55,ty+th*0.3,8,12);
     s.fillStyle='#888';s.fillRect(tx+tw*0.55+1,ty+th*0.3-2,6,3);
-    s.fillStyle='#f85149';s.fillRect(tx+tw*0.7,ty+th*0.25,14,10);// sauce
+    s.fillStyle='#f85149';s.fillRect(tx+tw*0.7,ty+th*0.25,14,10);
     s.fillStyle='#fff';s.fillRect(tx+tw*0.7,ty+th*0.25,14,3);
 
   } else if(obj.type==='door') {
@@ -882,64 +866,178 @@ function drawObject(obj,sx,sy) {
     s.fillStyle='#1a1408';s.fillRect(dx,dy+dh,dw,6);
     s.font='4px "Press Start 2P"';s.fillStyle='#d4a017';s.textAlign='center';
     s.fillText('WELCOME',sx,dy+dh+4);
+
+  } else if(obj.type==='brewery_sign') {
+    const sw=3.5*TILE,sh=1.2*TILE;
+    const bx=sx-sw/2,by=sy-sh;
+    // wooden backing
+    s.fillStyle='#4a2c08';s.fillRect(bx,by,sw,sh);
+    s.strokeStyle='#2e1c05';s.lineWidth=1.5;s.strokeRect(bx,by,sw,sh);
+    // grain lines
+    s.strokeStyle='rgba(0,0,0,0.15)';s.lineWidth=0.5;
+    for(let i=0;i<5;i++){s.beginPath();s.moveTo(bx+i*12,by);s.lineTo(bx+i*12+8,by+sh);s.stroke();}
+    // text
+    s.font='5px "Press Start 2P"';s.fillStyle='#d4a017';s.textAlign='center';
+    s.fillText("ROBBO'S",sx,by+12);
+    s.fillText('BREWERY',sx,by+22);
+    s.font='4px "Press Start 2P"';s.fillStyle='rgba(212,160,23,0.5)';
+    s.fillText('est. last thursday',sx,by+32);
+    // hop decorations
+    s.fillStyle='#3fb950';
+    [[bx+8,by+8],[bx+sw-8,by+8],[bx+8,by+sh-8],[bx+sw-8,by+sh-8]].forEach(([hx,hy])=>{
+      s.beginPath();s.arc(hx,hy,4,0,Math.PI*2);s.fill();
+    });
+
+  } else if(obj.type==='fermentor') {
+    const fh=3.5*TILE,fw=1.4*TILE;
+    const fx=sx-fw/2,fy=sy-fh*0.8;
+    // shadow
+    s.fillStyle='rgba(0,0,0,0.3)';s.beginPath();s.ellipse(sx+5,fy+fh+4,fw/2+4,6,0,0,Math.PI*2);s.fill();
+    // tank body
+    const grad=s.createLinearGradient(fx,0,fx+fw,0);
+    grad.addColorStop(0,'#1a1a22');grad.addColorStop(0.3,'#2e2e3a');grad.addColorStop(0.7,'#2a2a36');grad.addColorStop(1,'#161620');
+    s.fillStyle=grad;
+    s.beginPath();
+    s.ellipse(sx,fy+8,fw/2,8,0,0,Math.PI*2);s.fill();
+    s.fillRect(fx,fy+8,fw,fh-24);
+    s.fillStyle='#1a1a22';
+    s.beginPath();s.ellipse(sx,fy+fh-16,fw/2,8,0,0,Math.PI*2);s.fill();
+    // amber liquid level (visible through 'glass' band)
+    const liquidH=fh*0.6;
+    s.fillStyle=`rgba(200,120,20,${0.18+Math.sin(animT.lamp*0.4)*0.04})`;
+    s.fillRect(fx+4,fy+fh*0.15,fw-8,liquidH);
+    // ring bands
+    s.strokeStyle='#3a3a48';s.lineWidth=2;
+    [0.25,0.5,0.75].forEach(p=>{
+      s.beginPath();s.moveTo(fx,fy+p*fh);s.lineTo(fx+fw,fy+p*fh);s.stroke();
+    });
+    // sheen
+    s.fillStyle='rgba(255,255,255,0.04)';s.fillRect(fx+3,fy+8,4,fh-24);
+    // pressure gauge
+    s.fillStyle='#444';s.beginPath();s.arc(sx+fw/2-6,fy+fh*0.3,6,0,Math.PI*2);s.fill();
+    s.fillStyle='#888';s.beginPath();s.arc(sx+fw/2-6,fy+fh*0.3,4,0,Math.PI*2);s.fill();
+    s.strokeStyle='#f85149';s.lineWidth=1;
+    s.beginPath();s.moveTo(sx+fw/2-6,fy+fh*0.3);
+    s.lineTo(sx+fw/2-6+Math.cos(-0.8)*3,fy+fh*0.3+Math.sin(-0.8)*3);s.stroke();
+    // label
+    s.font='4px "Press Start 2P"';s.fillStyle='rgba(212,160,23,0.6)';s.textAlign='center';
+    const label=obj.c===16?'A':'B';
+    s.fillText('FMT '+label,sx,fy+fh*0.6);
+
+  } else if(obj.type==='keg') {
+    // Barrel keg
+    const kw=1.2*TILE,kh=1.4*TILE;
+    const kx=sx-kw/2,ky=sy-kh*0.6;
+    s.fillStyle='rgba(0,0,0,0.25)';s.beginPath();s.ellipse(sx+3,ky+kh+4,kw/2+2,5,0,0,Math.PI*2);s.fill();
+    s.fillStyle='#3d2808';
+    s.beginPath();s.ellipse(sx,ky+6,kw/2,5,0,0,Math.PI*2);s.fill();
+    s.fillRect(kx,ky+6,kw,kh-18);
+    s.beginPath();s.ellipse(sx,ky+kh-12,kw/2,5,0,0,Math.PI*2);s.fill();
+    // staves shading
+    s.fillStyle='#4a3210';s.fillRect(kx+kw*0.25,ky+6,3,kh-18);s.fillRect(kx+kw*0.6,ky+6,3,kh-18);
+    // metal bands
+    s.strokeStyle='#888';s.lineWidth=2;
+    [0.2,0.5,0.8].forEach(p=>{
+      s.beginPath();
+      s.ellipse(sx,ky+6+p*(kh-18),kw/2,3,0,0,Math.PI*2);
+      s.stroke();
+    });
+    // bung
+    s.fillStyle='#555';s.beginPath();s.arc(sx,ky+kh*0.4,4,0,Math.PI*2);s.fill();
+    s.fillStyle='#777';s.beginPath();s.arc(sx,ky+kh*0.4,2,0,Math.PI*2);s.fill();
+
+  } else if(obj.type==='tap_counter') {
+    const cw=obj.w*TILE,ch=obj.h*TILE;
+    const cx2=sx-TILE/2,cy2=sy-TILE/2;
+    // counter body
+    s.fillStyle='#2a1c08';s.fillRect(cx2,cy2,cw,ch);
+    s.fillStyle='#3d2808';s.fillRect(cx2,cy2,cw,8);// top surface
+    s.strokeStyle='#1a1005';s.lineWidth=1;s.strokeRect(cx2,cy2,cw,ch);
+    // bar rail
+    s.strokeStyle='#888';s.lineWidth=3;
+    s.beginPath();s.moveTo(cx2,cy2+ch);s.lineTo(cx2+cw,cy2+ch);s.stroke();
+    // tap handles
+    for(let i=0;i<3;i++) {
+      const tx2=cx2+cw*0.2+i*cw*0.28;
+      const ty2=cy2-18;
+      // tap base
+      s.fillStyle='#555';s.fillRect(tx2-3,cy2,6,8);
+      // tap arm
+      s.fillStyle='#888';s.fillRect(tx2-2,ty2,4,20);
+      // handle
+      s.fillStyle=['#3fb950','#d4a017','#f85149'][i];
+      s.beginPath();s.ellipse(tx2,ty2,5,8,0.2,0,Math.PI*2);s.fill();
+      // spout drip
+      s.fillStyle='rgba(212,160,23,0.4)';
+      s.beginPath();s.arc(tx2,cy2+10,2,0,Math.PI*2);s.fill();
+    }
+    // mugs
+    for(let i=0;i<2;i++) {
+      const mx=cx2+cw*0.7+i*20;
+      s.fillStyle='rgba(212,160,23,0.6)';s.fillRect(mx,cy2-14,12,16);
+      s.fillStyle='rgba(212,160,23,0.15)';s.fillRect(mx+2,cy2-12,8,8);
+      s.strokeStyle='rgba(212,160,23,0.4)';s.lineWidth=1;
+      s.beginPath();s.arc(mx+16,cy2-8,4,Math.PI*0.4,Math.PI*1.6);s.stroke();
+    }
+    // sign
+    s.font='4px "Press Start 2P"';s.fillStyle='#d4a017';s.textAlign='center';
+    s.fillText("ROBBO'S TAP",cx2+cw/2,cy2+ch-6);
   }
 }
 
 // ── HANDLE OBJECT CLICK ──
+const ZYN_MSGS = [
+  "you pick up a used zyn tin. mcgann was here.",
+  "it's mcgann's. still has some mint left. cursed.",
+  "spearmint 6mg. classic mcgann move.",
+  "there's like 4 of these on the floor. mcgann you feral.",
+  "the zyn tin rattles. empty. mcgann owes you nothing.",
+  "you consider putting it in. you don't. you do.",
+  "wintergreen. mcgann has no taste.",
+];
+
+const BREWERY_MSGS = [
+  "it smells incredible in here. hops and ambition.",
+  "robbo built this entirely with leftover bunnings gear.",
+  "the fermentor bubbles. it's alive, technically.",
+  "5.8% ABV. robbo calls it 'session strength'. robbo is wrong.",
+  "there's a post-it note that says 'don't touch FMT B until thursday'.",
+  "the brewery runs on passion, spare parts, and spite.",
+];
+
 function handleObjectClick(obj) {
   if(!myPlayer) return;
   switch(obj.type) {
     case 'bong': {
       const now=Date.now();
-      if(now-_lastBongUse<4000){addSystemMessage('you just had one, chill');return;}
+      if(now-_lastBongUse<4000){addSystemMessage('you just had one, wait');return;}
       _lastBongUse=now;
-      const bsp=worldToScreen(obj.c*TILE+TILE/2,obj.r*TILE+TILE/2);
       for(let i=0;i<12;i++) addSmoke(obj.c*TILE+TILE/2,obj.r*TILE-8);
-      myPlayer.chatMsg='*takes a massive rip* 💨';myPlayer.chatTimer=5000;
-      addChatMessage(myPlayer.name,'*takes a massive rip* 💨',myPlayer.color,true);
-      setTimeout(()=>{
-        if(players.george){players.george.chatMsg='nice one';players.george.chatTimer=3500;addChatMessage('GEORGE','nice one','#a07828');}
-      },900);
-      setTimeout(()=>{
-        if(players.kramer){players.kramer.chatMsg='pass it around!';players.kramer.chatTimer=3500;addChatMessage('KRAMER','pass it around!','#f85149');}
-      },2200);
-      setTimeout(()=>{
-        if(players.newman){players.newman.chatMsg='remarkable';players.newman.chatTimer=3000;addChatMessage('NEWMAN','remarkable','#58a6ff');}
-      },3500);
+      const bongMsgs=['*takes a massive rip*','*coughs for 45 seconds*','*takes a fat one* feels the cosmos','*rips the bong* stares at ceiling'];
+      const msg=bongMsgs[Math.floor(Math.random()*bongMsgs.length)];
+      myPlayer.chatMsg=msg;myPlayer.chatTimer=5000;
+      addChatMessage(myPlayer.name,msg,myPlayer.color,true);
       break;
     }
     case 'tv': {
       tvChannel=(tvChannel+1)%TV_CHANNELS.length;
       const ch=TV_CHANNELS[tvChannel];
-      addSystemMessage(`📺 changed to: ${ch.name}`);
-      const tvLines={'BAJOOKIE NETWORK':'george: ugh, this channel again','SEINFELD RERUNS':'kramer: i love this episode','MTV STATIC':'newman: i prefer opera','ISLAND LIVE':'kramer: is that YOU on tv?!'};
-      const reactor=tvLines[ch.name];
-      if(reactor){
-        setTimeout(()=>{
-          const who=reactor.split(':')[0];
-          const p=players[who];
-          if(p){p.chatMsg=reactor.split(': ')[1];p.chatTimer=4000;addChatMessage(who.toUpperCase(),p.chatMsg,p.color);}
-        },1000);
-      }
+      addSystemMessage('changed to: '+ch.name);
       break;
     }
     case 'fridge': {
-      const beers=['you grab a cold one 🍺','nothing left but light beer and sadness','score — last one','there\'s like 12 beers in here, beautiful'];
-      const msg=beers[Math.floor(Math.random()*beers.length)];
-      addSystemMessage(msg);
-      setTimeout(()=>{
-        if(players.newman){players.newman.chatMsg='grab me one while you\'re there';players.newman.chatTimer=4000;addChatMessage('NEWMAN','grab me one while you\'re there','#58a6ff');}
-      },800);
+      const beers=['you grab a cold one','nothing left but light beer and sadness','score — last one','beautiful. 12 beers. the cosmos provides.','there\'s a note: "don\'t drink robbo\'s special batch". you don\'t drink robbo\'s special batch.'];
+      addSystemMessage(beers[Math.floor(Math.random()*beers.length)]);
       break;
     }
     case 'sofa': {
-      const tx=( obj.c + obj.w/2)*TILE;
+      const tx=(obj.c+obj.w/2)*TILE;
       const ty=(obj.r+0.8)*TILE;
       myPlayer.path=[{x:tx,y:ty}];
       myPlayer.sitting=false;
       clearTimeout(myPlayer._sitTimer);
       myPlayer._sitTimer=setTimeout(()=>{
-        if(myPlayer){myPlayer.sitting=true;myPlayer.dir='idle';addSystemMessage('you sank into the couch 🛋️');}
+        if(myPlayer){myPlayer.sitting=true;myPlayer.dir='idle';addSystemMessage('you sank into the couch. you may never leave.');}
       },1400);
       break;
     }
@@ -948,35 +1046,67 @@ function handleObjectClick(obj) {
       myPlayer.sitting=false;
       clearTimeout(myPlayer._sitTimer);
       myPlayer._sitTimer=setTimeout(()=>{
-        if(myPlayer){myPlayer.sitting=true;myPlayer.dir='idle';addSystemMessage('you sank into the beanbag 🫘');}
+        if(myPlayer){myPlayer.sitting=true;myPlayer.dir='idle';addSystemMessage('the beanbag claims you. this is your life now.');}
       },1200);
+      break;
+    }
+    case 'zyn_pile': {
+      addSystemMessage(ZYN_MSGS[Math.floor(Math.random()*ZYN_MSGS.length)]);
       break;
     }
     case 'poster': {
       const facts={
-        'NIRVANA':     ['nevermind dropped 1991 and broke everything','smells like teen spirit — still slaps','kurt cobain changed the world'],
-        'SOUNDGARDEN': ['superunknown 1994 — one of the greatest albums ever','black hole sun, won\'t you come','chris cornell had the best voice in rock'],
+        'NIRVANA':     ['nevermind dropped 1991 and broke everything','smells like teen spirit — still slaps','kurt cobain changed the world, then checked out'],
+        'SOUNDGARDEN': ['superunknown 1994 — one of the greatest albums ever','black hole sun, won\'t you come','chris cornell had the best voice in rock, no argument'],
         'PEARL JAM':   ['ten (1991) — eddie vedder said so himself','still alive, still touring, still goated','alive is one of the greatest songs ever written'],
-        'AIC':         ['dirt (1992) — genuinely heavy','layne staley was a legend','down in a hole hits different at 3am'],
+        'AIC':         ['dirt (1992) — genuinely heavy','layne staley was a legend','down in a hole hits different at 3am with no lights on'],
       };
       const lines=facts[obj.band]||[];
-      addSystemMessage(`🎸 ${obj.label}`);
+      addSystemMessage(obj.label);
       if(lines.length) setTimeout(()=>addSystemMessage(lines[Math.floor(Math.random()*lines.length)]),400);
-      const reactions={george:'i saw them live once', kramer:'beautiful music!', newman:'a fine selection'};
-      const who=['george','kramer','newman'][Math.floor(Math.random()*3)];
-      setTimeout(()=>{
-        const p=players[who];
-        if(p){p.chatMsg=reactions[who];p.chatTimer=4000;addChatMessage(who.toUpperCase(),p.chatMsg,p.color);}
-      },1600);
       break;
     }
     case 'bulletin_board': {
-      addSystemMessage('📋 island bulletin board');
-      addSystemMessage(hasProfile?`logged in as ${savedProfile.username.toUpperCase()}`:'not logged in — visit the main site');
-      addSystemMessage('check ~/leaderboard to see top bajookie earners');
-      setTimeout(()=>{
-        if(players.george){players.george.chatMsg='someone write "george was here"';players.george.chatTimer=5000;addChatMessage('GEORGE','someone write "george was here"','#a07828');}
-      },500);
+      addSystemMessage('island bulletin board:');
+      addSystemMessage('- mcgann owes everyone $40');
+      addSystemMessage('- robbo says beer friday is on');
+      addSystemMessage(hasProfile?'logged in as '+savedProfile.username.toUpperCase():'not logged in — visit the main site');
+      break;
+    }
+    case 'brewery_sign': {
+      addSystemMessage("jack robbo's microbrewery — est. last thursday");
+      addSystemMessage('robbo said: "if i can make cheese i can make beer"');
+      addSystemMessage('robbo was right. probably.');
+      break;
+    }
+    case 'fermentor': {
+      const msgs=[
+        'the fermentor hums. something beautiful is happening in there.',
+        'you tap the side. a deep bloop sound. promising.',
+        'airlock is bubbling. robbo knows what he\'s doing. maybe.',
+        'smells like hops and ambition and a little bit of fear.',
+      ];
+      addSystemMessage(msgs[Math.floor(Math.random()*msgs.length)]);
+      break;
+    }
+    case 'keg': {
+      const msgs=[
+        'you try to lift the keg. it is full. your back is not ready.',
+        'keg is sealed with wax. robbo\'s signature. respect it.',
+        'it says "experimental" on a sticky note. you back away slowly.',
+        'you tap the keg. sounds hollow. this one might be done.',
+      ];
+      addSystemMessage(msgs[Math.floor(Math.random()*msgs.length)]);
+      break;
+    }
+    case 'tap_counter': {
+      const now=Date.now();
+      if(now-_lastTapUse<5000){addSystemMessage('slow down, pace yourself');return;}
+      _lastTapUse=now;
+      const pints=['you pull a pint of bungalow bitter. it\'s good. really good.','robbo pale ale — clean finish, hint of citrus. respect.','you fill your cup with the experimental batch. huge mistake. great mistake.'];
+      addSystemMessage(pints[Math.floor(Math.random()*pints.length)]);
+      myPlayer.chatMsg='*pulls a pint*';myPlayer.chatTimer=4000;
+      addChatMessage(myPlayer.name,'*pulls a pint*',myPlayer.color,true);
       break;
     }
     case 'door': {
@@ -984,6 +1114,154 @@ function handleObjectClick(obj) {
       setTimeout(()=>{ window.location.href='index.html'; },1200);
       break;
     }
+  }
+}
+
+// ── CAL NPC — tall ski bro, perpetually stoned ──
+const CAL_COLOR = '#1a88cc';
+const CAL_QUOTES = [
+  "oh man I lost my car im so high",
+  "oh man those gummies got me",
+  "bro I can't feel my skis",
+  "I swear I skied a black diamond like this once",
+  "wait where am I. where is my car.",
+  "these edibles are absolutely not 10mg",
+  "I need a beer. no I need two. no I need to sit down.",
+  "skiing on this couch counts as skiing",
+  "my gloves are somewhere. I had gloves.",
+  "powder day tomorrow I think. or yesterday. time is fake.",
+  "bro what if we just skied down the stairs",
+  "I ate a gummy 40 minutes ago. I don't know what 40 minutes means anymore.",
+  "the snow was speaking to me today. it said go home cal. I didn't.",
+  "someone put my skis on me. I don't remember that happening.",
+  "fresh tracks are a gift. also I'm cooked.",
+  "I cannot feel my tips. ski tips. leg tips.",
+  "where's the beer. did I drink the beer. I drank the beer.",
+  "alpine skiing is just controlled falling and so is this gummy",
+  "I think I left the car on the mountain",
+  "can someone check if the lifts are open. I can't read right now.",
+  "I'm fine. I'm a professional skier. I just can't stand up.",
+  "is there a late checkout. I think I'm still on the mountain.",
+];
+let calPlayer = null;
+let _calMsgTimer = 0;
+let _calPath = [];
+const CAL_HOME = { c:8, r:7 };
+
+function initCal() {
+  calPlayer = {
+    id:'cal', name:'CAL', color:CAL_COLOR,
+    x: CAL_HOME.c*TILE+TILE/2, y: CAL_HOME.r*TILE+TILE/2,
+    tx: CAL_HOME.c*TILE+TILE/2, ty: CAL_HOME.r*TILE+TILE/2,
+    dir:'idle', frame:0, chatMsg:'', chatTimer:0,
+    isYou:false, path:[], sitting:false,
+  };
+  players['cal'] = calPlayer;
+  _calMsgTimer = 3000 + Math.random()*6000;
+}
+
+function updateCal(dt) {
+  if(!calPlayer) return;
+  const p = calPlayer;
+  // movement
+  if(_calPath.length===0 && Math.random()<0.003) {
+    const nearHome = Math.hypot(p.x-(CAL_HOME.c*TILE+TILE/2), p.y-(CAL_HOME.r*TILE+TILE/2)) < TILE*4;
+    if(!nearHome) {
+      _calPath = [{x:CAL_HOME.c*TILE+TILE/2, y:CAL_HOME.r*TILE+TILE/2}];
+    } else {
+      // wander to fridge or bong area
+      const spots = [{c:7,r:5},{c:9,r:8},{c:25,r:3},{c:5,r:7}];
+      const s = spots[Math.floor(Math.random()*spots.length)];
+      _calPath = [{x:s.c*TILE+TILE/2, y:s.r*TILE+TILE/2}];
+    }
+  }
+  if(_calPath.length>0) { p.path=_calPath; if(p.path.length===0) _calPath=[]; }
+  // occasional sit
+  if(Math.random()<0.002) { p.sitting=!p.sitting; }
+  // messages
+  _calMsgTimer -= dt;
+  if(_calMsgTimer <= 0) {
+    _calMsgTimer = 12000 + Math.random()*20000;
+    const quote = CAL_QUOTES[Math.floor(Math.random()*CAL_QUOTES.length)];
+    p.chatMsg = quote;
+    p.chatTimer = 6000;
+    addChatMessage('CAL', quote, CAL_COLOR, false, false);
+  }
+}
+
+function drawCalGoblin(x, y, dir, frame, chatMsg, sitting) {
+  const s = ctx;
+  const color = CAL_COLOR;
+  // Taller goblin — extra 5px of body height
+  s.fillStyle='rgba(0,0,0,0.3)';
+  s.beginPath();s.ellipse(x,y+14,9,3,0,0,Math.PI*2);s.fill();
+  s.save();
+  if(dir==='left'){s.translate(x,y);s.scale(-1,1);s.translate(-x,-y);}
+  const px=v=>Math.round(v);
+  // body (taller)
+  s.fillStyle=color;s.fillRect(px(x-5),px(y-10),10,14);
+  // ski jacket stripe
+  s.fillStyle='#fff';s.fillRect(px(x-5),px(y-6),10,2);
+  // head
+  s.fillStyle=color;s.fillRect(px(x-5),px(y-22),10,12);
+  // ski goggles (yellow strap + lens)
+  s.fillStyle='#d4a017';s.fillRect(px(x-6),px(y-18),12,4);
+  s.fillStyle='rgba(0,180,220,0.5)';s.fillRect(px(x-4),px(y-18),8,4);
+  // eyes
+  s.fillStyle='#000';s.fillRect(px(x-3),px(y-16),2,2);s.fillRect(px(x+1),px(y-16),2,2);
+  // ears + horns
+  s.fillStyle=color;s.fillRect(px(x-7),px(y-21),2,4);s.fillRect(px(x+5),px(y-21),2,4);
+  s.fillStyle=darken(color,0.65);s.fillRect(px(x-4),px(y-26),2,5);s.fillRect(px(x+2),px(y-26),2,5);
+  // silly grin
+  s.fillStyle='#d4a017';s.fillRect(px(x-2),px(y-13),5,1);
+  if(sitting) {
+    s.fillStyle=darken(color,0.75);
+    s.fillRect(px(x-10),px(y+6),8,4);s.fillRect(px(x+2),px(y+6),8,4);
+    s.fillStyle=color;s.fillRect(px(x-7),px(y-8),2,4);s.fillRect(px(x+5),px(y-8),2,4);
+  } else {
+    const legOff=dir!=='idle'?Math.sin(frame*0.3)*3:0;
+    s.fillStyle=darken(color,0.75);
+    s.fillRect(px(x-5),px(y+4),4,7+legOff);s.fillRect(px(x+1),px(y+4),4,7-legOff);
+    const armOff=dir!=='idle'?Math.sin(frame*0.3)*2:0;
+    s.fillStyle='#fff';
+    s.fillRect(px(x-8),px(y-9+armOff),3,6);s.fillRect(px(x+5),px(y-9-armOff),3,6);
+  }
+  // SKIS — always drawn (horizontal planks under feet)
+  s.fillStyle='#c83010';
+  s.fillRect(px(x-16),px(y+10),32,3);// ski plank
+  s.fillStyle='#a02008';s.fillRect(px(x-16),px(y+10),32,1);// top edge
+  s.fillStyle='#e84020';s.fillRect(px(x-2),px(y+8),4,4);// binding
+  // ski poles (leaning, not held properly — too high)
+  s.strokeStyle='#888';s.lineWidth=1;
+  s.beginPath();s.moveTo(px(x-10),px(y+10));s.lineTo(px(x-14),px(y-20));s.stroke();
+  s.beginPath();s.moveTo(px(x+10),px(y+10));s.lineTo(px(x+14),px(y-20));s.stroke();
+  s.fillStyle='#555';
+  s.beginPath();s.arc(px(x-14),px(y-20),3,0,Math.PI*2);s.fill();
+  s.beginPath();s.arc(px(x+14),px(y-20),3,0,Math.PI*2);s.fill();
+  s.restore();
+  // name tag
+  s.font='10px "Press Start 2P"';s.textAlign='center';
+  const nw=s.measureText('CAL').width+8;
+  s.fillStyle='rgba(26,136,204,0.2)';s.fillRect(x-nw/2,y-38,nw,13);
+  s.fillStyle=CAL_COLOR;s.fillText('CAL',x,y-28);
+  // stoned indicator
+  s.font='8px "VT323"';s.fillStyle='rgba(160,220,100,0.7)';
+  s.fillText('[stoned]',x,y-42);
+  // chat bubble
+  if(chatMsg) {
+    s.font='11px "VT323"';
+    const maxW=130,lines=wrapText(chatMsg,maxW,s);
+    const bh=lines.length*14+10,bw=Math.min(maxW+16,150);
+    const bx=x-bw/2,by=y-52-bh;
+    s.fillStyle='rgba(26,136,204,0.12)';
+    s.strokeStyle='#1a88cc';s.lineWidth=1;
+    s.beginPath();s.roundRect(bx,by,bw,bh,3);s.fill();s.stroke();
+    s.fillStyle='rgba(26,136,204,0.12)';
+    s.beginPath();s.moveTo(x-4,by+bh);s.lineTo(x,by+bh+6);s.lineTo(x+4,by+bh);s.fill();
+    s.strokeStyle='#1a88cc';
+    s.beginPath();s.moveTo(x-4,by+bh);s.lineTo(x,by+bh+6);s.lineTo(x+4,by+bh);s.stroke();
+    s.fillStyle='#c9d1d9';s.textAlign='center';
+    lines.forEach((l,i)=>s.fillText(l,x,by+13+i*14));
   }
 }
 
@@ -995,95 +1273,17 @@ function createPlayer(id,name,color,x,y) {
   return {id,name,color,x,y,tx:x,ty:y,dir:'idle',frame:0,chatMsg:'',chatTimer:0,isYou:id==='you',path:[],sitting:false};
 }
 
-// ── DEMO PLAYERS ──
-const demoPlayers=[
-  {id:'george',name:'GEORGE',color:'#a07828'},
-  {id:'kramer',name:'KRAMER',color:'#f85149'},
-  {id:'newman', name:'NEWMAN', color:'#58a6ff'},
-];
-// Home spots (where they gravitate)
-const demoHomes={
-  george:{c:5,r:9},    // sofa
-  kramer:{c:22,r:4},   // kitchen
-  newman:{c:21,r:12},  // dining table
-};
-const demoZoneMsg={
-  george:{
-    home:['this is my spot','nobody move my cushion','i could nap here','this couch is incredible','i was just sitting here'],
-    bong: ['nice one','you got any more of that','i was gonna ask the same thing'],
-    def:  ['anyone ordering food yet','what are we watching','this place has good lighting','the remote is mine','i could live here honestly'],
-  },
-  kramer:{
-    home: ['look at this kitchen!','beautiful refrigerator','i\'m making sandwiches','the pantry — look at this!','giddyup!'],
-    bong: ['pass it around!','i\'m feeling it','that\'s the stuff'],
-    def:  ['what a vibe in here','i\'m moving in','beautiful!','this is the spot','look at this place'],
-  },
-  newman:{
-    home: ['pass the snacks','i\'ll have seconds','tremendous spread','is there more pizza','bring out more chips'],
-    bong: ['remarkable','a fine choice','i\'ll pass, i\'m watching my health. actually no give it here'],
-    def:  ['hello jerry','outstanding place','the mail can wait','i\'ll just be in the kitchen','remarkable'],
-  },
-};
-const demoMsgTimers={george:0,kramer:0,newman:0};
-
-const demoSpawns={george:{c:5,r:9},kramer:{c:22,r:4},newman:{c:21,r:12}};
-
-function initDemoPlayers() {
-  demoPlayers.forEach(dp=>{
-    const sp=demoSpawns[dp.id];
-    players[dp.id]=createPlayer(dp.id,dp.name,dp.color,sp.c*TILE+TILE/2,sp.r*TILE+TILE/2);
-  });
-  // George starts sitting on the sofa
-  if(players.george) players.george.sitting=true;
-}
-
-function updateDemoPlayers(dt) {
-  demoPlayers.forEach(dp=>{
-    const p=players[dp.id];if(!p)return;
-    const home=demoHomes[dp.id];
-    const nearHome=Math.hypot(p.x-(home.c*TILE+TILE/2),p.y-(home.r*TILE+TILE/2))<TILE*3.5;
-    const nearBong=Math.hypot(p.x-(7*TILE+TILE/2),p.y-(5*TILE+TILE/2))<TILE*5;
-
-    // movement
-    if(!p.sitting && demoPaths[dp.id]&&demoPaths[dp.id].length===0&&Math.random()<0.005){
-      if(!nearHome&&Math.random()<0.65){
-        demoPaths[dp.id]=[{x:home.c*TILE+TILE/2,y:home.r*TILE+TILE/2}];
-      } else {
-        const cc=Math.floor(p.x/TILE),cr=Math.floor(p.y/TILE);
-        for(let i=0;i<15;i++){
-          const nc=cc+Math.floor(Math.random()*9)-4,nr=cr+Math.floor(Math.random()*9)-4;
-          if(nr>0&&nr<ROWS-1&&nc>0&&nc<COLS-1&&worldMap[nr]&&worldMap[nr][nc]>0){
-            demoPaths[dp.id]=[{x:nc*TILE+TILE/2,y:nr*TILE+TILE/2}];break;
-          }
-        }
-      }
-    }
-    // sit at home
-    if(nearHome&&!p.sitting&&Math.random()<0.01) p.sitting=true;
-    if(!nearHome&&p.sitting) p.sitting=false;
-
-    // messages
-    demoMsgTimers[dp.id]-=dt;
-    if(demoMsgTimers[dp.id]<=0&&Math.random()<0.004){
-      const zone=nearBong?'bong':nearHome?'home':'def';
-      const msgs=demoZoneMsg[dp.id][zone]||demoZoneMsg[dp.id].def;
-      p.chatMsg=msgs[Math.floor(Math.random()*msgs.length)];
-      p.chatTimer=4500;
-      demoMsgTimers[dp.id]=9000+Math.random()*14000;
-      addChatMessage(dp.name,p.chatMsg,dp.color);
-    }
-    if(demoPaths[dp.id]&&demoPaths[dp.id].length>0){
-      p.path=demoPaths[dp.id];
-      if(p.path.length===0)demoPaths[dp.id]=[];
-    }
-  });
-}
-const demoPaths={george:[],kramer:[],newman:[]};
-
 // ── SECURITY HELPERS ──
 function _esc(s){return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 function _sanitizeName(s,max){return String(s??'').replace(/[^a-zA-Z0-9 _\-\.!]/g,'').trim().slice(0,max||16)||'GUEST';}
 function _sanitizeMsg(s){return String(s??'').replace(/[<>]/g,'').trim().slice(0,100);}
+
+// ── CHAT HISTORY (localStorage) ──
+const CHAT_HISTORY_KEY='tk_bungalow_chat';
+const CHAT_MAX=80;
+let _chatHistory=[];
+try { _chatHistory=JSON.parse(localStorage.getItem(CHAT_HISTORY_KEY)||'[]'); } catch(e){ _chatHistory=[]; }
+function _saveChatHistory(){ try{localStorage.setItem(CHAT_HISTORY_KEY,JSON.stringify(_chatHistory.slice(-CHAT_MAX)));}catch(e){} }
 
 // ── FIREBASE MULTIPLAYER ──
 const _BUNGALOW_CFG = {
@@ -1092,7 +1292,6 @@ const _BUNGALOW_CFG = {
   projectId: 'tonykrink-63723',
 };
 const _SESSION_ID = 'bk_' + Math.random().toString(36).slice(2,10);
-const _DEMO_IDS   = new Set(['george','kramer','newman']);
 let _bDb = null, _myDocRef = null;
 let _lastWrittenX = -999, _lastWrittenY = -999, _lastSyncTime = 0;
 
@@ -1101,7 +1300,7 @@ function _initBungalowFirebase() {
     let app;
     try { app = firebase.app('bungalow'); } catch(e) { app = firebase.initializeApp(_BUNGALOW_CFG,'bungalow'); }
     _bDb = firebase.firestore(app);
-    addSystemMessage('// multiplayer online ✓ — share this page with friends!');
+    addSystemMessage('// multiplayer online — share this url with friends');
   } catch(e) {
     console.warn('Bungalow Firebase:', e);
     addSystemMessage('// solo mode — firebase unavailable');
@@ -1132,7 +1331,7 @@ function _startPresence(name, color) {
       if (!players[id]) {
         players[id] = createPlayer(id, d.name, d.color, d.x || 13*TILE, d.y || 14*TILE);
         players[id]._lastChatTime = 0;
-        addSystemMessage(`🟢 ${d.name} entered the bungalow`);
+        addSystemMessage(d.name+' entered the bungalow');
       } else {
         const p = players[id];
         if (Math.hypot((d.x||0) - p.x, (d.y||0) - p.y) > 4) {
@@ -1149,17 +1348,16 @@ function _startPresence(name, color) {
       }
     });
     for (const id of Object.keys(players)) {
-      if (id === 'you' || _DEMO_IDS.has(id)) continue;
+      if (id === 'you') continue;
       if (!activeIds.has(id)) {
         const gone = players[id].name;
         delete players[id];
-        addSystemMessage(`🔴 ${gone} left the bungalow`);
+        addSystemMessage(gone+' left the bungalow');
       }
     }
     updatePlayersList();
   }, err => console.warn('Bungalow snapshot error:', err));
 
-  // Heartbeat every 15s
   setInterval(()=>{ if(_myDocRef) _myDocRef.update({lastSeen:Date.now()}).catch(()=>{}); }, 15000);
 }
 
@@ -1243,14 +1441,12 @@ canvas.addEventListener('mousemove',e=>{
 canvas.addEventListener('click',e=>{
   const rect=canvas.getBoundingClientRect();
   const sx=e.clientX-rect.left,sy=e.clientY-rect.top;
-  // check interactable objects first
   for(const obj of worldObjects){
     if(!obj.interactable)continue;
     const sp=worldToScreen(obj.c*TILE+TILE/2,obj.r*TILE+TILE/2);
     if(Math.abs(sp.x-sx)<44&&Math.abs(sp.y-sy)<44){handleObjectClick(obj);return;}
   }
   if(!myPlayer)return;
-  // unsit on move click
   if(myPlayer.sitting){myPlayer.sitting=false;clearTimeout(myPlayer._sitTimer);}
   const tile=screenToTile(sx,sy);
   if(tile.r>0&&tile.r<ROWS-1&&tile.c>0&&tile.c<COLS-1&&worldMap[tile.r]&&worldMap[tile.r][tile.c]>0){
@@ -1267,46 +1463,90 @@ const chatInput=document.getElementById('chat-input');
 const chatMessages=document.getElementById('chat-messages');
 chatInput.addEventListener('keydown',e=>{if(e.key==='Enter'&&chatInput.value.trim()){sendChat(chatInput.value.trim());chatInput.value='';}});
 document.addEventListener('keydown',e=>{if(e.key==='Enter'&&document.activeElement!==chatInput&&myPlayer){chatInput.focus();e.preventDefault();}});
-function sendChat(rawMsg){if(!myPlayer)return;const msg=_sanitizeMsg(rawMsg);if(!msg)return;myPlayer.chatMsg=msg;myPlayer.chatTimer=5500;addChatMessage(myPlayer.name,msg,myPlayer.color,true);_sendChatToFirestore(msg);}
-function addChatMessage(name,msg,color,isYou=false){
+
+function sendChat(rawMsg){
+  if(!myPlayer)return;
+  const msg=_sanitizeMsg(rawMsg);
+  if(!msg)return;
+  myPlayer.chatMsg=msg;myPlayer.chatTimer=5500;
+  addChatMessage(myPlayer.name,msg,myPlayer.color,true);
+  _sendChatToFirestore(msg);
+}
+
+function addChatMessage(name,msg,color,isYou=false,skipHistory=false){
   const div=document.createElement('div');div.className='chat-msg';
   const ns=document.createElement('span');ns.className='sender';ns.style.color=color||'#8b949e';ns.textContent=name+': ';
   const bs=document.createElement('span');bs.className='body';bs.textContent=msg;
   div.appendChild(ns);div.appendChild(bs);chatMessages.appendChild(div);
   chatMessages.scrollTop=chatMessages.scrollHeight;
+  if(!skipHistory){
+    _chatHistory.push({type:'chat',name,msg,color,ts:Date.now()});
+    _saveChatHistory();
+  }
 }
-function addSystemMessage(msg){
+
+function addSystemMessage(msg,skipHistory=false){
   const div=document.createElement('div');div.className='chat-msg system';div.textContent=msg;
   chatMessages.appendChild(div);chatMessages.scrollTop=chatMessages.scrollHeight;
+  if(!skipHistory){
+    _chatHistory.push({type:'system',msg,ts:Date.now()});
+    _saveChatHistory();
+  }
+}
+
+function _restoreChatHistory(){
+  if(!_chatHistory.length)return;
+  const cutoff=Date.now()-24*60*60*1000;// last 24h only
+  const recent=_chatHistory.filter(m=>m.ts>cutoff).slice(-30);
+  if(!recent.length)return;
+  // separator
+  const sep=document.createElement('div');sep.className='chat-msg system history';
+  sep.textContent='--- chat history ---';
+  chatMessages.appendChild(sep);
+  recent.forEach(m=>{
+    if(m.type==='chat'){
+      const div=document.createElement('div');div.className='chat-msg history';
+      const ns=document.createElement('span');ns.className='sender';ns.style.color=m.color||'#8b949e';ns.textContent=m.name+': ';
+      const bs=document.createElement('span');bs.className='body';bs.textContent=m.msg;
+      div.appendChild(ns);div.appendChild(bs);chatMessages.appendChild(div);
+    } else {
+      const div=document.createElement('div');div.className='chat-msg system history';
+      div.textContent=m.msg;chatMessages.appendChild(div);
+    }
+  });
+  const sep2=document.createElement('div');sep2.className='chat-msg system history';
+  sep2.textContent='--- now ---';
+  chatMessages.appendChild(sep2);
+  chatMessages.scrollTop=chatMessages.scrollHeight;
 }
 
 // ── PLAYERS LIST ──
-const _DEMO_ROLES = {george:'couch philosopher',kramer:'kitchen gremlin',newman:'dining menace'};
 function updatePlayersList(){
   const list=document.getElementById('players-list');list.innerHTML='';
   const all=Object.values(players);
-  // count real players (you + remote, not demo NPCs)
-  const realCount=all.filter(p=>p.isYou||!_DEMO_IDS.has(p.id)).length;
-  document.getElementById('online-num').textContent=realCount;
-  document.getElementById('online-count').textContent=realCount+' online';
+  if(calPlayer && !all.find(p=>p.id==='cal')) all.push(calPlayer);
+  document.getElementById('online-num').textContent=all.filter(p=>p.isYou||p.id!=='cal').length;
+  document.getElementById('online-count').textContent=all.filter(p=>p.isYou||p.id!=='cal').length+' online';
   all.forEach(p=>{
-    const div=document.createElement('div');div.className='player-entry';div.style.flexWrap='wrap';
+    const div=document.createElement('div');div.className='player-entry';
     const dot=document.createElement('div');dot.className='player-dot';dot.style.background=p.color;
     const name=document.createElement('span');name.className='player-name-tag'+(p.isYou?' you':'');
-    name.textContent=p.name+(p.isYou?' (you)':'')+(p.sitting?' 💺':'');
+    name.textContent=p.name+(p.isYou?' (you)':'')+(p.id==='cal'?' [stoned]':'')+(p.sitting?' \u{1F4BA}':'');
     div.appendChild(dot);div.appendChild(name);
-    if(_DEMO_ROLES[p.id]){
-      const role=document.createElement('span');role.className='player-role';
-      role.textContent=_DEMO_ROLES[p.id];div.appendChild(role);
-    }
     list.appendChild(div);
   });
 }
 
 function drawPlayers(){
-  Object.values(players).sort((a,b)=>a.y-b.y).forEach(p=>{
+  const allP = Object.values(players);
+  if(calPlayer) allP.push(calPlayer);
+  allP.sort((a,b)=>a.y-b.y).forEach(p=>{
     const sp=worldToScreen(p.x,p.y);
-    drawGoblin(sp.x,sp.y,p.color,p.dir,p.frame,p.name,p.chatMsg||'',p.isYou,p.sitting||false);
+    if(p.id==='cal'){
+      drawCalGoblin(sp.x,sp.y,p.dir,p.frame,p.chatMsg||'',p.sitting||false);
+    } else {
+      drawGoblin(sp.x,sp.y,p.color,p.dir,p.frame,p.name,p.chatMsg||'',p.isYou,p.sitting||false);
+    }
   });
 }
 
@@ -1318,31 +1558,15 @@ function initModal(){
     const gc=document.getElementById('profile-goblin-preview').getContext('2d');
     drawMiniGoblin(gc,24,42,chosenColor);
     document.getElementById('profile-username-display').textContent=savedProfile.username.toUpperCase().slice(0,12);
-    document.getElementById('enter-profile-btn').addEventListener('click',()=>enterBungalow(savedProfile.username.toUpperCase().slice(0,12),chosenColor));
-    document.getElementById('switch-to-guest').addEventListener('click',e=>{
-      e.preventDefault();
-      document.getElementById('modal-profile-view').style.display='none';
-      document.getElementById('modal-guest-view').style.display='block';
-      setTimeout(()=>document.getElementById('name-input-field').focus(),50);
+    document.getElementById('enter-profile-btn').addEventListener('click',()=>{
+      enterBungalow(savedProfile.username.toUpperCase().slice(0,12),chosenColor);
     });
   } else {
     document.getElementById('modal-profile-view').style.display='none';
     document.getElementById('modal-guest-view').style.display='block';
-    const pick=document.getElementById('avatar-pick');
-    COLORS.forEach((col,i)=>{
-      const wrap=document.createElement('div');wrap.className='avatar-opt'+(i===chosenAvatarIdx?' selected':'');
-      const c=document.createElement('canvas');c.width=24;c.height=30;drawMiniGoblin(c.getContext('2d'),12,20,col);wrap.appendChild(c);
-      wrap.addEventListener('click',()=>{document.querySelectorAll('.avatar-opt').forEach(el=>el.classList.remove('selected'));wrap.classList.add('selected');chosenColor=col;chosenAvatarIdx=i;});
-      pick.appendChild(wrap);
+    document.getElementById('enter-guest-btn').addEventListener('click',()=>{
+      enterBungalow('GUEST', chosenColor);
     });
-    document.getElementById('enter-btn').addEventListener('click',()=>{
-      let name=document.getElementById('name-input-field').value.trim().toUpperCase().slice(0,12);
-      if(!name)name='GUEST';enterBungalow(name,chosenColor);
-    });
-    document.getElementById('name-input-field').addEventListener('keydown',e=>{
-      if(e.key==='Enter'){let name=document.getElementById('name-input-field').value.trim().toUpperCase().slice(0,12);if(!name)name='GUEST';enterBungalow(name,chosenColor);}
-    });
-    setTimeout(()=>document.getElementById('name-input-field').focus(),50);
   }
 }
 
@@ -1353,28 +1577,29 @@ function enterBungalow(rawName,color){
   myPlayer=createPlayer('you',name,color,13*TILE+TILE/2,14*TILE+TILE/2);
   myPlayer.isYou=true;players['you']=myPlayer;
   cam.x=myPlayer.x;cam.y=myPlayer.y;
-  initDemoPlayers();updatePlayersList();
-  addSystemMessage('you rolled into the bungalow as '+name);
-  addSystemMessage('george is already on the couch. kramer is raiding the fridge. newman is at the table.');
-  addSystemMessage('💡 click on stuff to interact — try the bong, TV, fridge, posters');
+  updatePlayersList();
+  _restoreChatHistory();
+  addSystemMessage('you rolled into the bungalow as '+name, true);
+  addSystemMessage("robbo's brewery is in the back. zyns on the floor are mcgann's don't touch them", true);
+  addSystemMessage('click on stuff to interact — try the bong, TV, fridge, posters, brewery', true);
+  initCal();
+  setTimeout(()=>{
+    if(calPlayer){ calPlayer.chatMsg='oh man those gummies got me'; calPlayer.chatTimer=6000; addChatMessage('CAL','oh man those gummies got me',CAL_COLOR,false,false); }
+  }, 2000);
   _initBungalowFirebase();
   setTimeout(()=>_startPresence(name,color), 600);
-  setTimeout(()=>{if(players.george){players.george.chatMsg='took you long enough';players.george.chatTimer=4000;addChatMessage('GEORGE','took you long enough','#a07828');}},1500);
-  setTimeout(()=>{if(players.kramer){players.kramer.chatMsg='beautiful! sit down!';players.kramer.chatTimer=3500;addChatMessage('KRAMER','beautiful! sit down!','#f85149');}},3000);
 }
 
 // ── MAIN LOOP ──
 let lastTime=0;
 function loop(ts){
   const dt=Math.min(ts-lastTime,100);lastTime=ts;
-  if(myPlayer){updateDemoPlayers(dt);movePlayersToTargets(dt);updateCamera();updateSmoke(dt);_syncMyPosition();}
+  if(myPlayer){movePlayersToTargets(dt);updateCamera();updateSmoke(dt);_syncMyPosition();updateCal(dt);}
   ctx.clearRect(0,0,canvas.width,canvas.height);
   drawWorld();drawPlayers();drawSmoke();
-  // vignette
   const grad=ctx.createRadialGradient(canvas.width/2,canvas.height/2,canvas.height*0.3,canvas.width/2,canvas.height/2,canvas.height*0.85);
   grad.addColorStop(0,'rgba(0,0,0,0)');grad.addColorStop(1,'rgba(0,0,0,0.55)');
   ctx.fillStyle=grad;ctx.fillRect(0,0,canvas.width,canvas.height);
-  // scanlines
   ctx.fillStyle='rgba(0,0,0,0.022)';
   for(let y=0;y<canvas.height;y+=4)ctx.fillRect(0,y,canvas.width,1);
   requestAnimationFrame(loop);

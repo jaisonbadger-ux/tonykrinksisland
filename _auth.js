@@ -120,6 +120,7 @@ async function _onAuthChanged(user) {
   } else {
     _currentUser    = null;
     _currentProfile = null;
+    try { localStorage.removeItem('tk_profile'); } catch(e) {}
     _showLoginBtn();
   }
 }
@@ -131,6 +132,8 @@ async function _loadProfile(uid) {
   } catch(e) {
     _currentProfile = { username: 'anon', avatarId: 'goblin' };
   }
+  // Expose profile to bungalow (map.html) via localStorage
+  try { localStorage.setItem('tk_profile', JSON.stringify(_currentProfile)); } catch(e) {}
 }
 
 // Write username/avatarId/lastSeen to userStats on login/load
