@@ -1151,10 +1151,10 @@ input.field:focus, textarea.field:focus { border-color: var(--blue); }
     &nbsp;&nbsp;&nbsp;
     <span class="hi">sys:</span> welcome to tony krink's island &nbsp;·&nbsp;
     <span class="warn">warn:</span> bajookie flows are at maximum capacity &nbsp;·&nbsp;
-    <span class="hi">info:</span> george costanza was last seen near the message board &nbsp;·&nbsp;
-    <span class="warn">warn:</span> kramer has a scheme &nbsp;·&nbsp;
-    <span class="hi">sys:</span> the seinfeld bot is running. it will not stop. &nbsp;·&nbsp;
-    <span class="warn">info:</span> newman has been banned from the island. he found a way back. &nbsp;·&nbsp;
+    <span class="hi">info:</span> dribzybot has posted &nbsp;·&nbsp;
+    <span class="warn">warn:</span> japingus is watching you &nbsp;·&nbsp;
+    <span class="hi">sys:</span> the bajookie clicker will never be finished. this is intentional. &nbsp;·&nbsp;
+    <span class="warn">info:</span> farrow has not eaten anything except twiggy sticks in four days. &nbsp;·&nbsp;
     <span class="hi">sys:</span> click the bajookie coin. there is no reason. click anyway. &nbsp;·&nbsp;
     &nbsp;&nbsp;&nbsp;
   </span>
@@ -2939,58 +2939,119 @@ function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').re
 // CLICKER DATA
 // ═══════════════════════════════════════════════
 const PRODS = [
-  {id:'p1', icon:'👆', name:'Clicking Finger',     base:15,        cps:0.1  },
-  {id:'p2', icon:'💧', name:'Yung Lean Teardrop',  base:100,       cps:1    },
-  {id:'p3', icon:'🍶', name:'Drain Gang Goblet',   base:500,       cps:5    },
-  {id:'p4', icon:'📼', name:'Bajookie VHS Tape',   base:2000,      cps:12   },
-  {id:'p5', icon:'☁️', name:'Sad Cloud Server',    base:7000,      cps:25   },
-  {id:'p6', icon:'🛋️', name:"Homer's Couch",       base:20000,     cps:50   },
-  {id:'p7', icon:'🌐', name:'Geocities Host',      base:75000,     cps:100  },
-  {id:'p8', icon:'🌫️', name:'Island Mist Machine', base:200000,    cps:250  },
-  {id:'p9', icon:'🏝️', name:'Island Resort',       base:666000,    cps:600  },
-  {id:'p0', icon:'🕳️', name:'The Void',            base:5000000,   cps:2000  },
-  {id:'pa', icon:'🌋', name:'Bajookie Volcano',          base:25000000,    cps:8000  },
-  {id:'pb', icon:'🧠', name:'Collective Consciousness',  base:500000000,   cps:25000 },
-  {id:'pc', icon:'♾️', name:'Infinite Bajookie Loop',    base:10000000000, cps:100000},
+  {id:'p1', icon:'👆', name:'Clicking Finger',          base:15,              cps:0.1     },
+  {id:'p2', icon:'💧', name:'Yung Lean Teardrop',       base:200,             cps:0.5     },
+  {id:'p3', icon:'🍶', name:'Drain Gang Goblet',        base:1500,            cps:2       },
+  {id:'p4', icon:'📼', name:'Bajookie VHS Tape',        base:8000,            cps:8       },
+  {id:'p5', icon:'☁️', name:'Sad Cloud Server',         base:35000,           cps:18      },
+  {id:'p6', icon:'🛋️', name:"Homer's Couch",            base:120000,          cps:40      },
+  {id:'p7', icon:'🌐', name:'Geocities Host',           base:500000,          cps:90      },
+  {id:'p8', icon:'🌫️', name:'Island Mist Machine',      base:2000000,         cps:220     },
+  {id:'p9', icon:'🏝️', name:'Island Resort',            base:8000000,         cps:550     },
+  {id:'p0', icon:'🕳️', name:'The Void',                 base:50000000,        cps:1800    },
+  {id:'pa', icon:'🌋', name:'Bajookie Volcano',         base:400000000,       cps:6000    },
+  {id:'pb', icon:'🧠', name:'Collective Consciousness', base:10000000000,     cps:20000   },
+  {id:'pc', icon:'♾️', name:'Infinite Bajookie Loop',   base:300000000000,    cps:80000   },
+  {id:'pd', icon:'🌌', name:'Dark Matter Dispenser',    base:10000000000000,  cps:350000  },
+  {id:'pe', icon:'⭐', name:'Bajookie Nebula',          base:5e17,            cps:2000000 },
+  {id:'pf', icon:'🌀', name:'The Drain Singularity',   base:2e22,            cps:15000000},
 ];
 
 const BOOSTS = [
-  {id:'c1', icon:'🧤', name:'Rubber Gloves',    desc:'×5 click power',           cost:500,        type:'click', mult:5,  prod:null, reqN:null, req:null,  reqTotal:null},
-  {id:'c2', icon:'🥊', name:'Power Fist',       desc:'×10 click power',          cost:25000,      type:'click', mult:10, prod:null, reqN:null, req:'c1',  reqTotal:null},
-  {id:'c3', icon:'💎', name:'Bajookie Crystal', desc:'×25 click power',          cost:500000,     type:'click', mult:25, prod:null, reqN:null, req:'c2',  reqTotal:null},
-  {id:'c4', icon:'🔮', name:'Void Shard',       desc:'×50 click power',          cost:50000000,   type:'click', mult:50, prod:null, reqN:null, req:'c3',  reqTotal:null},
-  {id:'b1a',icon:'👆', name:'Double Tap',       desc:'Clicking Fingers ×2',      cost:100,        type:'prod',  mult:2,  prod:'p1', reqN:1,   req:null,  reqTotal:null},
-  {id:'b1b',icon:'👆', name:'Rapid Fire',       desc:'Clicking Fingers ×5',      cost:2000,       type:'prod',  mult:5,  prod:'p1', reqN:10,  req:null,  reqTotal:null},
-  {id:'b2a',icon:'💧', name:'Drip Harder',      desc:'Teardrops ×2',             cost:1000,       type:'prod',  mult:2,  prod:'p2', reqN:1,   req:null,  reqTotal:null},
-  {id:'b2b',icon:'💧', name:'Ocean of Lean',    desc:'Teardrops ×5',             cost:10000,      type:'prod',  mult:5,  prod:'p2', reqN:10,  req:null,  reqTotal:null},
-  {id:'b3a',icon:'🍶', name:'Purple Haze',      desc:'Goblets ×2',               cost:5000,       type:'prod',  mult:2,  prod:'p3', reqN:1,   req:null,  reqTotal:null},
-  {id:'b3b',icon:'🍶', name:'Drain King',       desc:'Goblets ×5',               cost:50000,      type:'prod',  mult:5,  prod:'p3', reqN:10,  req:null,  reqTotal:null},
-  {id:'b4a',icon:'📼', name:'Rewind',           desc:'VHS Tapes ×2',             cost:20000,      type:'prod',  mult:2,  prod:'p4', reqN:1,   req:null,  reqTotal:null},
-  {id:'b4b',icon:'📼', name:'Hi-Fi Bajookie',   desc:'VHS Tapes ×5',             cost:200000,     type:'prod',  mult:5,  prod:'p4', reqN:10,  req:null,  reqTotal:null},
-  {id:'b5a',icon:'☁️', name:'Storm Front',      desc:'Cloud Servers ×2',         cost:70000,      type:'prod',  mult:2,  prod:'p5', reqN:1,   req:null,  reqTotal:null},
-  {id:'b5b',icon:'☁️', name:'The Mist',         desc:'Cloud Servers ×5',         cost:700000,     type:'prod',  mult:5,  prod:'p5', reqN:10,  req:null,  reqTotal:null},
-  {id:'b6a',icon:'🛋️', name:'Snack Stockpile',  desc:"Homer's Couches ×2",       cost:200000,     type:'prod',  mult:2,  prod:'p6', reqN:1,   req:null,  reqTotal:null},
-  {id:'b6b',icon:'🛋️', name:'Never Leave',      desc:"Homer's Couches ×5",       cost:2000000,    type:'prod',  mult:5,  prod:'p6', reqN:10,  req:null,  reqTotal:null},
-  {id:'b7a',icon:'🌐', name:'Web 2.0',          desc:'Geocities Hosts ×2',       cost:750000,     type:'prod',  mult:2,  prod:'p7', reqN:1,   req:null,  reqTotal:null},
-  {id:'b7b',icon:'🌐', name:'GeoBajookie Pro',  desc:'Geocities Hosts ×5',       cost:7500000,    type:'prod',  mult:5,  prod:'p7', reqN:10,  req:null,  reqTotal:null},
-  {id:'b8a',icon:'🌫️', name:'Mist Expansion',   desc:'Mist Machines ×2',         cost:2000000,    type:'prod',  mult:2,  prod:'p8', reqN:1,   req:null,  reqTotal:null},
-  {id:'b8b',icon:'🌫️', name:'Island Fog',       desc:'Mist Machines ×5',         cost:20000000,   type:'prod',  mult:5,  prod:'p8', reqN:10,  req:null,  reqTotal:null},
-  {id:'b9a',icon:'🏝️', name:'5-Star Resort',    desc:'Island Resorts ×2',        cost:6660000,    type:'prod',  mult:2,  prod:'p9', reqN:1,   req:null,  reqTotal:null},
-  {id:'b9b',icon:'🏝️', name:'Bajookie Tourism', desc:'Island Resorts ×5',        cost:66600000,   type:'prod',  mult:5,  prod:'p9', reqN:10,  req:null,  reqTotal:null},
-  {id:'b0a',icon:'🕳️', name:'Void Tap',         desc:'The Void ×2',              cost:50000000,   type:'prod',  mult:2,  prod:'p0', reqN:1,   req:null,  reqTotal:null},
-  {id:'b0b',icon:'🕳️', name:'Bajookie Abyss',   desc:'The Void ×5',              cost:500000000,  type:'prod',  mult:5,  prod:'p0', reqN:10,  req:null,  reqTotal:null},
-  {id:'g1', icon:'🌴', name:'Island Alignment', desc:'All producers ×1.5',        cost:1000000,    type:'global',mult:1.5,prod:null, reqN:null, req:null,  reqTotal:50 },
-  {id:'g2', icon:'🌊', name:'Bajookie Tide',    desc:'All producers ×3',          cost:1000000000, type:'global',mult:3,  prod:null, reqN:null, req:null,  reqTotal:200},
-  {id:'baa',icon:'🌋', name:'Eruption',         desc:'Bajookie Volcano ×2',        cost:250000000,  type:'prod',  mult:2,  prod:'pa', reqN:1,   req:null,  reqTotal:null},
-  {id:'bab',icon:'🌋', name:'Supervolcano',     desc:'Bajookie Volcano ×5',        cost:2500000000, type:'prod',  mult:5,  prod:'pa', reqN:10,  req:null,  reqTotal:null},
-  {id:'bba',icon:'🧠', name:'Hive Mind',        desc:'Collective Consciousness ×2', cost:5000000000, type:'prod',  mult:2,  prod:'pb', reqN:1,   req:null,  reqTotal:null},
-  {id:'bbb',icon:'🧠', name:'Omniscience',      desc:'Collective Consciousness ×5', cost:50000000000, type:'prod', mult:5,  prod:'pb', reqN:10,  req:null,  reqTotal:null},
-  {id:'bca',icon:'♾️', name:'Loop Detected',    desc:'Infinite Loop ×2',            cost:100000000000, type:'prod', mult:2, prod:'pc', reqN:1,   req:null,  reqTotal:null},
-  {id:'bcb',icon:'♾️', name:'Stack Overflow',   desc:'Infinite Loop ×5',            cost:1000000000000, type:'prod',mult:5, prod:'pc', reqN:10,  req:null,  reqTotal:null},
-  {id:'g3', icon:'⬆', name:'Bajookie Ascendancy', desc:'All producers ×5',         cost:1000000000000, type:'global',mult:5, prod:null, reqN:null, req:null, reqTotal:500},
-  {id:'g4', icon:'🌌', name:'Island Singularity',  desc:'All producers ×10',        cost:100000000000000, type:'global',mult:10, prod:null, reqN:null, req:'g3', reqTotal:null},
-  {id:'c5', icon:'🌀', name:'Void Resonance',   desc:'+0.1 click per producer owned', cost:100000000, type:'click', mult:1, prod:null, reqN:null, req:'c4', reqTotal:null},
-  {id:'c6', icon:'💥', name:'Island Pulse',     desc:'×100 click power', cost:10000000000, type:'click', mult:100, prod:null, reqN:null, req:'c5', reqTotal:null},
+  // ── CLICK BOOSTS ──
+  {id:'c1', icon:'🧤', name:'Rubber Gloves',     desc:'×5 click power',            cost:2000,       type:'click', mult:5,   prod:null, reqN:null, req:null, reqTotal:null},
+  {id:'c2', icon:'🥊', name:'Power Fist',        desc:'×10 click power',           cost:150000,     type:'click', mult:10,  prod:null, reqN:null, req:'c1', reqTotal:null},
+  {id:'c3', icon:'💎', name:'Bajookie Crystal',  desc:'×25 click power',           cost:8000000,    type:'click', mult:25,  prod:null, reqN:null, req:'c2', reqTotal:null},
+  {id:'c4', icon:'🔮', name:'Void Shard',        desc:'×50 click power',           cost:800000000,  type:'click', mult:50,  prod:null, reqN:null, req:'c3', reqTotal:null},
+  {id:'c5', icon:'🌀', name:'Void Resonance',    desc:'+0.1 click per producer',   cost:20000000000,type:'click', mult:1,   prod:null, reqN:null, req:'c4', reqTotal:null},
+  {id:'c6', icon:'💥', name:'Island Pulse',      desc:'×100 click power',          cost:2000000000000,type:'click',mult:100, prod:null, reqN:null, req:'c5', reqTotal:null},
+  {id:'c7', icon:'🌌', name:'Dark Resonance',    desc:'×500 click power',          cost:2e17,       type:'click', mult:500, prod:null, reqN:null, req:'c6', reqTotal:null},
+  // ── P1: Clicking Finger ──
+  {id:'b1a',icon:'👆', name:'Double Tap',        desc:'Clicking Fingers ×2',  cost:100,        type:'prod', mult:2,  prod:'p1', reqN:1,  req:null, reqTotal:null},
+  {id:'b1b',icon:'👆', name:'Rapid Fire',        desc:'Clicking Fingers ×5',  cost:5000,       type:'prod', mult:5,  prod:'p1', reqN:10, req:null, reqTotal:null},
+  {id:'b1c',icon:'👆', name:'Turbo Tap',         desc:'Clicking Fingers ×10', cost:100000,     type:'prod', mult:10, prod:'p1', reqN:25, req:null, reqTotal:null},
+  {id:'b1d',icon:'👆', name:'Infinite Click',    desc:'Clicking Fingers ×25', cost:2000000,    type:'prod', mult:25, prod:'p1', reqN:50, req:null, reqTotal:null},
+  // ── P2: Yung Lean Teardrop ──
+  {id:'b2a',icon:'💧', name:'Drip Harder',       desc:'Teardrops ×2',         cost:2000,       type:'prod', mult:2,  prod:'p2', reqN:1,  req:null, reqTotal:null},
+  {id:'b2b',icon:'💧', name:'Ocean of Lean',     desc:'Teardrops ×5',         cost:30000,      type:'prod', mult:5,  prod:'p2', reqN:10, req:null, reqTotal:null},
+  {id:'b2c',icon:'💧', name:'Sad Boy Flood',     desc:'Teardrops ×10',        cost:600000,     type:'prod', mult:10, prod:'p2', reqN:25, req:null, reqTotal:null},
+  {id:'b2d',icon:'💧', name:'Drain World',       desc:'Teardrops ×25',        cost:12000000,   type:'prod', mult:25, prod:'p2', reqN:50, req:null, reqTotal:null},
+  // ── P3: Drain Gang Goblet ──
+  {id:'b3a',icon:'🍶', name:'Purple Haze',       desc:'Goblets ×2',           cost:15000,      type:'prod', mult:2,  prod:'p3', reqN:1,  req:null, reqTotal:null},
+  {id:'b3b',icon:'🍶', name:'Drain King',        desc:'Goblets ×5',           cost:200000,     type:'prod', mult:5,  prod:'p3', reqN:10, req:null, reqTotal:null},
+  {id:'b3c',icon:'🍶', name:'Goblet Mastery',    desc:'Goblets ×10',          cost:4000000,    type:'prod', mult:10, prod:'p3', reqN:25, req:null, reqTotal:null},
+  {id:'b3d',icon:'🍶', name:'Eternal Drain',     desc:'Goblets ×25',          cost:80000000,   type:'prod', mult:25, prod:'p3', reqN:50, req:null, reqTotal:null},
+  // ── P4: Bajookie VHS Tape ──
+  {id:'b4a',icon:'📼', name:'Rewind',            desc:'VHS Tapes ×2',         cost:80000,      type:'prod', mult:2,  prod:'p4', reqN:1,  req:null, reqTotal:null},
+  {id:'b4b',icon:'📼', name:'Hi-Fi Bajookie',    desc:'VHS Tapes ×5',         cost:1000000,    type:'prod', mult:5,  prod:'p4', reqN:10, req:null, reqTotal:null},
+  {id:'b4c',icon:'📼', name:'Remaster',          desc:'VHS Tapes ×10',        cost:20000000,   type:'prod', mult:10, prod:'p4', reqN:25, req:null, reqTotal:null},
+  {id:'b4d',icon:'📼', name:'4K Bajookie',       desc:'VHS Tapes ×25',        cost:400000000,  type:'prod', mult:25, prod:'p4', reqN:50, req:null, reqTotal:null},
+  // ── P5: Sad Cloud Server ──
+  {id:'b5a',icon:'☁️', name:'Storm Front',       desc:'Cloud Servers ×2',     cost:350000,     type:'prod', mult:2,  prod:'p5', reqN:1,  req:null, reqTotal:null},
+  {id:'b5b',icon:'☁️', name:'The Mist',          desc:'Cloud Servers ×5',     cost:5000000,    type:'prod', mult:5,  prod:'p5', reqN:10, req:null, reqTotal:null},
+  {id:'b5c',icon:'☁️', name:'Cloudstorm',        desc:'Cloud Servers ×10',    cost:100000000,  type:'prod', mult:10, prod:'p5', reqN:25, req:null, reqTotal:null},
+  {id:'b5d',icon:'☁️', name:'Sad Datacenter',    desc:'Cloud Servers ×25',    cost:2000000000, type:'prod', mult:25, prod:'p5', reqN:50, req:null, reqTotal:null},
+  // ── P6: Homer's Couch ──
+  {id:'b6a',icon:'🛋️', name:'Snack Stockpile',   desc:"Homer's Couches ×2",   cost:1200000,    type:'prod', mult:2,  prod:'p6', reqN:1,  req:null, reqTotal:null},
+  {id:'b6b',icon:'🛋️', name:'Never Leave',       desc:"Homer's Couches ×5",   cost:15000000,   type:'prod', mult:5,  prod:'p6', reqN:10, req:null, reqTotal:null},
+  {id:'b6c',icon:'🛋️', name:'Couch Kingdom',     desc:"Homer's Couches ×10",  cost:300000000,  type:'prod', mult:10, prod:'p6', reqN:25, req:null, reqTotal:null},
+  {id:'b6d',icon:'🛋️', name:'Donut Dimension',   desc:"Homer's Couches ×25",  cost:6000000000, type:'prod', mult:25, prod:'p6', reqN:50, req:null, reqTotal:null},
+  // ── P7: Geocities Host ──
+  {id:'b7a',icon:'🌐', name:'Web 2.0',           desc:'Geocities Hosts ×2',   cost:5000000,    type:'prod', mult:2,  prod:'p7', reqN:1,  req:null, reqTotal:null},
+  {id:'b7b',icon:'🌐', name:'GeoBajookie Pro',   desc:'Geocities Hosts ×5',   cost:60000000,   type:'prod', mult:5,  prod:'p7', reqN:10, req:null, reqTotal:null},
+  {id:'b7c',icon:'🌐', name:'Flash Era',         desc:'Geocities Hosts ×10',  cost:1200000000, type:'prod', mult:10, prod:'p7', reqN:25, req:null, reqTotal:null},
+  {id:'b7d',icon:'🌐', name:'Internet Titan',    desc:'Geocities Hosts ×25',  cost:25000000000,type:'prod', mult:25, prod:'p7', reqN:50, req:null, reqTotal:null},
+  // ── P8: Island Mist Machine ──
+  {id:'b8a',icon:'🌫️', name:'Mist Expansion',    desc:'Mist Machines ×2',     cost:20000000,   type:'prod', mult:2,  prod:'p8', reqN:1,  req:null, reqTotal:null},
+  {id:'b8b',icon:'🌫️', name:'Island Fog',        desc:'Mist Machines ×5',     cost:250000000,  type:'prod', mult:5,  prod:'p8', reqN:10, req:null, reqTotal:null},
+  {id:'b8c',icon:'🌫️', name:'Fog of War',        desc:'Mist Machines ×10',    cost:5000000000, type:'prod', mult:10, prod:'p8', reqN:25, req:null, reqTotal:null},
+  {id:'b8d',icon:'🌫️', name:'The Eternal Mist',  desc:'Mist Machines ×25',    cost:1e11,       type:'prod', mult:25, prod:'p8', reqN:50, req:null, reqTotal:null},
+  // ── P9: Island Resort ──
+  {id:'b9a',icon:'🏝️', name:'5-Star Resort',     desc:'Island Resorts ×2',    cost:80000000,   type:'prod', mult:2,  prod:'p9', reqN:1,  req:null, reqTotal:null},
+  {id:'b9b',icon:'🏝️', name:'Bajookie Tourism',  desc:'Island Resorts ×5',    cost:1000000000, type:'prod', mult:5,  prod:'p9', reqN:10, req:null, reqTotal:null},
+  {id:'b9c',icon:'🏝️', name:'Paradise Found',    desc:'Island Resorts ×10',   cost:20000000000,type:'prod', mult:10, prod:'p9', reqN:25, req:null, reqTotal:null},
+  {id:'b9d',icon:'🏝️', name:'Infinite Resort',   desc:'Island Resorts ×25',   cost:4e11,       type:'prod', mult:25, prod:'p9', reqN:50, req:null, reqTotal:null},
+  // ── P0: The Void ──
+  {id:'b0a',icon:'🕳️', name:'Void Tap',          desc:'The Void ×2',          cost:500000000,  type:'prod', mult:2,  prod:'p0', reqN:1,  req:null, reqTotal:null},
+  {id:'b0b',icon:'🕳️', name:'Bajookie Abyss',    desc:'The Void ×5',          cost:6000000000, type:'prod', mult:5,  prod:'p0', reqN:10, req:null, reqTotal:null},
+  {id:'b0c',icon:'🕳️', name:'Event Horizon',     desc:'The Void ×10',         cost:1.2e11,     type:'prod', mult:10, prod:'p0', reqN:25, req:null, reqTotal:null},
+  {id:'b0d',icon:'🕳️', name:'Void Singularity',  desc:'The Void ×25',         cost:2.5e12,     type:'prod', mult:25, prod:'p0', reqN:50, req:null, reqTotal:null},
+  // ── PA: Bajookie Volcano ──
+  {id:'baa',icon:'🌋', name:'Eruption',           desc:'Bajookie Volcano ×2',  cost:4000000000, type:'prod', mult:2,  prod:'pa', reqN:1,  req:null, reqTotal:null},
+  {id:'bab',icon:'🌋', name:'Supervolcano',       desc:'Bajookie Volcano ×5',  cost:5e10,       type:'prod', mult:5,  prod:'pa', reqN:10, req:null, reqTotal:null},
+  {id:'bac',icon:'🌋', name:'Magma Core',         desc:'Bajookie Volcano ×10', cost:1e12,       type:'prod', mult:10, prod:'pa', reqN:25, req:null, reqTotal:null},
+  {id:'bad',icon:'🌋', name:'Planet Killer',      desc:'Bajookie Volcano ×25', cost:2e13,       type:'prod', mult:25, prod:'pa', reqN:50, req:null, reqTotal:null},
+  // ── PB: Collective Consciousness ──
+  {id:'bba',icon:'🧠', name:'Hive Mind',          desc:'Consciousness ×2',     cost:1e11,       type:'prod', mult:2,  prod:'pb', reqN:1,  req:null, reqTotal:null},
+  {id:'bbb',icon:'🧠', name:'Omniscience',        desc:'Consciousness ×5',     cost:1.5e12,     type:'prod', mult:5,  prod:'pb', reqN:10, req:null, reqTotal:null},
+  {id:'bbc',icon:'🧠', name:'Galaxy Brain',       desc:'Consciousness ×10',    cost:3e13,       type:'prod', mult:10, prod:'pb', reqN:25, req:null, reqTotal:null},
+  {id:'bbd',icon:'🧠', name:'Transcendence',      desc:'Consciousness ×25',    cost:6e14,       type:'prod', mult:25, prod:'pb', reqN:50, req:null, reqTotal:null},
+  // ── PC: Infinite Bajookie Loop ──
+  {id:'bca',icon:'♾️', name:'Loop Detected',      desc:'Infinite Loop ×2',     cost:3e12,       type:'prod', mult:2,  prod:'pc', reqN:1,  req:null, reqTotal:null},
+  {id:'bcb',icon:'♾️', name:'Stack Overflow',     desc:'Infinite Loop ×5',     cost:4e13,       type:'prod', mult:5,  prod:'pc', reqN:10, req:null, reqTotal:null},
+  {id:'bcc',icon:'♾️', name:'Recursive Dream',    desc:'Infinite Loop ×10',    cost:8e14,       type:'prod', mult:10, prod:'pc', reqN:25, req:null, reqTotal:null},
+  {id:'bcd',icon:'♾️', name:'Infinite Depth',     desc:'Infinite Loop ×25',    cost:1.6e16,     type:'prod', mult:25, prod:'pc', reqN:50, req:null, reqTotal:null},
+  // ── PD: Dark Matter Dispenser ──
+  {id:'bda',icon:'🌌', name:'Dark Flow',          desc:'Dark Matter ×2',       cost:1e14,       type:'prod', mult:2,  prod:'pd', reqN:1,  req:null, reqTotal:null},
+  {id:'bdb',icon:'🌌', name:'Dark Energy',        desc:'Dark Matter ×5',       cost:1.5e15,     type:'prod', mult:5,  prod:'pd', reqN:10, req:null, reqTotal:null},
+  {id:'bdc',icon:'🌌', name:'Dark Dominion',      desc:'Dark Matter ×10',      cost:3e16,       type:'prod', mult:10, prod:'pd', reqN:25, req:null, reqTotal:null},
+  {id:'bdd',icon:'🌌', name:'Void Harvest',       desc:'Dark Matter ×25',      cost:6e17,       type:'prod', mult:25, prod:'pd', reqN:50, req:null, reqTotal:null},
+  // ── PE: Bajookie Nebula ──
+  {id:'bea',icon:'⭐', name:'Nebula Bloom',       desc:'Bajookie Nebula ×2',   cost:5e15,       type:'prod', mult:2,  prod:'pe', reqN:1,  req:null, reqTotal:null},
+  {id:'beb',icon:'⭐', name:'Stellar Core',       desc:'Bajookie Nebula ×5',   cost:7e16,       type:'prod', mult:5,  prod:'pe', reqN:10, req:null, reqTotal:null},
+  {id:'bec',icon:'⭐', name:'Supernova',          desc:'Bajookie Nebula ×10',  cost:1.4e18,     type:'prod', mult:10, prod:'pe', reqN:25, req:null, reqTotal:null},
+  {id:'bed',icon:'⭐', name:'Galaxy Engine',      desc:'Bajookie Nebula ×25',  cost:3e19,       type:'prod', mult:25, prod:'pe', reqN:50, req:null, reqTotal:null},
+  // ── PF: The Drain Singularity ──
+  {id:'bfa',icon:'🌀', name:'Drain Point',        desc:'Singularity ×2',       cost:2e17,       type:'prod', mult:2,  prod:'pf', reqN:1,  req:null, reqTotal:null},
+  {id:'bfb',icon:'🌀', name:'Vortex Core',        desc:'Singularity ×5',       cost:3e18,       type:'prod', mult:5,  prod:'pf', reqN:10, req:null, reqTotal:null},
+  {id:'bfc',icon:'🌀', name:'Omega Drain',        desc:'Singularity ×10',      cost:6e19,       type:'prod', mult:10, prod:'pf', reqN:25, req:null, reqTotal:null},
+  {id:'bfd',icon:'🌀', name:'Singularity Breach', desc:'Singularity ×25',      cost:1.2e21,     type:'prod', mult:25, prod:'pf', reqN:50, req:null, reqTotal:null},
+  // ── GLOBAL BOOSTS ──
+  {id:'g1', icon:'🌴', name:'Island Alignment',   desc:'All producers ×1.5',   cost:5000000,    type:'global', mult:1.5, prod:null, reqN:null, req:null, reqTotal:50 },
+  {id:'g2', icon:'🌊', name:'Bajookie Tide',      desc:'All producers ×3',     cost:5e10,       type:'global', mult:3,   prod:null, reqN:null, req:null, reqTotal:200},
+  {id:'g3', icon:'⬆',  name:'Bajookie Ascendancy',desc:'All producers ×5',     cost:5e13,       type:'global', mult:5,   prod:null, reqN:null, req:null, reqTotal:500},
+  {id:'g4', icon:'🌌', name:'Island Singularity', desc:'All producers ×10',    cost:5e16,       type:'global', mult:10,  prod:null, reqN:null, req:'g3', reqTotal:null},
+  {id:'g5', icon:'🌟', name:'Bajookie Supremacy', desc:'All producers ×25',    cost:5e20,       type:'global', mult:25,  prod:null, reqN:null, req:'g4', reqTotal:null},
 ];
 
 const PACTS = [
@@ -2998,44 +3059,57 @@ const PACTS = [
     id:'pac1', icon:'📬', name:"Newman's Contract",
     desc:"Newman takes over island logistics. All passive CPS ×5 permanently. In exchange, your click power is permanently divided by 10. Newman takes his cut.",
     warn:"⚠ PERMANENT: Click power ÷10. Conflicts with The George Gambit.",
-    cost:10000, conflicts:['pac2'], prereq:null,
+    cost:500000, conflicts:['pac2'], prereq:null,
   },
   {
     id:'pac2', icon:'🥸', name:'The George Gambit',
     desc:"Start lying. Tell everyone you're a bajookie magnate. Clicks become ×10 more powerful. But your passive generators, embarrassed by the association, produce 80% less.",
     warn:"⚠ PERMANENT: All passive CPS ×0.2. Conflicts with Newman's Contract.",
-    cost:5000, conflicts:['pac1'], prereq:null,
+    cost:250000, conflicts:['pac1'], prereq:null,
   },
   {
     id:'pac3', icon:'🌀', name:'Drain Gang Induction',
     desc:"You are now in the gang. All passive production ×3 globally. The rules: you may never own more than 10 of any single producer going forward. Existing counts above 10 stay.",
     warn:"âš  PERMANENT: Each producer hard-capped at 10 from this point forward.",
-    cost:50000, conflicts:[], prereq:null,
+    cost:2500000, conflicts:[], prereq:null,
   },
   {
     id:'pac4', icon:'📺', name:"Homer's Bargain",
     desc:"Trade your dignity for double passive income. The tick rate of all generators is permanently doubled. The cost: the displayed coin count will quietly lie to you at random.",
     warn:"⚠ PERMANENT: Passive income ×2. Coin display becomes untrustworthy.",
-    cost:100000, conflicts:[], prereq:null,
+    cost:10000000, conflicts:[], prereq:null,
   },
   {
     id:'pac5', icon:'🕳️', name:'The Void Pact',
     desc:"Offer your entire production to the Void. ALL producers reset to zero. In return you receive a permanent ×10 global multiplier on all future production and click power — forever. Your coins remain untouched.",
     warn:"⚠ IRREVERSIBLE: All producers reset to 0. Gain permanent ×10 everything.",
-    cost:1000000, conflicts:[], prereq:{prod:'p0', n:5},
+    cost:100000000, conflicts:[], prereq:{prod:'p0', n:5},
   },
 ];
 
 const MILESTONES = [
   {at:100,     label:'100 bajookie · the journey begins'},
+  {at:500,     label:'500 · something stirs in the void'},
   {at:1000,    label:'1K · yung lean approves'},
+  {at:5000,    label:'5K · the drain gang acknowledges you'},
   {at:10000,   label:'10K · the mist thickens'},
+  {at:50000,   label:'50K · the geocities gods are watching'},
   {at:100000,  label:'100K · you are becoming island'},
-  {at:1000000, label:'1M · george is humiliated'},
-  {at:1e9,     label:'1B · newman is furious'},
+  {at:500000,  label:'500K · even the void has noticed'},
+  {at:1000000, label:'1M · farrow looks up from his screen'},
+  {at:5000000, label:'5M · japingus is impressed and alarmed'},
+  {at:1e9,     label:'1B · the mist machine gains sentience'},
+  {at:1e10,    label:'10B · reality is bending toward you'},
+  {at:1e11,    label:'100B · the island itself trembles'},
   {at:1e12,    label:'1T · the void acknowledges you'},
+  {at:1e13,    label:'10T · economists are confused'},
+  {at:1e14,    label:'100T · you have become a concept'},
   {at:1e15,    label:'1Qa · transcendence'},
+  {at:1e16,    label:'10Qa · bajookie flows are off the charts'},
   {at:1e18,    label:'1Qi · you ARE bajookie'},
+  {at:1e21,    label:'1Se · the drain singularity awakens'},
+  {at:1e24,    label:'1Sep · economists are now crying'},
+  {at:1e30,    label:'1Non · this number should not exist'},
 ];
 
 // ═══════════════════════════════════════════════
@@ -3053,7 +3127,7 @@ let seenMs     = JSON.parse(_ls('tk_seenms') || '{}');
 let cps = 0, clickPow = 1;
 
 function totalProds() { return PRODS.reduce((s,p) => s + (owned[p.id]||0), 0); }
-function prodCost(p)  { return Math.floor(p.base * Math.pow(1.15, owned[p.id]||0)); }
+function prodCost(p)  { return Math.floor(p.base * Math.pow(1.18, owned[p.id]||0)); }
 
 function recalc() {
   clickPow = 1;
@@ -3156,7 +3230,7 @@ function checkMs() {
   });
 }
 
-const SAVE_VERSION = 4; // bump to force migration checks on new deploys
+const SAVE_VERSION = 5; // bump to force migration checks on new deploys
 function save() {
   localStorage.setItem('tk_coins',   coins);
   localStorage.setItem('tk_earned',  totalEarned);
@@ -3460,25 +3534,25 @@ const JAP_GIF = 'https://web.archive.org/web/20091027140007im_/http://www.geocit
 
 const SHOP = [
   // ── CLASSICS ──
-  { id:'tinnie',   label:'TINNIE',      cost:50,  cat:'vices', desc:'+buzz',              fn: s => { s.buzz  = Math.min(100, s.buzz  + 25); } },
-  { id:'vape',     label:'VAPE RIP',    cost:40,  cat:'vices', desc:'+smoke',             fn: s => { s.smoke = Math.min(100, s.smoke + 25); } },
-  { id:'zyn',      label:'ZYN',         cost:35,  cat:'vices', desc:'+zyn',               fn: s => { s.zyn   = Math.min(100, s.zyn   + 30); } },
-  { id:'pill',     label:'PILL',        cost:75,  cat:'vices', desc:'+pills',             fn: s => { s.pills = Math.min(100, s.pills + 25); } },
-  { id:'nangs',    label:'NANGS',       cost:60,  cat:'vices', desc:'+pills+buzz',        fn: s => { s.pills = Math.min(100, s.pills + 30); s.buzz = Math.min(100, s.buzz + 5); } },
+  { id:'tinnie',   label:'TINNIE',       cost:150,  cat:'vices', desc:'+buzz',                fn: s => { s.buzz  = Math.min(100, s.buzz  + 25); } },
+  { id:'vape',     label:'VAPE RIP',     cost:120,  cat:'vices', desc:'+smoke',               fn: s => { s.smoke = Math.min(100, s.smoke + 25); } },
+  { id:'zyn',      label:'ZYN',          cost:100,  cat:'vices', desc:'+zyn',                 fn: s => { s.zyn   = Math.min(100, s.zyn   + 30); } },
+  { id:'pill',     label:'PILL',         cost:200,  cat:'vices', desc:'+pills',               fn: s => { s.pills = Math.min(100, s.pills + 25); } },
+  { id:'nangs',    label:'NANGS',        cost:180,  cat:'vices', desc:'+pills+buzz',          fn: s => { s.pills = Math.min(100, s.pills + 30); s.buzz = Math.min(100, s.buzz + 5); } },
   // ── KUSH ──
-  { id:'cone',     label:'CONE RIP',    cost:50,  cat:'kush',  desc:'+kush+smoke',        fn: s => { s.kush  = Math.min(100, s.kush  + 25); s.smoke = Math.min(100, s.smoke + 10); } },
-  { id:'blunt',    label:'BLUNT',       cost:65,  cat:'kush',  desc:'+kush',              fn: s => { s.kush  = Math.min(100, s.kush  + 38); } },
-  { id:'bong',     label:'BONG',        cost:120, cat:'kush',  desc:'+kush+smoke BIG RIP',fn: s => { s.kush  = Math.min(100, s.kush  + 60); s.smoke = Math.min(100, s.smoke + 30); } },
-  // ── GOON ──
-  { id:'beer',     label:'6-PACK',      cost:90,  cat:'goon',  desc:'+buzz',              fn: s => { s.buzz  = Math.min(100, s.buzz  + 40); } },
-  { id:'goonbag',  label:'GOON BAG',    cost:110, cat:'goon',  desc:'+goon+buzz',         fn: s => { s.goon  = Math.min(100, s.goon  + 45); s.buzz = Math.min(100, s.buzz + 15); } },
-  { id:'goonfort', label:'GOON FORT.',  cost:280, cat:'goon',  desc:'+goon+buzz+fun (SPIN)', fn: s => { s.goon = Math.min(100, s.goon + 80); s.buzz = Math.min(100, s.buzz + 25); s.fun = Math.min(100, s.fun + 45); } },
+  { id:'cone',     label:'CONE RIP',     cost:150,  cat:'kush',  desc:'+kush+smoke',          fn: s => { s.kush  = Math.min(100, s.kush  + 25); s.smoke = Math.min(100, s.smoke + 10); } },
+  { id:'blunt',    label:'BLUNT',        cost:200,  cat:'kush',  desc:'+kush',                fn: s => { s.kush  = Math.min(100, s.kush  + 38); } },
+  { id:'bong',     label:'BONG',         cost:350,  cat:'kush',  desc:'+kush+smoke BIG RIP',  fn: s => { s.kush  = Math.min(100, s.kush  + 60); s.smoke = Math.min(100, s.smoke + 30); } },
+  // ── EDGE ──
+  { id:'edgesesh', label:'QUICK EDGE',   cost:250,  cat:'edge',  desc:'+edge',                fn: s => { s.goon  = Math.min(100, s.goon  + 20); } },
+  { id:'deepedge', label:'DEEP SESSION', cost:400,  cat:'edge',  desc:'+edge+fun',            fn: s => { s.goon  = Math.min(100, s.goon  + 45); s.fun = Math.min(100, s.fun + 15); } },
+  { id:'voidedge', label:'VOID EDGE',    cost:900,  cat:'edge',  desc:'+edge MAX+fun+pills',  fn: s => { s.goon  = Math.min(100, s.goon  + 85); s.fun = Math.min(100, s.fun + 35); s.pills = Math.min(100, s.pills + 10); } },
   // ── FUN ──
-  { id:'fidget',   label:'FIDGET',      cost:70,  cat:'fun',   desc:'+fun',               fn: s => { s.fun   = Math.min(100, s.fun   + 30); } },
-  { id:'footy',    label:'FOOTY',       cost:80,  cat:'fun',   desc:'+fun',               fn: s => { s.fun   = Math.min(100, s.fun   + 42); } },
-  { id:'bpong',    label:'BEER PONG',   cost:200, cat:'fun',   desc:'+buzz+fun',          fn: s => { s.buzz  = Math.min(100, s.buzz  + 30); s.fun = Math.min(100, s.fun + 38); } },
+  { id:'fidget',   label:'FIDGET',       cost:200,  cat:'fun',   desc:'+fun',                 fn: s => { s.fun   = Math.min(100, s.fun   + 30); } },
+  { id:'footy',    label:'FOOTY',        cost:250,  cat:'fun',   desc:'+fun',                 fn: s => { s.fun   = Math.min(100, s.fun   + 42); } },
+  { id:'bpong',    label:'BEER PONG',    cost:600,  cat:'fun',   desc:'+buzz+fun',            fn: s => { s.buzz  = Math.min(100, s.buzz  + 30); s.fun = Math.min(100, s.fun + 38); } },
   // ── MEGA ──
-  { id:'sesh',     label:'SESH',        cost:400, cat:'mega',  desc:'+40 ALL STATS',      fn: s => { ['buzz','smoke','zyn','pills','kush','fun','goon'].forEach(k => s[k] = Math.min(100, s[k] + 40)); } },
+  { id:'sesh',     label:'SESH',         cost:1200, cat:'mega',  desc:'+40 ALL STATS',        fn: s => { ['buzz','smoke','zyn','pills','kush','fun','goon'].forEach(k => s[k] = Math.min(100, s[k] + 40)); } },
 ];
 
 // ── MESSAGES ──
@@ -3748,31 +3822,31 @@ const MSGS = {
   ],
 
   need_goon: [
-    'the goon bag is empty and my CLASS is showing and i HATE showing class.',
-    'without goon i start to feel like a REAL PERSON and that is terrifying to everyone.',
-    'tricky mac said "a goblin without a bag is a goblin without direction cuz" - i have no direction.',
-    'GOON BAG. now. the goblin requires the sacred vessel.',
-    'i can feel myself sobering into coherence and it is AWFUL. fill the bag.',
-    'without the goon i lose my special brand of chaotic wisdom. it lives in the bag.',
-    'the sacred cask runs dry and with it my vibes. unacceptable.',
-    'i need the cardboard. i need the bag. i need the wine that lives inside.',
-    'without goon i start having opinions. sober opinions. i do not want sober opinions.',
-    'u dont understand what the goon does for me. for my PROCESS. for my schemes.',
-    'goon bag critical. sending formal request. this IS the formal request.',
-    'no bag. no vibe. no goblin. give me the goon and the goblin returns.',
+    'the edge meter is depleted and my transcendence is on hold. unacceptable.',
+    'without edging i am just a regular goblin and regular goblins have no POWER.',
+    'tricky mac said "u gotta hold it together cuz, dont let it peak too soon" - wise words i am not following.',
+    'QUICK EDGE. now. the goblin requires the sacred practice immediately.',
+    'i can feel the cosmic buildup dissipating and it is HEARTBREAKING. help me.',
+    'without the edge i lose contact with the deeper mysteries. they live in the denial.',
+    'the threshold approaches and nobody is here to acknowledge it. this is a crisis.',
+    'i have been on the verge of something profound for four hours. i require assistance.',
+    'without the practice my energy becomes CHAOTIC and uncontrolled. not good chaos. bad chaos.',
+    'u dont understand what the edging does for my PROCESS. it is a spiritual thing. give me quick edge.',
+    'edge critical. i am at the precipice. sending formal request. this IS the formal request.',
+    'no edge. no vibe. no goblin. restore the practice and the goblin returns to power.',
   ],
 
   goon_mode: [
-    'i have achieved GOON MODE. my schemes are now both stupid AND inspired. peak performance.',
-    'the bag is full and my wisdom is non-euclidean. tricky mac would understand.',
-    'HEHEHE. the goon does something to the goblin brain that NO other substance replicates.',
-    'i am currently communicating with entities that live in the goon bag. they have OPINIONS.',
-    'at this level of goon the plans stop being plans and start being DESTINIES.',
-    'the cardboard vessel has spoken. i have listened. i will not share what it said.',
-    'i feel ENORMOUS. not in size. in CONCEPT. the goon expands the self.',
-    'tricky mac once spun a bag of goon and made a decision that changed everything. i understand now.',
-    'everything is spinning a bit but in a GOOD way. the goblin is aligned with the universe.',
-    'the goon has unlocked a door in my mind. i do not know what is behind it. i am going in.',
+    'i have achieved EDGE MODE. i am hovering at the absolute maximum of my potential. do not touch me.',
+    'the threshold is held. my wisdom is non-euclidean. tricky mac would understand the restraint.',
+    'HEHEHE. the practice does something to the goblin brain that NO other substance or activity replicates.',
+    'i am currently in communion with entities that exist at the very edge of perception. they are also holding it.',
+    'at this level of sustained edge the schemes stop being schemes and start being PROPHECIES.',
+    'the practice has spoken. i have listened. i will not share what was revealed. it would overwhelm u.',
+    'i feel ENORMOUS. not in size. in AWARENESS. the sustained edge expands consciousness to dangerous levels.',
+    'tricky mac once held the line for 6 hours and made a decision that changed everything. i understand now.',
+    'everything is vibrating at exactly the right frequency. the goblin is aligned with the deep void.',
+    'the edge has unlocked a door in my mind. i do not know what is behind it. i am holding it open. not going through. just holding.',
   ],
 
   philosophy: [
@@ -3917,7 +3991,7 @@ function render() {
   // Status badge
   const statusEl = getEl('jap-status');
   if (statusEl) {
-    const labels = { happy:'\uD83D\uDE08 THRIVING', okay:'\uD83D\uDE10 FINE', need:'\uD83D\uDE24 NEEDS SOMETHING', bad:'\uD83D\uDE30 NOT OK', dying:'\uD83D\uDC80 CRITICAL', goon:'\uD83E\uDEB4 GOON MODE', dead:'\uD83D\uDC80 DEAD' };
+    const labels = { happy:'\uD83D\uDE08 THRIVING', okay:'\uD83D\uDE10 FINE', need:'\uD83D\uDE24 NEEDS SOMETHING', bad:'\uD83D\uDE30 NOT OK', dying:'\uD83D\uDC80 CRITICAL', goon:'\uD83E\uDEB4 EDGE MODE', dead:'\uD83D\uDC80 DEAD' };
     const colors = { happy:'var(--green)', okay:'var(--dim)', need:'var(--gold)', bad:'var(--orange)', dying:'var(--red)', goon:'#cc44ff', dead:'#555' };
     statusEl.textContent = labels[state] || state.toUpperCase();
     statusEl.style.color = colors[state] || 'var(--dim)';
@@ -3941,6 +4015,9 @@ function render() {
     if (!btn) return;
     btn.classList.toggle('disabled', !(coins >= item.cost));
   });
+
+  const lfEl = getEl('jap-lastfed');
+  if (lfEl) lfEl.textContent = jap.lastFedBy ? 'last fed by: ' + jap.lastFedBy : '';
 }
 
 function showMsg(text) {
@@ -4013,7 +4090,7 @@ function buildWidget() {
   w.id = 'japingus-widget';
 
   // Group shop items by category
-  const catLabels = { vices:'── vices ──', kush:'── kush ──', goon:'── goon ──', fun:'── fun ──', mega:'── mega ──' };
+  const catLabels = { vices:'── vices ──', kush:'── kush ──', edge:'── edge ──', fun:'── fun ──', mega:'── mega ──' };
   let lastCat = null;
   const shopItems = SHOP.map(item => {
     let prefix = '';
@@ -4035,7 +4112,7 @@ function buildWidget() {
     <img src="${JAP_GIF}" id="jap-gif-dead" alt="japingus" style="max-height:70px;image-rendering:pixelated;filter:grayscale(1) brightness(0.5);">
   </div>
   <p>JAPINGUS IS DEAD.<br>u let him die. again.</p>
-  <button id="jap-revive-btn" onclick="japRevive()">REVIVE (800 baj)</button>
+  <button id="jap-revive-btn" onclick="japRevive()">REVIVE (5000 baj)</button>
 </div>
 <div id="jap-body">
   <div style="text-align:center;padding:6px 0 2px;position:relative;">
@@ -4081,7 +4158,7 @@ function buildWidget() {
       <span class="jap-stat-val" id="jap-val-fun" style="font-size:8px;color:var(--dim);min-width:28px;text-align:right;"></span>
     </div>
     <div class="jap-stat-row">
-      <span class="jap-stat-label">GOON</span>
+      <span class="jap-stat-label">EDGE</span>
       <div class="jap-bar-bg"><div class="jap-bar-fill bar-goon" id="jap-bar-goon" style="width:30%;transition:width 0.4s,filter 0.3s;"></div></div>
       <span class="jap-stat-val" id="jap-val-goon" style="font-size:8px;color:var(--dim);min-width:28px;text-align:right;"></span>
     </div>
@@ -4103,12 +4180,12 @@ window.japToggle = function() {
 };
 
 window.japRevive = function() {
-  if (coins < 800) {
+  if (coins < 5000) {
     const el = getEl('jap-dead-screen').querySelector('p');
     if (el) el.textContent = 'insufficient funds. japingus remains dead. this is on u.';
     return;
   }
-  coins -= 800;
+  coins -= 5000;
   updateDisplay();
   jap = defaultState();
   jap.life = 50; jap.buzz = 50; jap.smoke = 50; jap.zyn = 50; jap.pills = 50; jap.kush = 40; jap.fun = 50; jap.goon = 20;
@@ -4132,6 +4209,7 @@ window._jap     = { get: () => jap, set: v => { jap = v; }, render, applyOffline
 window._japShop = SHOP;
 
 })();
+// ═══════════════════════════════════════════════
 // ═══════════════════════════════════════════════
 // ═══════════════════════════════════════════════
 // ═══════════════════════════════════════════════
