@@ -4130,6 +4130,7 @@ window._japShop = SHOP;
 // ═══════════════════════════════════════════════
 // ═══════════════════════════════════════════════
 // ═══════════════════════════════════════════════
+// ═══════════════════════════════════════════════
 // FIREBASE AUTH + COMMUNAL CLOUD SYNC
 // Tony Krink's Island
 // ═══════════════════════════════════════════════
@@ -4257,11 +4258,26 @@ async function _onAuthChanged(user) {
 }
 
 async function _loadProfile(uid) {
+  // Derive a sane fallback name from email rather than 'anon'
+  const emailFallback = (_currentUser?.email || '').split('@')[0]
+    .replace(/[^a-zA-Z0-9_\-\.]/g, '').slice(0, 16) || 'user';
   try {
     const snap = await _db.doc(`users/${uid}/data/profile`).get();
-    _currentProfile = snap.exists ? snap.data() : { username: 'anon', avatarId: 'goblin' };
+    if (snap.exists) {
+      _currentProfile = snap.data();
+      // Repair if username is somehow blank/anon
+      if (!_currentProfile.username || _currentProfile.username === 'anon') {
+        _currentProfile.username = emailFallback;
+        _db.doc(`users/${uid}/data/profile`).set(_currentProfile, { merge: true }).catch(() => {});
+      }
+    } else {
+      // Profile doc missing — create a minimal one from email
+      _currentProfile = { username: emailFallback, avatarId: 'goblin' };
+      _db.doc(`users/${uid}/data/profile`).set(_currentProfile).catch(() => {});
+    }
   } catch(e) {
-    _currentProfile = { username: 'anon', avatarId: 'goblin' };
+    // Firestore read blocked — still show email prefix, not 'anon'
+    _currentProfile = { username: emailFallback, avatarId: 'goblin' };
   }
   // Expose profile to bungalow (map.html) via localStorage
   try { localStorage.setItem('tk_profile', JSON.stringify(_currentProfile)); } catch(e) {}

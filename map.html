@@ -173,10 +173,14 @@ let chosenColor = COLORS[Math.floor(Math.random() * COLORS.length)];
 
 function _applyProfile() {
   hasProfile = !!(savedProfile.username && savedProfile.username.trim() && savedProfile.username !== 'anon');
-  const AVATAR_COLORS = ['#58a6ff','#3fb950','#f778ba','#d4a017','#39c5cf','#f85149','#a371f7','#ff8c42','#00d4ff','#c9d1d9','#f85149','#8b949e'];
+  // avatarId is a string like 'goblin', 'beardo' etc — map to a colour
+  const AVATAR_COLOR_MAP = {
+    'goblin':'#3fb950','brown-guy':'#d4a017','dark-girl':'#a371f7','beardo':'#58a6ff',
+    'hijab':'#f778ba','wheelchair':'#39c5cf','cane':'#ff8c42','nonbinary':'#f85149',
+    'silver':'#8b949e','trans':'#00d4ff','curly':'#f85149','bald':'#c9d1d9',
+  };
   if (hasProfile && savedProfile.avatarId) {
-    const idx = parseInt(savedProfile.avatarId) || 0;
-    if (AVATAR_COLORS[idx]) chosenColor = AVATAR_COLORS[idx];
+    chosenColor = AVATAR_COLOR_MAP[savedProfile.avatarId] || COLORS[0];
   }
 }
 _applyProfile();
@@ -1981,12 +1985,19 @@ function loop(ts){
 // ── AUTH CHECK — determine login state before showing modal ──
 (function() {
   const _BKCFG = {
-    apiKey:    'AIzaSyDpFlMknPObiiH0AAyJ8Hhacla_NIe-lzA',
-    authDomain:'tonykrink-63723.firebaseapp.com',
-    projectId: 'tonykrink-63723',
+    apiKey:            'AIzaSyDpFlMknPObiiH0AAyJ8Hhacla_NIe-lzA',
+    authDomain:        'tonykrink-63723.firebaseapp.com',
+    projectId:         'tonykrink-63723',
+    storageBucket:     'tonykrink-63723.firebasestorage.app',
+    messagingSenderId: '500681949863',
+    appId:             '1:500681949863:web:90519bf57149e3c6d15182',
   };
   let _bkApp;
-  try { _bkApp = firebase.app('bungalow'); } catch(e) { _bkApp = firebase.initializeApp(_BKCFG, 'bungalow'); }
+  // MUST use the DEFAULT app (no name) — same as index.html.
+  // Firebase Auth state is stored per app-name in localStorage.
+  // A named 'bungalow' app has a separate auth key and will never see
+  // the user who logged in via the default app on index.html.
+  try { _bkApp = firebase.app(); } catch(e) { _bkApp = firebase.initializeApp(_BKCFG); }
   const _bkAuth = firebase.auth(_bkApp);
   const _bkDb2  = firebase.firestore(_bkApp);
 
