@@ -75,7 +75,7 @@ Example style:
 
 async function generatePosts(headlines) {
   const list = headlines.map((h, i) => `${i + 1}. [${h.source}] ${h.title}`).join("\n");
-  const userMsg = `Today's headlines:\n\n${list}\n\nWrite 3 Dribzybot posts. Each reacts to a DIFFERENT headline. Keep each to 1-3 sentences. Stay in character.\n\nReply with a JSON array ONLY (no other text):\n[\n  {"text": "...", "topic": "one or two words", "headline": "exact headline used", "source": "source name"},\n  ...\n]`;
+  const userMsg = `Today's headlines:\n\n${list}\n\nWrite 1 Dribzybot post reacting to ONE of these headlines. Keep it to 1-3 sentences. Stay in character.\n\nReply with a JSON array ONLY (no other text):\n[\n  {"text": "...", "topic": "one or two words", "headline": "exact headline used", "source": "source name"}\n]`;
 
   const msg = await anthropic.messages.create({
     model: "claude-haiku-4-5-20251001",
