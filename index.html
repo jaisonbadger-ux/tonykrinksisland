@@ -1305,7 +1305,8 @@ input.field:focus, textarea.field:focus { border-color: var(--blue); }
           <div class="stat-row"><span>total clicks</span><span id="island-total-clicks" style="color:var(--cyan);">—</span></div>
           <div class="stat-row"><span>time</span><span id="stat-time">--:--:--</span></div>
           <div class="stat-row"><span>vibe index</span><span style="color:var(--green);">█████████░ 94%</span></div>
-          <div class="stat-row"><span>george</span><span style="color:var(--red);">lying about something</span></div>
+          <div class="stat-row"><span>cal</span><span style="color:#1a88cc;" id="home-cal-status">stoned in the bungalow</span></div>
+          <div class="stat-row"><span>japingus</span><span id="home-jap-status" style="color:var(--muted);">checking...</span></div>
           <div style="margin-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:6px;">
             <button class="btn btn-gold btn-block" onclick="showTab('clicker',null)">🪙 clicker</button>
             <button class="btn btn-pink btn-block" onclick="showTab('seinfeld',null)">🥸 bot</button>
@@ -1339,17 +1340,26 @@ input.field:focus, textarea.field:focus { border-color: var(--blue); }
         </div>
       </div>
 
+      <!-- DRIBZY LATEST POST -->
+      <div class="box">
+        <div class="box-header"><span>&#129302; dribzy.latest</span><button class="btn" style="padding:2px 8px;font-size:10px;" onclick="showTab('dribzy',null)">open feed &#8594;</button></div>
+        <div class="box-body" style="padding:10px 14px;">
+          <div id="home-dribzy-post" style="font-size:13px;line-height:1.6;color:var(--text);font-family:'VT323',monospace;">loading dribzy's thoughts...</div>
+          <div id="home-dribzy-meta" style="font-size:10px;color:var(--dim);margin-top:6px;"></div>
+        </div>
+      </div>
+
       <!-- BART CHALKBOARD -->
       <div class="box">
         <div class="box-header"><span>// bart.chalkboard</span><span style="color:var(--green);">LIVE</span></div>
         <div class="box-body" style="padding:0;">
-          <div class="chalkboard">
+          <div class="chalkboard" id="bart-chalkboard">
 <div style="text-align:center;padding:6px 0 2px;"><img src="https://web.archive.org/web/20091027140007im_/http://www.geocities.com/fairman42/elbarto.gif" alt="El Barto" style="image-rendering:pixelated;max-height:80px;"></div>
-            <span class="chalk-line">I will not sell bajookie.</span>
-            <span class="chalk-line">I will not sell bajookie.</span>
-            <span class="chalk-line">I will not sell bajookie.</span>
-            <span class="chalk-line">I will not sell bajookie.</span>
-            <span class="chalk-line">I will not sell bajookie.</span>
+            <span class="chalk-line" id="chalk-0">&nbsp;</span>
+            <span class="chalk-line" id="chalk-1">&nbsp;</span>
+            <span class="chalk-line" id="chalk-2">&nbsp;</span>
+            <span class="chalk-line" id="chalk-3">&nbsp;</span>
+            <span class="chalk-line" id="chalk-4">&nbsp;</span>
           </div>
         </div>
       </div>
@@ -3343,6 +3353,87 @@ function initGame() {
 
 initGame(); // run immediately on page load (no auth required)
 
+// ── BART CHALKBOARD — rotating lines ──
+(function() {
+  const LINES = [
+    'I will not sell bajookie.',
+    'Cal is not my dealer.',
+    'Robbo\'s beer is not a controlled substance.',
+    'I will not mine bitcoin in school.',
+    'The zyns are not mine.',
+    'Dribzybot wrote my essay.',
+    'I did not ascend the island.',
+    'McGann\'s zyns are not community property.',
+    'I will not reset the leaderboard.',
+    'Japingus is a living being, not a game.',
+    'I will not claim I invented bajookie.',
+    'The bong was already like that.',
+    'Cal\'s gummies are not snacks.',
+    'I did not hack the clicker.',
+    'Robbo\'s brewery is OSHA compliant.',
+    'I will not feed japingus my lunch.',
+    'Dribzy\'s tweets are not journalism.',
+    'I cannot see the bajookie singularity.',
+  ];
+  const line = LINES[Math.floor(Math.random() * LINES.length)];
+  for (let i = 0; i < 5; i++) {
+    const el = document.getElementById('chalk-' + i);
+    if (el) el.textContent = line;
+  }
+})();
+
+// ── HOME DRIBZY LATEST POST ──
+(function() {
+  let _homeDribzyLoaded = false;
+  function _loadHomeDribzy() {
+    if (_homeDribzyLoaded) return;
+    const postEl = document.getElementById('home-dribzy-post');
+    const metaEl = document.getElementById('home-dribzy-meta');
+    if (!postEl) return;
+    // Try after Firebase is ready (up to 5s)
+    const tryLoad = (attempt) => {
+      if (!window._db) {
+        if (attempt < 10) setTimeout(() => tryLoad(attempt + 1), 500);
+        return;
+      }
+      window._db.collection('dribzybot_posts')
+        .orderBy('timestamp', 'desc')
+        .limit(1)
+        .get()
+        .then(snap => {
+          if (snap.empty) { postEl.textContent = 'dribzy hasn\'t posted yet.'; return; }
+          const d = snap.docs[0].data();
+          _homeDribzyLoaded = true;
+          postEl.innerHTML = (d.text || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/#(\w+)/g,'<span style="color:var(--neon);">#$1</span>');
+          if (metaEl) metaEl.textContent = (d.source ? '— re: '+d.source : '') + (d.topic ? ' · #'+d.topic : '');
+        })
+        .catch(() => { postEl.textContent = 'dribzy is offline.'; });
+    };
+    tryLoad(0);
+  }
+  // Load on startup + expose for showTab
+  setTimeout(_loadHomeDribzy, 1200);
+  window._loadHomeDribzy = _loadHomeDribzy;
+})();
+
+// ── HOME JAPINGUS STATUS ──
+(function() {
+  const JAP_STATE_LABELS = {
+    happy:'\uD83D\uDE08 thriving',okay:'fine',need:'\u26A0 needs something',
+    bad:'not ok',dying:'\uD83D\uDC80 critical',goon:'goon mode',dead:'dead',
+  };
+  const JAP_STATE_COLORS = {
+    happy:'var(--green)',okay:'var(--muted)',need:'var(--gold)',
+    bad:'var(--orange)',dying:'var(--red)',goon:'#cc44ff',dead:'#555',
+  };
+  window._updateHomeJapStatus = function(state) {
+    const el = document.getElementById('home-jap-status');
+    if (!el) return;
+    el.textContent = JAP_STATE_LABELS[state] || state;
+    el.style.color = JAP_STATE_COLORS[state] || 'var(--muted)';
+  };
+})();
+
 
 
 // ── JAPINGUS VIRTUAL PET ──
@@ -3826,6 +3917,7 @@ function render() {
     statusEl.textContent = labels[state] || state.toUpperCase();
     statusEl.style.color = colors[state] || 'var(--dim)';
   }
+  if (typeof window._updateHomeJapStatus === 'function') window._updateHomeJapStatus(state);
 
   // Drain warning — which stats are hurting life
   const warnEl = getEl('jap-warn');
@@ -4035,6 +4127,7 @@ window._jap     = { get: () => jap, set: v => { jap = v; }, render, applyOffline
 window._japShop = SHOP;
 
 })();
+// ═══════════════════════════════════════════════
 // ═══════════════════════════════════════════════
 // ═══════════════════════════════════════════════
 // FIREBASE AUTH + COMMUNAL CLOUD SYNC
