@@ -213,10 +213,18 @@ let tvChannel    = 0;
 let _lastBongUse = 0;
 let _lastTapUse  = 0;
 let _recordTrack = 0;
+let _npcsMuted        = false; // "stop!" mutes all NPC timers, "go!" unmutes
+let _calKetMode       = false;
+let _calKetTimer      = 0;
+let _calKetCooldown   = 0;
+let _farrowAsleep     = false;
+let _farrowSleepTimer = 0;
+let _farrowSleepCooldown = 0;
+let _barneyBarkTimer  = 220000 + Math.random()*120000; // 3.5–5.5 min between rare barks
 const RECORDS = [
   { artist:'Nirvana',       title:'In Bloom',               col:'#1a5055' },
-  { artist:'Soundgarden',   title:'Black Hole Sun',          col:'#1a2c1a' },
-  { artist:'Pearl Jam',     title:'Alive',                   col:'#3a1010' },
+  { artist:'Helmet',        title:'Unsung',                  col:'#1a2c1a' },
+  { artist:'The Melvins',  title:'Hooch',                   col:'#3a1010' },
   { artist:'AIC',           title:'Down in a Hole',          col:'#0e0e0e' },
   { artist:'Smashing Pumpkins', title:'Thru the Eyes of Ruby', col:'#1a1a3a' },
   { artist:'Pixies',        title:'Where Is My Mind?',       col:'#2a0a10' },
@@ -288,10 +296,19 @@ const worldObjects = [
   { type:'zyn_pile', c:3,  r:11, label:"used zyn pouches", interactable:true },
   { type:'zyn_pile', c:6,  r:12, label:"more mcgann zyns behind the couch", interactable:true },
   // ── Grunge posters ──
-  { type:'poster', c:0,  r:4,  band:'NIRVANA',     album:'nevermind',     colors:['#1a5055','#f8f040'], label:'Nirvana — Nevermind (1991)', interactable:true },
-  { type:'poster', c:0,  r:11, band:'SOUNDGARDEN',  album:'superunknown',  colors:['#1a2c1a','#3fb950'], label:'Soundgarden — Superunknown (1994)', interactable:true },
-  { type:'poster', c:27, r:6,  band:'PEARL JAM',    album:'ten',           colors:['#3a1010','#f85149'], label:'Pearl Jam — Ten (1991)', interactable:true },
-  { type:'poster', c:27, r:13, band:'AIC',           album:'dirt',          colors:['#0e0e0e','#8b949e'], label:'Alice In Chains — Dirt (1992)', interactable:true },
+  { type:'poster', c:0,  r:4,  band:'NIRVANA',      album:'nevermind',     colors:['#1a5055','#f8f040'], label:'Nirvana — Nevermind (1991)', interactable:true },
+  { type:'poster', c:0,  r:11, band:'HELMET',        album:'betty',         colors:['#1a1a2a','#c0c0c0'], label:'Helmet — Betty (1994)', interactable:true },
+  { type:'poster', c:27, r:6,  band:'THE MELVINS',   album:'houdini',       colors:['#1a0820','#a371f7'], label:'The Melvins — Houdini (1993)', interactable:true },
+  { type:'poster', c:27, r:13, band:'AIC',            album:'dirt',          colors:['#0e0e0e','#8b949e'], label:'Alice In Chains — Dirt (1992)', interactable:true },
+  { type:'poster', c:27, r:3,  band:'MUDHONEY',      album:'superfuzz',     colors:['#1a1008','#d4a017'], label:'Mudhoney — Superfuzz Bigmuff (1988)', interactable:true },
+  // ── Chip packets ──
+  { type:'chip_packet', c:5,  r:4,  label:'empty chip packet (salt & vinegar)' },
+  { type:'chip_packet', c:10, r:11, label:'empty chip packet (bbq)' },
+  { type:'chip_packet', c:7,  r:9,  label:'empty chip packet (cheese & onion)' },
+  // ── Barney ── always on couch
+  { type:'barney', c:6, r:6, label:'barney (click him)', interactable:true },
+  // ── Xbox setup ──
+  { type:'xbox', c:3, r:3, label:'xbox (barney\'s)' },
   // ── Bulletin board ──
   { type:'bulletin_board', c:0, r:16, label:'island bulletin board', interactable:true },
   // ── Fireplace + windows ──
@@ -787,22 +804,34 @@ function drawObject(obj,sx,sy) {
         s.beginPath();s.moveTo(ex+3,ey-3);s.lineTo(ex-3,ey+3);s.stroke();
       });
       s.beginPath();s.arc(cx2,cy2+4,9,0.2,Math.PI-0.2);s.stroke();
-    } else if(obj.band==='SOUNDGARDEN') {
-      s.strokeStyle=obj.colors[1];s.lineWidth=2;
-      s.beginPath();s.arc(cx2,cy2,14,0,Math.PI*2);s.stroke();
-      for(let i=0;i<8;i++){
-        const a=(i/8)*Math.PI*2;
-        s.beginPath();s.moveTo(cx2+Math.cos(a)*16,cy2+Math.sin(a)*16);
-        s.lineTo(cx2+Math.cos(a)*24,cy2+Math.sin(a)*24);s.stroke();
-      }
-      s.fillStyle=obj.colors[1];s.beginPath();s.arc(cx2,cy2,5,0,Math.PI*2);s.fill();
-    } else if(obj.band==='PEARL JAM') {
+    } else if(obj.band==='HELMET') {
+      // Industrial H with bolts
+      s.strokeStyle=obj.colors[1];s.lineWidth=3;
+      s.beginPath();s.moveTo(cx2-12,cy2-16);s.lineTo(cx2-12,cy2+14);s.stroke();
+      s.beginPath();s.moveTo(cx2+12,cy2-16);s.lineTo(cx2+12,cy2+14);s.stroke();
+      s.beginPath();s.moveTo(cx2-12,cy2);s.lineTo(cx2+12,cy2);s.stroke();
       s.fillStyle=obj.colors[1];
-      const lx=cx2-8,ly=cy2-18;
-      s.beginPath();
-      s.moveTo(lx+8,ly);s.lineTo(lx,ly+16);s.lineTo(lx+6,ly+16);
-      s.lineTo(lx-2,ly+32);s.lineTo(lx+12,ly+16);s.lineTo(lx+6,ly+16);s.lineTo(lx+14,ly);
-      s.closePath();s.fill();
+      for(let bx2=-12;bx2<=12;bx2+=24){s.beginPath();s.arc(cx2+bx2,cy2-16,3,0,Math.PI*2);s.fill();s.beginPath();s.arc(cx2+bx2,cy2+14,3,0,Math.PI*2);s.fill();}
+    } else if(obj.band==='THE MELVINS') {
+      // Sludge circle with heavy drips
+      s.fillStyle=obj.colors[1];
+      s.beginPath();s.arc(cx2,cy2-8,14,0,Math.PI*2);s.fill();
+      s.fillStyle='rgba(163,113,247,0.5)';
+      for(let i=0;i<5;i++){
+        const dx2=cx2-10+i*5;
+        const dh=8+i*4+Math.sin(i*1.3)*4;
+        s.fillRect(dx2-2,cy2+6,4,dh);
+      }
+      s.fillStyle=obj.colors[0];s.beginPath();s.arc(cx2,cy2-8,7,0,Math.PI*2);s.fill();
+    } else if(obj.band==='MUDHONEY') {
+      // Fuzz wave lines
+      s.strokeStyle=obj.colors[1];s.lineWidth=1.5;
+      for(let i=0;i<6;i++){
+        s.beginPath();s.moveTo(cx2-16,cy2-14+i*5);
+        for(let wx=0;wx<=32;wx+=4){s.lineTo(cx2-16+wx,cy2-14+i*5+Math.sin((wx+i*8)*0.5)*3);}
+        s.stroke();
+      }
+      s.fillStyle=obj.colors[1];s.beginPath();s.arc(cx2,cy2-4,5,0,Math.PI*2);s.fill();
     } else if(obj.band==='AIC') {
       s.strokeStyle=obj.colors[1];s.lineWidth=2;
       for(let i=0;i<3;i++){
@@ -1193,6 +1222,80 @@ function drawObject(obj,sx,sy) {
       s.fillStyle='#fff';s.textAlign='center';
       s.fillText(obj._stimMsg,dx,dy-47);
     }
+
+  } else if(obj.type==='chip_packet') {
+    // Crumpled empty chip packet on the floor
+    const seed=(obj.c*11+obj.r*7)%360;
+    s.save();s.translate(sx,sy);s.rotate(seed*0.017);
+    s.fillStyle='rgba(0,0,0,0.2)';s.fillRect(-10,2,20,8);
+    const cols=['#c8a020','#e04020','#4080c8','#40a840'];
+    s.fillStyle=cols[(obj.c+obj.r)%4];s.fillRect(-10,-4,20,10);
+    s.strokeStyle='rgba(0,0,0,0.3)';s.lineWidth=0.5;s.strokeRect(-10,-4,20,10);
+    s.fillStyle='rgba(255,255,255,0.15)';s.fillRect(-8,-3,4,8);
+    s.fillStyle='rgba(0,0,0,0.2)';s.fillRect(-2,-4,1,10);s.fillRect(4,-4,1,10);
+    s.restore();
+
+  } else if(obj.type==='xbox') {
+    // Xbox on a small shelf near the tv
+    s.fillStyle='rgba(0,0,0,0.2)';s.fillRect(sx-14,sy+4,28,8);
+    s.fillStyle='#1a1a1a';s.fillRect(sx-12,sy-8,24,12);
+    s.strokeStyle='#2a2a2a';s.lineWidth=1;s.strokeRect(sx-12,sy-8,24,12);
+    s.fillStyle='#107c10';s.beginPath();s.arc(sx,sy-2,4,0,Math.PI*2);s.fill();
+    s.fillStyle='rgba(16,124,16,0.4)';s.beginPath();s.arc(sx,sy-2,8,0,Math.PI*2);s.fill();
+    s.font='4px "Press Start 2P"';s.fillStyle='rgba(255,255,255,0.4)';s.textAlign='center';
+    s.fillText('XBOX',sx,sy-9);
+
+  } else if(obj.type==='barney') {
+    // Barney — static, sitting on couch, long hair grunge guy, always gaming
+    const bx=sx,by=sy;
+    const pxb=v=>Math.round(v);
+    // shadow
+    s.fillStyle='rgba(0,0,0,0.25)';
+    s.beginPath();s.ellipse(bx,by+12,10,3,0,0,Math.PI*2);s.fill();
+    // legs (sitting)
+    s.fillStyle='#2a2a3a';
+    s.fillRect(pxb(bx-9),pxb(by),8,8);s.fillRect(pxb(bx+1),pxb(by),8,8);
+    // feet
+    s.fillStyle='#1a1a1a';s.fillRect(pxb(bx-11),pxb(by+6),5,4);s.fillRect(pxb(bx+6),pxb(by+6),5,4);
+    // torso — dark faded tee (grunge)
+    s.fillStyle='#1e1e1e';s.fillRect(pxb(bx-5),pxb(by-10),10,10);
+    // arms holding controller
+    s.fillStyle='#c8a878';
+    s.fillRect(pxb(bx-9),pxb(by-5),4,5);s.fillRect(pxb(bx+5),pxb(by-5),4,5);
+    // controller
+    s.fillStyle='#111';s.fillRect(pxb(bx-5),pxb(by-1),10,5);
+    s.fillStyle='#107c10';s.beginPath();s.arc(pxb(bx+2),pxb(by+1),1.5,0,Math.PI*2);s.fill();
+    s.fillStyle='#f85149';s.beginPath();s.arc(pxb(bx+4),pxb(by),1.5,0,Math.PI*2);s.fill();
+    // head
+    s.fillStyle='#c8a878';s.fillRect(pxb(bx-5),pxb(by-22),10,12);
+    // LONG HAIR — flows down past shoulders
+    s.fillStyle='#1a0a00';
+    s.fillRect(pxb(bx-6),pxb(by-25),12,8);// top
+    s.fillRect(pxb(bx-8),pxb(by-22),3,18);// left flow
+    s.fillRect(pxb(bx+5),pxb(by-22),3,18);// right flow
+    s.fillRect(pxb(bx-7),pxb(by-18),2,12);// extra left
+    s.fillRect(pxb(bx+5),pxb(by-18),2,10);// extra right
+    // face — slack expression, half lidded
+    s.fillStyle='#222';s.fillRect(pxb(bx-3),pxb(by-17),2,2);s.fillRect(pxb(bx+1),pxb(by-17),2,2);
+    s.fillStyle='#a07040';s.fillRect(pxb(bx-2),pxb(by-12),4,1);// neutral mouth
+    // name
+    s.font='10px "Press Start 2P"';s.textAlign='center';
+    const bnw=s.measureText('BARNEY').width+8;
+    s.fillStyle='rgba(40,40,40,0.3)';s.fillRect(bx-bnw/2,by-38,bnw,13);
+    s.fillStyle='#888';s.fillText('BARNEY',bx,by-28);
+    s.font='8px "VT323"';s.fillStyle='rgba(120,120,120,0.7)';
+    s.fillText('[gaming]',bx,by-42);
+    // bark bubble
+    if(obj._barkMsg && obj._barkTimer > 0) {
+      obj._barkTimer -= 16;
+      s.font='14px "VT323"';
+      const bsw=s.measureText(obj._barkMsg).width+16;
+      s.fillStyle='rgba(40,40,40,0.2)';
+      s.strokeStyle='#555';s.lineWidth=1;
+      s.beginPath();s.roundRect(bx-bsw/2,by-62,bsw,20,3);s.fill();s.stroke();
+      s.fillStyle='#aaa';s.textAlign='center';
+      s.fillText(obj._barkMsg,bx,by-47);
+    }
   }
 }
 
@@ -1302,12 +1405,21 @@ function handleObjectClick(obj) {
       addSystemMessage(ZYN_MSGS[Math.floor(Math.random()*ZYN_MSGS.length)]);
       break;
     }
+    case 'barney': {
+      const BARNEY_BARKS = ['WOOF','ARF ARF','BORK','*bark*','WOOF WOOF','GRRR','ARF','BORK BORK','RUFF','WOOF!','*big bark*','ARF ARF ARF'];
+      const bark = BARNEY_BARKS[Math.floor(Math.random()*BARNEY_BARKS.length)];
+      obj._barkMsg = bark;
+      obj._barkTimer = 2500;
+      addChatMessage('BARNEY', bark, '#888', false, false);
+      break;
+    }
     case 'poster': {
       const facts={
-        'NIRVANA':     ['nevermind dropped 1991 and broke everything','smells like teen spirit — still slaps','kurt cobain changed the world, then checked out'],
-        'SOUNDGARDEN': ['superunknown 1994 — one of the greatest albums ever','black hole sun, won\'t you come','chris cornell had the best voice in rock, no argument'],
-        'PEARL JAM':   ['ten (1991) — eddie vedder said so himself','still alive, still touring, still goated','alive is one of the greatest songs ever written'],
-        'AIC':         ['dirt (1992) — genuinely heavy','layne staley was a legend','down in a hole hits different at 3am with no lights on'],
+        'NIRVANA':      ['nevermind dropped 1991 and broke everything','smells like teen spirit — still slaps','kurt cobain changed the world, then checked out'],
+        'HELMET':       ['betty (1994) — criminally underrated','unsung is one of the heaviest songs of the 90s','page hamilton played jazz guitar. then he made this. peak.'],
+        'THE MELVINS':  ['houdini (1993) — produced by kurt cobain','the melvins invented sludge metal. full stop.','buzz osbourne\'s hair is an independent entity'],
+        'MUDHONEY':     ['superfuzz bigmuff — before grunge had a name','touch me i\'m sick. they were sick. they were right.','mark arm was grunge before grunge was a word'],
+        'AIC':          ['dirt (1992) — genuinely heavy','layne staley was a legend','down in a hole hits different at 3am with no lights on'],
       };
       const lines=facts[obj.band]||[];
       addSystemMessage(obj.label);
@@ -1450,6 +1562,18 @@ const CAL_QUOTES = [
   "a year 9 asked me about the meaning of life. I said powder snow and left it at that.",
   "the kids at school think I'm cool. I am. I'm also extremely high every single day.",
   "I wrote 'ski = life' on the whiteboard and then had nothing else to add. left it up.",
+  // youtube / travel docs
+  "bro I'm watching this travel doc about mongolia and I can't stop crying it's so beautiful.",
+  "this youtube rabbit hole started at skiing and now I'm watching a man in vietnam fix motorcycles.",
+  "I've watched 14 travel docs today and I haven't moved. this is research. for skiing.",
+  "there's this channel where a guy just walks around japan filming nothing and I've been watching for 6 hours.",
+  "I put on a cooking channel to fall asleep and now I'm learning to make ramen at 3am. involuntarily.",
+  "there's a guy on youtube who hikes remote scotland alone. that's the dream. that's the actual dream.",
+  "I found a channel about the silk road and I think I've been watching it for two days. maybe three.",
+  "I started watching a doc about icebergs and now I'm googling flights to greenland. every time.",
+  "bro this guy canoes through the canadian wilderness alone for 60 days. I would last 90 minutes.",
+  "I found a 4 hour documentary about mount cook and I cried twice before the skiing part even started.",
+  "youtube showed me a video of someone skiing japan pow in 2011 and now I've watched it 40 times.",
 ];
 let calPlayer = null;
 let _calMsgTimer = 0;
@@ -1471,29 +1595,81 @@ function initCal() {
 function updateCal(dt) {
   if(!calPlayer) return;
   const p = calPlayer;
-  // movement
-  if(_calPath.length===0 && Math.random()<0.003) {
-    const nearHome = Math.hypot(p.x-(CAL_HOME.c*TILE+TILE/2), p.y-(CAL_HOME.r*TILE+TILE/2)) < TILE*4;
-    if(!nearHome) {
-      _calPath = [{x:CAL_HOME.c*TILE+TILE/2, y:CAL_HOME.r*TILE+TILE/2}];
-    } else {
-      // wander to fridge or bong area
-      const spots = [{c:7,r:5},{c:9,r:8},{c:25,r:3},{c:5,r:7}];
-      const s = spots[Math.floor(Math.random()*spots.length)];
-      _calPath = [{x:s.c*TILE+TILE/2, y:s.r*TILE+TILE/2}];
+  if(_calKetCooldown > 0) _calKetCooldown -= dt;
+
+  // ket mode: frantic movement + rapid messages, burns off after 40-65s
+  if(_calKetMode) {
+    _calKetTimer -= dt;
+    if(_calKetTimer <= 0) {
+      _calKetMode = false;
+      p.sitting = true;
+      if(!_npcsMuted) {
+        const comedown = 'oh. oh that was. I need to sit down. I need to sit down right now.';
+        p.chatMsg = comedown; p.chatTimer = 7000;
+        addChatMessage('CAL', comedown, CAL_COLOR, false, false);
+      }
     }
+    // frantic movement while on ket
+    if(Math.random() < 0.018) {
+      const ks = [{c:7,r:5},{c:9,r:8},{c:5,r:7},{c:10,r:5},{c:6,r:9},{c:8,r:4},{c:11,r:6},{c:4,r:8}];
+      const sp = ks[Math.floor(Math.random()*ks.length)];
+      _calPath = [{x:sp.c*TILE+TILE/2, y:sp.r*TILE+TILE/2}];
+    }
+    p.sitting = false;
+  } else {
+    // normal movement
+    if(_calPath.length===0 && Math.random()<0.003) {
+      const nearHome = Math.hypot(p.x-(CAL_HOME.c*TILE+TILE/2), p.y-(CAL_HOME.r*TILE+TILE/2)) < TILE*4;
+      if(!nearHome) {
+        _calPath = [{x:CAL_HOME.c*TILE+TILE/2, y:CAL_HOME.r*TILE+TILE/2}];
+      } else {
+        const spots = [{c:7,r:5},{c:9,r:8},{c:25,r:3},{c:5,r:7}];
+        const sp = spots[Math.floor(Math.random()*spots.length)];
+        _calPath = [{x:sp.c*TILE+TILE/2, y:sp.r*TILE+TILE/2}];
+      }
+    }
+    if(Math.random()<0.002) { p.sitting=!p.sitting; }
   }
   if(_calPath.length>0) { p.path=_calPath; if(p.path.length===0) _calPath=[]; }
-  // occasional sit
-  if(Math.random()<0.002) { p.sitting=!p.sitting; }
-  // messages
+
+  // random ket trigger (~once per 1.5hrs of play on average)
+  if(!_calKetMode && _calKetCooldown <= 0 && Math.random() < 0.00012) {
+    _calKetMode = true;
+    _calKetTimer = 40000 + Math.random()*25000;
+    _calKetCooldown = 720000 + Math.random()*360000; // 12-18 min cooldown
+    p.sitting = false;
+    if(!_npcsMuted) {
+      p.chatMsg = '*sniffs something off his key*'; p.chatTimer = 5000;
+      addChatMessage('CAL', '*sniffs something off his key*', CAL_COLOR, false, false);
+      const KET_MSGS = [
+        'WAIT WAIT WAIT this is incredible',
+        'IM LITERALLY VIBRATING RN',
+        'bro bro bro bro bro bro bro',
+        'THE CEILING. LOOK AT THE CEILING.',
+        'I AM DOING AEROBICS RIGHT NOW. VOLUNTARILY.',
+        'I need everyone to stop and listen to me right now',
+        '*does a jumping jack mid-sentence*',
+        'oh my GOD is this what birds feel like',
+        'someone put on music I NEED MUSIC RIGHT NOW',
+        'I\'m going to ring my mum. I\'m ringing my mum. mum pick up.',
+        'everything is incredible. including the floor. especially the floor.',
+        'I understand skiing at a MOLECULAR LEVEL right now',
+      ];
+      setTimeout(()=>{ if(!calPlayer||_npcsMuted) return; const km=KET_MSGS[Math.floor(Math.random()*KET_MSGS.length)]; calPlayer.chatMsg=km; calPlayer.chatTimer=5500; addChatMessage('CAL',km,CAL_COLOR,false,false); }, 3500);
+      setTimeout(()=>{ if(!calPlayer||_npcsMuted) return; const km=KET_MSGS[Math.floor(Math.random()*KET_MSGS.length)]; calPlayer.chatMsg=km; calPlayer.chatTimer=5500; addChatMessage('CAL',km,CAL_COLOR,false,false); }, 9000);
+      setTimeout(()=>{ if(!calPlayer||_npcsMuted) return; const km=KET_MSGS[Math.floor(Math.random()*KET_MSGS.length)]; calPlayer.chatMsg=km; calPlayer.chatTimer=5500; addChatMessage('CAL',km,CAL_COLOR,false,false); }, 17000);
+    }
+  }
+
+  // messages (slower: 35-60s)
   _calMsgTimer -= dt;
   if(_calMsgTimer <= 0) {
-    _calMsgTimer = 25000 + Math.random()*35000;
-    const quote = CAL_QUOTES[Math.floor(Math.random()*CAL_QUOTES.length)];
-    p.chatMsg = quote;
-    p.chatTimer = 6000;
-    addChatMessage('CAL', quote, CAL_COLOR, false, false);
+    _calMsgTimer = 35000 + Math.random()*25000;
+    if(!_npcsMuted) {
+      const quote = CAL_QUOTES[Math.floor(Math.random()*CAL_QUOTES.length)];
+      p.chatMsg = quote; p.chatTimer = 6000;
+      addChatMessage('CAL', quote, CAL_COLOR, false, false);
+    }
   }
 }
 
@@ -1616,6 +1792,23 @@ const FARROW_QUOTES = [
   "my body is 40% twiggy sticks 40% carlton and 20% pure genius and I stand by that breakdown.",
   "I can't tell if I'm still high or just that hungover. might be both. probably both.",
   "every time I close my eyes I see the bitcoin chart. this is either amazing or a problem.",
+  // online gambling
+  "I put $50 on a cricket match at 3am and it's been the most stressful hour of my life. go australia.",
+  "I'm not a gambler. I just use sports betting apps sometimes at 2am. completely different.",
+  "I've been up $200 and I lost it all back betting on esports. I have no regrets. that's a lie.",
+  "pokies online are cooked but I understand them perfectly and they should fear me specifically.",
+  "I set a deposit limit and then found a different site. classic risk management.",
+  "cricket, basketball, darts, dogs racing — bro if it has odds I've looked at it too long.",
+  "I had a perfect parlay and the last leg lost by one wicket. I'll never forgive cricket for that.",
+  "gambling while stoned is technically a skill. the skill is knowing when to close the tab. I don't close the tab.",
+  "I'm up $600 on the year. I've been down $1200. net negative but the variance is INSANE.",
+  // skiing (farrow also skis, different to cal)
+  "I ski once a year and every year I am somehow worse. I don't understand it. I practice.",
+  "cal says I'm a good skier. cal is very encouraging. I watched the GoPro footage. cal is wrong.",
+  "I booked a ski trip and it was a powder day and I spent 90% of it in the chalet coding.",
+  "I fell on a blue run last year and a child had to help me up. a very small child.",
+  "the ski jacket has a BTC logo on it now. I sewed it on. I'm not embarrassed.",
+  "cal pushed me onto a black run once. I made it down. took 45 minutes. I never looked back.",
 ];
 let farrowPlayer = null;
 let _farrowMsgTimer = 5000 + Math.random()*8000; // offset from cal
@@ -1636,36 +1829,62 @@ function initFarrow() {
 function updateFarrow(dt) {
   if(!farrowPlayer) return;
   const p = farrowPlayer;
-  // Farrow rarely moves — he's glued to the pc
-  // occasional small wander to fridge then back
+  if(_farrowSleepCooldown > 0) _farrowSleepCooldown -= dt;
+
+  // sleep state — farrow is passed out, neck broken
+  if(_farrowAsleep) {
+    _farrowSleepTimer -= dt;
+    if(_farrowSleepTimer <= 0) {
+      _farrowAsleep = false;
+      p.sitting = true;
+      _farrowSleepCooldown = 360000 + Math.random()*480000; // 6-14 min cooldown
+      if(!_npcsMuted) {
+        const wakeMsg = ['ngh. what. I\'m awake. I was debugging.','...how long was I out. the node is still running. good.','I wasn\'t asleep. I was thinking with my eyes closed and my neck at a bad angle.'][Math.floor(Math.random()*3)];
+        p.chatMsg = wakeMsg; p.chatTimer = 6000;
+        addChatMessage('FARROW', wakeMsg, FARROW_COLOR, false, false);
+      }
+    }
+    return; // no movement or messages while asleep
+  }
+
+  // random sleep trigger — passes out at his desk when high enough
+  if(!_farrowAsleep && _farrowSleepCooldown <= 0 && Math.random() < 0.00008) {
+    const distFromHome = Math.hypot(p.x-(FARROW_HOME.c*TILE+TILE/2), p.y-(FARROW_HOME.r*TILE+TILE/2));
+    if(distFromHome < TILE*3) {
+      _farrowAsleep = true;
+      _farrowSleepTimer = 150000 + Math.random()*210000; // 2.5–6 min asleep
+      p.path = []; p.sitting = true;
+      addSystemMessage('FARROW — neck broken');
+    }
+  }
+
+  // Farrow rarely moves — glued to the pc
   if(p.path.length===0 && Math.random()<0.001) {
     const distFromHome = Math.hypot(p.x-(FARROW_HOME.c*TILE+TILE/2), p.y-(FARROW_HOME.r*TILE+TILE/2));
     if(distFromHome > TILE*2) {
-      p.path=[{x:FARROW_HOME.c*TILE+TILE/2, y:FARROW_HOME.r*TILE+TILE/2}];
-      p.sitting=false;
+      p.path=[{x:FARROW_HOME.c*TILE+TILE/2, y:FARROW_HOME.r*TILE+TILE/2}]; p.sitting=false;
     } else if(Math.random()<0.3) {
-      // go grab a longneck from fridge
-      p.path=[{x:25*TILE+TILE/2, y:2*TILE+TILE/2},{x:FARROW_HOME.c*TILE+TILE/2, y:FARROW_HOME.r*TILE+TILE/2}];
-      p.sitting=false;
+      p.path=[{x:25*TILE+TILE/2, y:2*TILE+TILE/2},{x:FARROW_HOME.c*TILE+TILE/2, y:FARROW_HOME.r*TILE+TILE/2}]; p.sitting=false;
     }
   }
-  // sit back down when home
   if(p.path.length===0) {
-    const distFromHome = Math.hypot(p.x-(FARROW_HOME.c*TILE+TILE/2), p.y-(FARROW_HOME.r*TILE+TILE/2));
-    if(distFromHome < TILE) p.sitting=true;
+    const d = Math.hypot(p.x-(FARROW_HOME.c*TILE+TILE/2), p.y-(FARROW_HOME.r*TILE+TILE/2));
+    if(d < TILE) p.sitting=true;
   }
-  // messages
+
+  // messages (slower: 40-70s)
   _farrowMsgTimer -= dt;
   if(_farrowMsgTimer <= 0) {
-    _farrowMsgTimer = 28000 + Math.random()*40000;
-    const quote = FARROW_QUOTES[Math.floor(Math.random()*FARROW_QUOTES.length)];
-    p.chatMsg = quote;
-    p.chatTimer = 6500;
-    addChatMessage('FARROW', quote, FARROW_COLOR, false, false);
+    _farrowMsgTimer = 40000 + Math.random()*30000;
+    if(!_npcsMuted) {
+      const quote = FARROW_QUOTES[Math.floor(Math.random()*FARROW_QUOTES.length)];
+      p.chatMsg = quote; p.chatTimer = 6500;
+      addChatMessage('FARROW', quote, FARROW_COLOR, false, false);
+    }
   }
 }
 
-function drawFarrowGoblin(x, y, dir, frame, chatMsg, sitting) {
+function drawFarrowGoblin(x, y, dir, frame, chatMsg, sitting, asleep) {
   const s = ctx;
   const px=v=>Math.round(v);
   // shadow
@@ -1715,9 +1934,22 @@ function drawFarrowGoblin(x, y, dir, frame, chatMsg, sitting) {
   const nw=s.measureText('FARROW').width+8;
   s.fillStyle='rgba(247,147,26,0.15)';s.fillRect(x-nw/2,y-36,nw,13);
   s.fillStyle=FARROW_COLOR;s.fillText('FARROW',x,y-26);
+  // asleep — draw tilted head (neck broken) overlay
+  if(asleep) {
+    s.save();
+    s.translate(x, y-15);s.rotate(1.1); // head lolls hard to side
+    s.fillStyle='#c8a878';s.fillRect(px(-5),px(-6),10,12); // head (rotated)
+    s.fillStyle='#3a2010';s.fillRect(px(-5),px(-9),10,5);s.fillRect(px(-6),px(-7),2,4);s.fillRect(px(4),px(-7),2,4); // hair
+    s.fillStyle='rgba(0,0,0,0.8)';s.fillRect(px(-3),px(-2),3,1);s.fillRect(px(1),px(-2),3,1); // closed eyes
+    s.fillStyle='#a06040';s.fillRect(px(-1),px(3),3,1); // slack mouth
+    // zzz
+    s.font='bold 9px "VT323"';s.fillStyle='rgba(247,147,26,0.7)';s.textAlign='center';
+    s.fillText('z z z',4,-14);
+    s.restore();
+  }
   // stoned + coding indicator
-  s.font='8px "VT323"';s.fillStyle='rgba(247,147,26,0.6)';
-  s.fillText('[stoned] [coding]',x,y-40);
+  s.font='8px "VT323"';s.fillStyle= asleep ? 'rgba(247,100,26,0.8)' : 'rgba(247,147,26,0.6)';
+  s.fillText(asleep ? '[ASLEEP - neck broken]' : '[stoned] [coding]',x,y-40);
   // chat bubble
   if(chatMsg) {
     s.font='11px "VT323"';
@@ -1790,6 +2022,21 @@ const ROBBO_QUOTES = [
   "cal is my best mate in the world and he is genuinely the most annoying person on earth.",
   "I love cal like a brother and I want to put him through the fermentor.",
   "cal borrowed my bong four days ago and hasn't given it back. I can't even be mad. I'm mad.",
+  // jeep — the great unfinished project
+  "the jeep needs a new diff. has needed one for six months. she's still going though. barely.",
+  "I ordered a part for the jeep and they sent the wrong one. third time this has happened.",
+  "the jeep's making a new noise I've never heard before. I've decided to pretend it's normal.",
+  "I'm gonna restore the jeep this summer. properly. full restoration. this is the summer.",
+  "I've spent more money on the jeep than the jeep is worth. by a significant margin. I love her.",
+  "the jeep needs a new alternator now. of course she does. of COURSE.",
+  "I love that jeep more than anything and I will never finish fixing it and those two things are compatible.",
+  "she leaks a bit of oil. she always has. I consider it character.",
+  "I found a part on facebook marketplace for $40 and I drove four hours to get it. worth it.",
+  "the rust on the wheel arches is 'manageable'. that's what I've been telling myself for two years.",
+  "the heater doesn't work. it's okay. I wear the helmet. the helmet is warm.",
+  "I've watched every jeep restoration youtube video ever posted. I still can't do the diff.",
+  "bro the jeep is older than me and she runs. that's more than can be said for most things.",
+  "I keep telling people I'm 'nearly done' with the jeep. I've been nearly done since 2022.",
 ];
 
 // Cal and Robbo bicker — triggered periodically
@@ -1804,8 +2051,23 @@ const ROBBO_CAL_FIGHTS = [
   { robbo:"cal you drank four of my test batch without asking",       cal:"they were in the fridge robbo. fridge items are communal." },
   { robbo:"my good flannel has ski wax on it now",                    cal:"it adds character. it looks cool." },
   { robbo:"you said you'd do a brewery tour with me for the island",  cal:"I will. I'm just waiting until I'm less high. so. soon." },
+  // jeep fights
+  { robbo:"cal the jeep needs a new alternator I need three hundred bucks",    cal:"what's an alternator robbo. genuinely. what does it do." },
+  { robbo:"I've been under the jeep for four hours cal",                        cal:"do you want me to come down there. actually nah. I physically cannot move." },
+  { robbo:"I'm going to sell the jeep",                                         cal:"you're not going to sell the jeep robbo and we both know that." },
+  { robbo:"cal the jeep's leaking oil again",                                   cal:"all good cars leak a little bit bro. it's how they breathe." },
+  { robbo:"I drove four hours to get a part and it was the wrong one",          cal:"that's very robbo of you mate. very very robbo." },
+  { robbo:"the jeep restoration is nearly done",                                cal:"you said that in 2022 bro. you said it in 2023. you're saying it now." },
+  // random everything fights
+  { robbo:"cal have you seen my bong. it was RIGHT HERE",                       cal:"I have no memory of that bong whatsoever." },
+  { robbo:"cal you ate ALL the chippies",                                        cal:"the bag was nearly empty robbo. I did a mercy finish." },
+  { robbo:"bro you left the TV on all night again",                             cal:"the TV needed company robbo. you wouldn't understand." },
+  { robbo:"cal you said you'd help me move the keg four days ago",              cal:"I WILL help. I'm just waiting for the right physical and emotional state." },
+  { robbo:"farrow's been in that chair for nine hours straight",                cal:"he's in flow state robbo. don't interrupt flow state." },
+  { robbo:"cal there are skis inside the bungalow",                             cal:"where else would they go robbo. the snow isn't here year round." },
+  { robbo:"you put a dent in the fermentor",                                    cal:"that fermentor was already dented when I got here." },
+  { robbo:"the cheese in the fridge is yours isn't it",                         cal:"I'm not going to confirm or deny any specific cheese at this time." },
 ];
-let _robboCal_timer = 55000 + Math.random()*45000; // first fight after 55-100s
 
 let robboPlayer = null;
 let _robboMsgTimer = 8000 + Math.random()*10000; // offset from others
@@ -1841,27 +2103,29 @@ function updateRobbo(dt) {
       p.path=[{x:sp.c*TILE+TILE/2, y:sp.r*TILE+TILE/2}];
     }
   }
-  // quotes
+  // quotes (slower: 42-75s)
   _robboMsgTimer -= dt;
   if(_robboMsgTimer <= 0) {
-    _robboMsgTimer = 30000 + Math.random()*45000;
-    const quote = ROBBO_QUOTES[Math.floor(Math.random()*ROBBO_QUOTES.length)];
-    p.chatMsg = quote; p.chatTimer = 6500;
-    addChatMessage('ROBBO', quote, ROBBO_COLOR, false, false);
+    _robboMsgTimer = 42000 + Math.random()*33000;
+    if(!_npcsMuted) {
+      const quote = ROBBO_QUOTES[Math.floor(Math.random()*ROBBO_QUOTES.length)];
+      p.chatMsg = quote; p.chatTimer = 6500;
+      addChatMessage('ROBBO', quote, ROBBO_COLOR, false, false);
+    }
   }
   // cal/robbo bicker
   _robboCal_timer -= dt;
   if(_robboCal_timer <= 0) {
-    _robboCal_timer = 70000 + Math.random()*80000;
-    if(calPlayer && robboPlayer) {
+    _robboCal_timer = 80000 + Math.random()*90000;
+    if(!_npcsMuted && calPlayer && robboPlayer) {
       const fight = ROBBO_CAL_FIGHTS[Math.floor(Math.random()*ROBBO_CAL_FIGHTS.length)];
       robboPlayer.chatMsg = fight.robbo; robboPlayer.chatTimer = 6000;
       addChatMessage('ROBBO', fight.robbo, ROBBO_COLOR, false, false);
       setTimeout(()=>{
-        if(!calPlayer) return;
+        if(!calPlayer||_npcsMuted) return;
         calPlayer.chatMsg = fight.cal; calPlayer.chatTimer = 6000;
         addChatMessage('CAL', fight.cal, CAL_COLOR, false, false);
-      }, 3500);
+      }, 4000);
     }
   }
 }
@@ -2049,7 +2313,7 @@ function _startPresence(name, color) {
       }
     });
     for (const id of Object.keys(players)) {
-      if (id === 'you' || id === 'cal' || id === 'farrow' || id === 'robbo') continue; // never remove local NPCs
+      if (id === 'you' || id === 'cal' || id === 'farrow' || id === 'robbo' || id === 'barney') continue; // never remove local NPCs
       if (!activeIds.has(id)) {
         const gone = players[id].name;
         delete players[id];
@@ -2169,6 +2433,8 @@ function sendChat(rawMsg){
   if(!myPlayer)return;
   const msg=_sanitizeMsg(rawMsg);
   if(!msg)return;
+  if(msg.toLowerCase()==='stop!'){_npcsMuted=true;addSystemMessage('[ npcs muted — type go! to unmute ]');return;}
+  if(msg.toLowerCase()==='go!'){_npcsMuted=false;addSystemMessage('[ npcs unmuted ]');return;}
   myPlayer.chatMsg=msg;myPlayer.chatTimer=5500;
   addChatMessage(myPlayer.name,msg,myPlayer.color,true);
   _sendChatToFirestore(msg);
@@ -2251,7 +2517,7 @@ function drawPlayers(){
     if(p.id==='cal'){
       drawCalGoblin(sp.x,sp.y,p.dir,p.frame,p.chatMsg||'',p.sitting||false);
     } else if(p.id==='farrow'){
-      drawFarrowGoblin(sp.x,sp.y,p.dir,p.frame,p.chatMsg||'',p.sitting||false);
+      drawFarrowGoblin(sp.x,sp.y,p.dir,p.frame,p.chatMsg||'',p.sitting||false,_farrowAsleep);
     } else if(p.id==='robbo'){
       drawRobboGoblin(sp.x,sp.y,p.dir,p.frame,p.chatMsg||'',p.sitting||false);
     } else {
@@ -2312,7 +2578,24 @@ function enterBungalow(rawName,color){
 let lastTime=0;
 function loop(ts){
   const dt=Math.min(ts-lastTime,100);lastTime=ts;
-  if(myPlayer){movePlayersToTargets(dt);updateCamera();updateSmoke(dt);_syncMyPosition();updateCal(dt);updateFarrow(dt);updateRobbo(dt);}
+  if(myPlayer){
+    movePlayersToTargets(dt);updateCamera();updateSmoke(dt);_syncMyPosition();
+    updateCal(dt);updateFarrow(dt);updateRobbo(dt);
+    // barney — very rare autonomous bark (every ~3-5 min)
+    _barneyBarkTimer -= dt;
+    if(_barneyBarkTimer <= 0) {
+      _barneyBarkTimer = 220000 + Math.random()*120000;
+      if(!_npcsMuted) {
+        const barneyObj = worldObjects.find(o=>o.type==='barney');
+        if(barneyObj) {
+          const RARE_BARKS=['woof.','...arf','*muffled bork*','ruff','woof?','...woof'];
+          const rb=RARE_BARKS[Math.floor(Math.random()*RARE_BARKS.length)];
+          barneyObj._barkMsg=rb; barneyObj._barkTimer=2000;
+          addChatMessage('BARNEY',rb,'#888',false,false);
+        }
+      }
+    }
+  }
   ctx.clearRect(0,0,canvas.width,canvas.height);
   drawWorld();drawPlayers();drawSmoke();
   const grad=ctx.createRadialGradient(canvas.width/2,canvas.height/2,canvas.height*0.3,canvas.width/2,canvas.height/2,canvas.height*0.85);
