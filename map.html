@@ -307,6 +307,8 @@ const worldObjects = [
   { type:'plant', c:26, r:2,  label:'plant' },
   // ── Door ──
   { type:'door',  c:13, r:19, label:'front door → index.html', interactable:true },
+  // ── Darius ──
+  { type:'darius', c:5, r:13, label:'darius (click him)', interactable:true },
   // ── Brewery (Jack Robbo's) ──
   { type:'brewery_sign', c:15, r:13, label:"Jack Robbo's Microbrewery", interactable:true },
   { type:'fermentor',    c:16, r:14, label:'fermenter A — Bungalow Bitter', interactable:true },
@@ -1141,6 +1143,56 @@ function drawObject(obj,sx,sy) {
     grd2.addColorStop(0,`rgba(247,147,26,${screenGlow*0.12})`);
     grd2.addColorStop(1,'transparent');
     s.fillStyle=grd2;s.fillRect(px2-20,py2-30,TILE+40,50);
+
+  } else if(obj.type==='darius') {
+    // Darius — static, sitting cross-legged on the floor, stims only on click
+    const dx=sx, dy=sy;
+    const pxd=v=>Math.round(v);
+    // shadow
+    s.fillStyle='rgba(0,0,0,0.25)';
+    s.beginPath();s.ellipse(dx,dy+10,11,4,0,0,Math.PI*2);s.fill();
+    // legs cross-legged
+    s.fillStyle='#2a4a8a';s.fillRect(pxd(dx-10),pxd(dy+2),20,8);
+    s.fillStyle='#1e3a7a';s.fillRect(pxd(dx-10),pxd(dy+6),10,4);s.fillRect(pxd(dx),pxd(dy+6),10,4);
+    // feet
+    s.fillStyle='#c8a060';s.fillRect(pxd(dx-12),pxd(dy+8),5,4);s.fillRect(pxd(dx+7),pxd(dy+8),5,4);
+    // torso — comfy hoodie, dark blue
+    s.fillStyle='#1a2a5a';s.fillRect(pxd(dx-6),pxd(dy-10),12,12);
+    s.fillStyle='#243070';s.fillRect(pxd(dx-5),pxd(dy-8),3,8);s.fillRect(pxd(dx+2),pxd(dy-8),3,8); // hoodie texture
+    // hood up slightly
+    s.fillStyle='#1a2a5a';s.fillRect(pxd(dx-7),pxd(dy-14),14,6);
+    // head
+    s.fillStyle='#c8a060';s.fillRect(pxd(dx-5),pxd(dy-22),10,12);
+    // hair — short, dark
+    s.fillStyle='#1a0a00';s.fillRect(pxd(dx-5),pxd(dy-24),10,4);
+    s.fillRect(pxd(dx-6),pxd(dy-22),2,3);
+    // ears
+    s.fillStyle='#c8a060';s.fillRect(pxd(dx-7),pxd(dy-20),2,4);s.fillRect(pxd(dx+5),pxd(dy-20),2,4);
+    // eyes — calm, slightly downward (stimming focus)
+    s.fillStyle='#222';s.fillRect(pxd(dx-3),pxd(dy-17),2,2);s.fillRect(pxd(dx+1),pxd(dy-17),2,2);
+    // gentle smile
+    s.fillStyle='#a07040';s.fillRect(pxd(dx-2),pxd(dy-13),5,1);
+    // arms resting on knees
+    s.fillStyle='#c8a060';
+    s.fillRect(pxd(dx-9),pxd(dy-8),3,6);s.fillRect(pxd(dx+6),pxd(dy-8),3,6);
+    // name tag
+    s.font='10px "Press Start 2P"';s.textAlign='center';
+    const dnw=s.measureText('DARIUS').width+8;
+    s.fillStyle='rgba(100,160,255,0.15)';s.fillRect(dx-dnw/2,dy-36,dnw,13);
+    s.fillStyle='#64a0ff';s.fillText('DARIUS',dx,dy-26);
+    s.font='8px "VT323"';s.fillStyle='rgba(100,160,255,0.6)';
+    s.fillText('[click me]',dx,dy-40);
+    // active stim bubble (reuses chatMsg on a fake player obj)
+    if(obj._stimMsg && obj._stimTimer > 0) {
+      obj._stimTimer -= 16; // approximate per frame
+      s.font='14px "VT323"';
+      const sw=s.measureText(obj._stimMsg).width+16;
+      s.fillStyle='rgba(100,160,255,0.15)';
+      s.strokeStyle='#64a0ff';s.lineWidth=1;
+      s.beginPath();s.roundRect(dx-sw/2,dy-62,sw,20,3);s.fill();s.stroke();
+      s.fillStyle='#fff';s.textAlign='center';
+      s.fillText(obj._stimMsg,dx,dy-47);
+    }
   }
 }
 
@@ -1317,6 +1369,20 @@ function handleObjectClick(obj) {
       setTimeout(()=>{ window.location.href='index.html'; },1200);
       break;
     }
+    case 'darius': {
+      const DARIUS_STIMS = [
+        "AAAAAAAAAH",  "EEEEEEEEE",  "WOOOOOOOOO", "MMMMMMMMMM",
+        "YEEEEEEEE",   "AAAH AAAH",  "WOAH WOAH",  "EHEHEHEHE",
+        "OOOOOOOOO",   "AHHHHHHH",   "WEEEEEEEE",  "MMHMMHMM",
+        "AAAH AAAH AAAH", "OOOH OOOH", "EHHHHHHH", "WOOOAH",
+        "AAAAAAH AAAH",   "MMMMMMM",  "YAAAAAAA",  "EEEEEH",
+      ];
+      const stim = DARIUS_STIMS[Math.floor(Math.random()*DARIUS_STIMS.length)];
+      obj._stimMsg = stim;
+      obj._stimTimer = 2800;
+      addChatMessage('DARIUS', stim, '#64a0ff', false, false);
+      break;
+    }
     case 'pc_setup': {
       const pcMsgs=['farrow is deep in it. you can see a bitcoin chart open behind 47 terminal tabs.','the monitor smells faintly of twiggy sticks and ambition.','there\'s a sticky note: "BUY MORE BTC". another one: "sell??" crossed out aggressively.','you see code. lots of it. something about a "bitcoin autobuy daemon". sounds cooked.','the screensaver is just a bitcoin logo slowly spinning. farrow made it himself.'];
       addSystemMessage(pcMsgs[Math.floor(Math.random()*pcMsgs.length)]);
@@ -1334,6 +1400,7 @@ function handleObjectClick(obj) {
 // ── CAL NPC — tall ski bro, perpetually stoned, substitute teacher ──
 const CAL_COLOR = '#1a88cc';
 const CAL_QUOTES = [
+  // high / general
   "oh man I lost my car im so high",
   "oh man those gummies got me",
   "bro I can't feel my skis",
@@ -1356,23 +1423,33 @@ const CAL_QUOTES = [
   "can someone check if the lifts are open. I can't read right now.",
   "I'm fine. I'm a professional skier. I just can't stand up.",
   "is there a late checkout. I think I'm still on the mountain.",
-  // japan skiing
-  "niseko is the greatest place on earth. I cried in a gondola there.",
-  "hakuba powder is different. it has a spiritual quality. or I was just fully cooked.",
-  "I was a substitute teacher in nagano once. the kids loved me. I think.",
-  "japanese convenience store onigiri at 2am after a powder day. nothing better.",
+  "I've been sitting here for four hours and it feels like twenty minutes. peak.",
+  "honestly I think I'm too high to ski right now. that's a new low.",
+  "someone should put water near me. I'm not going to get it myself.",
+  // japan skiing (deep)
+  "niseko is the greatest place on earth. I cried in a gondola there. I don't apologise for that.",
+  "hakuba powder is different. it has a spiritual quality. or I was just fully cooked at the time.",
+  "I was a substitute teacher in nagano once. the kids loved me. I think. one of them drew me.",
+  "japanese convenience store onigiri at 2am after a powder day. nothing before or since.",
   "I told my students in japan to open their textbooks and then I fell asleep standing up.",
-  "bro the lifts in hokkaido open at 8am. I was there at 6am. still high from the night before.",
-  "I asked a japanese kid what 8 times 7 is and he told me and then I said yep and moved on.",
-  // substitute teacher
-  "I'm a substitute teacher. the kids call me mr cal. I let them.",
-  "I put on a documentary about penguins and had a nap. educational.",
+  "the lifts in hokkaido open at 8am. I was there at 6am. still high from the night before.",
+  "I asked a japanese kid what 8 times 7 is and he said 56 and I went yep and we moved on.",
+  "furano gets 15 metres of snow a year. I have been to furano. it changed me permanently.",
+  "I went to japan for two weeks and stayed for six. I don't fully know why. the snow was good.",
+  "the japanese ski patrol found me asleep in a tree. they were very polite about it.",
+  // substitute teacher (deep)
+  "I'm a substitute teacher. the kids call me mr cal. I let them do that.",
+  "I put on a documentary about penguins and had a nap at the back. educational day.",
   "a kid asked me if I was okay and I said are ANY of us okay and then I sat down.",
-  "I told year 7 maths class that numbers are a social construct. they seemed into it.",
+  "I told year 7 maths that numbers are a social construct. they seemed into it.",
   "I was supposed to teach PE but I just watched from the bench and gave thumbs up.",
-  "the principal called me in. I thought it was about the gummy incident. it wasn't. still worried.",
-  "I genuinely forgot what subject I was meant to be teaching by period 3.",
-  "a kid threw a spitball and I said nice arc and gave him a gold star.",
+  "the principal called me in. I thought it was about the gummy incident. it was a different incident.",
+  "I forgot what subject I was teaching by period 3. turns out it was chemistry. concerning.",
+  "a kid threw a spitball and I said nice arc and gave him a merit certificate.",
+  "I gave them all free study and spent 40 minutes looking out the window. best lesson I've run.",
+  "a year 9 asked me about the meaning of life. I said powder snow and left it at that.",
+  "the kids at school think I'm cool. I am. I'm also extremely high every single day.",
+  "I wrote 'ski = life' on the whiteboard and then had nothing else to add. left it up.",
 ];
 let calPlayer = null;
 let _calMsgTimer = 0;
@@ -1412,7 +1489,7 @@ function updateCal(dt) {
   // messages
   _calMsgTimer -= dt;
   if(_calMsgTimer <= 0) {
-    _calMsgTimer = 12000 + Math.random()*20000;
+    _calMsgTimer = 25000 + Math.random()*35000;
     const quote = CAL_QUOTES[Math.floor(Math.random()*CAL_QUOTES.length)];
     p.chatMsg = quote;
     p.chatTimer = 6000;
@@ -1499,41 +1576,46 @@ function drawCalGoblin(x, y, dir, frame, chatMsg, sitting) {
 // ── FARROW NPC — bitcoin genius, permanently cooked, always hungover ──
 const FARROW_COLOR = '#f7931a'; // bitcoin orange
 const FARROW_QUOTES = [
+  // bitcoin / coding genius
   "bitcoin is just math bro. BEAUTIFUL math.",
-  "the only food I've eaten in 3 days is twiggy sticks and I've never felt more alive",
-  "what if... blockchain but for skiing. hear me out.",
+  "the only food I've eaten in 3 days is twiggy sticks and I've never felt more alive.",
+  "what if... blockchain but for skiing. hear me out. no seriously hear me out.",
   "this carlton hits different when BTC is up 8%",
-  "I'm not addicted to coding I just can't stop",
-  "I wrote a script that buys btc every time I eat a twiggy stick",
-  "the whitepaper changed my life. also these gummies.",
-  "bro satoshi was definitely a stoner. look at the genesis block timestamp.",
-  "I compiled this at 3am and it works. I don't know why it works.",
-  "stack sats. eat twiggy sticks. sleep eventually.",
+  "I'm not addicted to coding I just can't stop. there's a difference.",
+  "I wrote a script that buys btc every time I eat a twiggy stick. it's up 40%.",
+  "the whitepaper changed my life. also these gummies changed my life. busy year.",
+  "bro satoshi was definitely a stoner. look at the genesis block timestamp. that's a 10pm commit.",
+  "I compiled this at 3am and it works. I don't know why it works and I won't look at it.",
+  "stack sats. eat twiggy sticks. sleep eventually. that's the whole plan.",
   "my node went down and I cried. the twiggy sticks helped. barely.",
-  "proof of work is basically just... vibes but mathematically",
-  "I haven't seen sunlight but I've seen the mempool and it's beautiful",
+  "proof of work is basically just vibes but with maths attached.",
+  "I haven't seen sunlight since tuesday but I've seen the mempool and it's beautiful.",
   "lightning network goes brrr. also this carlton goes brrr.",
-  "I am SO high and this code is SO elegant",
+  "I am SO high and this code is SO elegant and I wish you could see what I'm seeing right now.",
   "decentralised. permissionless. COOKED.",
-  "twiggy sticks are the bitcoin of snacks. finite supply. incredible taste.",
-  "bro the block reward just halved. I need like four beers.",
-  "I wrote 400 lines today and can't remember any of them",
-  "when btc moons I'm buying a ski lodge. that's the plan. always been the plan.",
-  "the hash rate is up. I am also up. we are all up.",
-  "I think I accidentally wrote a virus but it's a very efficient one",
-  // hangover quotes
-  "it feels like I've been shot out of a cannon mate",
-  "you gotta help me mate. I can't feel my face and that's probably fine.",
-  "I had 14 carltons last night and wrote the most beautiful code of my life and now I feel like death",
-  "my head. oh no. my head.",
-  "I think I blacked out and kept coding. the git commits don't lie.",
-  "someone bring me a twiggy stick I can't stand up",
-  "the carlton longnecks were a mistake. the code was not a mistake.",
-  "I need water. or a beer. one of those. both probably.",
-  "bro I am so dusty. completely dusty. send help.",
-  "I woke up at the desk again. the code was still compiling. respect.",
-  "my body is 40% twiggy sticks 40% carlton and 20% genius right now",
-  "I can't tell if I'm still high or just that hungover",
+  "twiggy sticks are the bitcoin of snacks. finite supply. incredible taste. I stand by this.",
+  "bro the block reward just halved. I need like four beers to process this.",
+  "I wrote 400 lines today and can't remember any of them but the tests are passing.",
+  "when btc moons I'm buying a ski lodge. that's always been the plan. I've told everyone.",
+  "the hash rate is up. I am also up. we are all up. everything is up.",
+  "I think I accidentally wrote a virus but it's a very efficient one so it's fine.",
+  "I haven't eaten a vegetable in two weeks. twiggy sticks are basically meat so I'm fine.",
+  "the mempool is congested and so am I. we're the same right now.",
+  "I cracked the algorithm. no I won't explain which algorithm. just know I cracked it.",
+  // hangover (detailed suffering)
+  "it feels like I've been shot out of a cannon mate. not in a good way.",
+  "you gotta help me mate. I literally cannot feel my face and I'm not sure that's fine.",
+  "I had 14 carltons last night and wrote the most beautiful code of my life and I feel like death.",
+  "my head. oh no. my head is doing something.",
+  "I think I blacked out and kept coding. the git commits don't lie. 47 commits at 4am.",
+  "someone bring me a twiggy stick I physically cannot stand up right now.",
+  "the carlton longnecks were a mistake. the code was not a mistake. clear distinction.",
+  "I need water. or a beer. one of those. both. in that order. actually reverse order.",
+  "bro I am so dusty. completely and utterly dusty. I'm basically sand.",
+  "I woke up at the desk again. the code was still compiling. I respect that about it.",
+  "my body is 40% twiggy sticks 40% carlton and 20% pure genius and I stand by that breakdown.",
+  "I can't tell if I'm still high or just that hungover. might be both. probably both.",
+  "every time I close my eyes I see the bitcoin chart. this is either amazing or a problem.",
 ];
 let farrowPlayer = null;
 let _farrowMsgTimer = 5000 + Math.random()*8000; // offset from cal
@@ -1575,7 +1657,7 @@ function updateFarrow(dt) {
   // messages
   _farrowMsgTimer -= dt;
   if(_farrowMsgTimer <= 0) {
-    _farrowMsgTimer = 14000 + Math.random()*22000;
+    _farrowMsgTimer = 28000 + Math.random()*40000;
     const quote = FARROW_QUOTES[Math.floor(Math.random()*FARROW_QUOTES.length)];
     p.chatMsg = quote;
     p.chatTimer = 6500;
@@ -1658,48 +1740,72 @@ function drawFarrowGoblin(x, y, dir, frame, chatMsg, sitting) {
 const ROBBO_COLOR = '#8B4513'; // brewery brown
 const ROBBO_QUOTES = [
   // brewing
-  "the pale ale is coming along. three more days. maybe two. maybe five.",
-  "I need more hops. someone go to the shops. actually I'll go. no I won't.",
-  "the fermentor is doing something weird. I'll deal with it later.",
-  "bungalow bitter batch 7 is going to be the best one. I say that every time.",
-  "I've been brewing for six years and I still don't fully understand yeast.",
-  "the keg exploded once. not today though. probably.",
-  // begging for kush
-  "anyone got any kush? asking for me. it's for me.",
-  "cal have you got any green mate. seriously. I've got nothing.",
-  "I would kill for a cone right now. not literally. maybe literally.",
-  "I've been dry for four days and I'm not handling it well as you can see.",
-  "farrow have you got any? no? typical. absolute typical.",
-  "I'll swap you a fresh pint for a cone. that's a great deal. that's a steal.",
-  "someone on this island has to have some kush. statistically.",
+  "the pale ale is coming along. three more days. maybe two. maybe five. could be seven.",
+  "I need more hops. someone go to bunnings. actually I'll go. no I won't go.",
+  "the fermentor is doing something weird and I'm going to ignore it for now.",
+  "bungalow bitter batch 7 is going to be the best one. I say that every single time.",
+  "I've been brewing for six years and I still don't fully understand yeast and I never will.",
+  "the keg exploded once. not today. probably not today.",
+  "I spent $800 on brewing equipment this month and nobody asked how I was going.",
+  "the wort smells incredible. nobody came to smell it. I smelled it alone.",
+  "batch 6 was almost perfect. almost. the almost is what's killing me.",
+  "I've been reading brewing forums for four hours and I'm more confused than when I started.",
+  // begging for kush (lots)
+  "anyone got any kush? asking for me. it's very much for me.",
+  "cal have you got any green mate. I'm serious. I have literally nothing.",
+  "I would do almost anything for a cone right now. please.",
+  "I've been dry for four days and I'm not handling it well. as you can see.",
+  "farrow have you got any? no? course not. typical. absolute typical.",
+  "I'll swap you a fresh pint for a cone. that's a great deal. that's genuinely a steal.",
+  "someone on this island has to have some kush. statistically one of you has something.",
+  "I'm not asking for much. I'm asking for weed. one small amount of weed.",
+  "I haven't had a cone in four days and I've been standing next to a fermentor that whole time.",
+  "if someone gives me a cone I will name the next batch after them. that's a real offer.",
+  "I checked my pockets. I've checked everyone else's pockets. nothing. disaster.",
+  "the problem with being sober is I can hear everything robbo says and it's mostly me.",
+  // not being paid back / no one appreciates him
+  "cal still owes me $60 from the snowies trip. that was eight months ago.",
+  "farrow said he'd pay me back for the hops last month. hasn't mentioned it once.",
+  "I bought six rounds at the pub and no one's got me back. not once. I counted.",
+  "I lent cal my good flannel. he came back with ski wax on it. he didn't apologise.",
+  "someone drank four of my test batch longnecks and left the empties. I know it was cal.",
+  "I paid for the uber home three times last month. running total: $87. outstanding.",
+  "nobody reimburses the brewer. I am the brewer. I am not being reimbursed.",
   // complaining
-  "this is a nightmare. everything about today is a nightmare.",
-  "nobody helps. I ask for one thing and nobody helps.",
-  "the helmet was my dad's idea and now I can't take it off emotionally.",
-  "why does cal have skis inside. WHY are there skis inside.",
-  "I've been standing at this fermentor for six hours and nobody cared once.",
-  "the yeast went bad. the YEAST went BAD. do you understand what I'm dealing with.",
-  "I cooked the hops wrong. again. I always cook the hops wrong.",
-  "nobody drinks my beer and says it's good. they drink it and go quiet. that's something.",
-  "I'm doing everything myself. always. every time.",
-  // fighting with cal (but love him really)
+  "this is a nightmare. everything about today specifically is a nightmare.",
+  "nobody helps. I ask for one thing and nobody helps. one thing.",
+  "the helmet was my dad's idea and now I can't take it off. emotionally I mean.",
+  "why does cal have skis inside. WHY. are there skis inside.",
+  "I've been standing at this fermentor for six hours and nobody asked how it's going.",
+  "the yeast went bad. the YEAST went BAD. do you understand what this means.",
+  "I cooked the hops wrong again. I always cook the hops wrong. it's my thing.",
+  "nobody drinks my beer and says wow. they drink it and go very quiet. that's something.",
+  "I'm doing everything myself. always. every time. without exception.",
+  "the helmet has a dent in it now. don't ask. I'm not ready to talk about it.",
+  "nobody appreciates craft brewing. they drink it and say 'nice' and go back to their phones.",
+  // cal friendship
   "cal you dropped a zyn in the mash tun again didn't you. I can TELL.",
-  "if cal skis into the brewery one more time I'm going to lose my mind.",
-  "me and cal had a fight earlier. he was wrong. I was also slightly wrong. he was more wrong.",
-  "cal's my best mate but he is genuinely the most annoying person on earth.",
-  "I love cal like a brother and I want to throw him into the fermentor.",
+  "if cal skis into the brewery one more time I am going to lose my mind completely.",
+  "me and cal had a fight this morning. he was wrong. I was also slightly wrong. he was more wrong.",
+  "cal is my best mate in the world and he is genuinely the most annoying person on earth.",
+  "I love cal like a brother and I want to put him through the fermentor.",
+  "cal borrowed my bong four days ago and hasn't given it back. I can't even be mad. I'm mad.",
 ];
 
 // Cal and Robbo bicker — triggered periodically
 const ROBBO_CAL_FIGHTS = [
-  { robbo:"cal stop leaving ski wax on the couch",       cal:"that could be anyone's ski wax robbo" },
-  { robbo:"cal you ate my last twiggy stick",            cal:"I thought it was a community twiggy stick" },
-  { robbo:"you promised to help in the brewery",        cal:"I was going to. then I sat down." },
-  { robbo:"cal why are your skis in the fermentor room",cal:"they needed somewhere to live robbo" },
-  { robbo:"you never have any kush cal",                cal:"bro I'm high right now look at me" },
-  { robbo:"stop teaching kids on school nights you're a mess the next day", cal:"the kids need me robbo. also yeah fair." },
+  { robbo:"cal stop leaving ski wax all over the couch",              cal:"that could genuinely be anyone's ski wax robbo" },
+  { robbo:"cal you ate my last twiggy stick",                         cal:"I thought it was a community twiggy stick bro" },
+  { robbo:"you said you'd help in the brewery three days ago",        cal:"I was going to. then I sat down and time happened." },
+  { robbo:"cal why are your skis in the fermentor room",              cal:"they needed somewhere to live robbo. they have feelings." },
+  { robbo:"you never have any kush cal ever",                         cal:"bro I am high right now. look at me. look at my eyes." },
+  { robbo:"you still owe me sixty bucks from the snowies",            cal:"I thought we agreed that was a gift" },
+  { robbo:"stop teaching kids on school nights you're wrecked the next day", cal:"the kids need me robbo. also yeah fair point." },
+  { robbo:"cal you drank four of my test batch without asking",       cal:"they were in the fridge robbo. fridge items are communal." },
+  { robbo:"my good flannel has ski wax on it now",                    cal:"it adds character. it looks cool." },
+  { robbo:"you said you'd do a brewery tour with me for the island",  cal:"I will. I'm just waiting until I'm less high. so. soon." },
 ];
-let _robboCal_timer = 35000 + Math.random()*30000; // first fight after 35-65s
+let _robboCal_timer = 55000 + Math.random()*45000; // first fight after 55-100s
 
 let robboPlayer = null;
 let _robboMsgTimer = 8000 + Math.random()*10000; // offset from others
@@ -1738,7 +1844,7 @@ function updateRobbo(dt) {
   // quotes
   _robboMsgTimer -= dt;
   if(_robboMsgTimer <= 0) {
-    _robboMsgTimer = 15000 + Math.random()*25000;
+    _robboMsgTimer = 30000 + Math.random()*45000;
     const quote = ROBBO_QUOTES[Math.floor(Math.random()*ROBBO_QUOTES.length)];
     p.chatMsg = quote; p.chatTimer = 6500;
     addChatMessage('ROBBO', quote, ROBBO_COLOR, false, false);
@@ -1746,7 +1852,7 @@ function updateRobbo(dt) {
   // cal/robbo bicker
   _robboCal_timer -= dt;
   if(_robboCal_timer <= 0) {
-    _robboCal_timer = 40000 + Math.random()*40000;
+    _robboCal_timer = 70000 + Math.random()*80000;
     if(calPlayer && robboPlayer) {
       const fight = ROBBO_CAL_FIGHTS[Math.floor(Math.random()*ROBBO_CAL_FIGHTS.length)];
       robboPlayer.chatMsg = fight.robbo; robboPlayer.chatTimer = 6000;
