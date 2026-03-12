@@ -847,15 +847,52 @@ input.field:focus, textarea.field:focus { border-color: var(--blue); }
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 4px 7px;
+  padding: 8px 10px;
   background: #111820;
   cursor: pointer;
   border-bottom: 1px solid #1a2030;
   user-select: none;
+  min-height: 36px;
+  -webkit-tap-highlight-color: transparent;
 }
 #jap-header span:first-child { color: var(--green); font-weight: 900; font-size: 10px; }
-#jap-toggle { color: var(--muted); font-size: 10px; }
-#jap-body { padding: 8px; }
+#jap-toggle {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: bold;
+  padding: 2px 6px;
+  background: #1a2030;
+  border-radius: 3px;
+  line-height: 1;
+}
+#jap-body {
+  padding: 8px;
+  overflow: hidden;
+  max-height: 800px;
+  transition: max-height 0.35s ease, opacity 0.3s ease, padding 0.3s ease;
+  opacity: 1;
+}
+#japingus-widget.jap-collapsed #jap-body {
+  max-height: 0;
+  opacity: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+@media (max-width: 600px) {
+  #japingus-widget {
+    bottom: 12px;
+    right: 12px;
+    width: 185px;
+  }
+  #jap-header {
+    padding: 10px 12px;
+    min-height: 44px;
+  }
+  #jap-toggle {
+    font-size: 15px;
+    padding: 4px 8px;
+  }
+}
 #jap-sprite {
   font-family: 'Courier New', monospace;
   font-size: 10px;
@@ -4154,14 +4191,16 @@ function render() {
 
   if ((state === 'bad' || state === 'dying') && collapsed) {
     collapsed = false;
-    getEl('jap-body').style.display = '';
+    w.classList.remove('jap-collapsed');
     getEl('jap-toggle').textContent = '[-]';
   }
 
   const alive = state !== 'dead';
   getEl('jap-dead-screen').style.display = alive ? 'none' : 'block';
-  getEl('jap-body').style.display = (!alive || collapsed) ? 'none' : '';
-  if (!alive) { getEl('jap-body').style.display = 'none'; return; }
+  if (!alive) {
+    w.classList.add('jap-collapsed');
+    return;
+  }
 
   // GIF filter per state
   const img = getEl('jap-gif');
@@ -4372,7 +4411,8 @@ function buildWidget() {
 
 window.japToggle = function() {
   collapsed = !collapsed;
-  getEl('jap-body').style.display = collapsed ? 'none' : '';
+  const w = getEl('japingus-widget');
+  if (collapsed) w.classList.add('jap-collapsed'); else w.classList.remove('jap-collapsed');
   getEl('jap-toggle').textContent = collapsed ? '[+]' : '[-]';
 };
 
@@ -4396,6 +4436,14 @@ window.japRevive = function() {
 jap = loadState();
 applyOfflineDecay();
 buildWidget();
+// auto-collapse on mobile so it doesn't block content
+if (window.innerWidth <= 600) {
+  collapsed = true;
+  const w2 = getEl('japingus-widget');
+  if (w2) w2.classList.add('jap-collapsed');
+  const tog = getEl('jap-toggle');
+  if (tog) tog.textContent = '[+]';
+}
 render();
 showMsg(_offlineMsg || pickMsg(getState()));
 _offlineMsg = null;
