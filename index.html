@@ -4656,9 +4656,10 @@ function _startGameSync() {
 }
 
 function _applyGameState(d) {
-  coins       = parseFloat(d.coins  ?? coins       ?? 0);
-  totalEarned = parseFloat(d.earned ?? totalEarned ?? 0);
-  clicks      = parseInt  (d.clicks ?? clicks      ?? 0);
+  // NOTE: coins/earned/clicks are the island-wide communal totals.
+  // We do NOT copy them into the user's personal balance — each user
+  // keeps their own coins in localStorage. The island total is
+  // displayed separately via the shared/stats listener.
   owned       = d.owned   ?? owned   ?? {};
   bought      = d.bought  ?? bought  ?? {};
   pacts       = d.pacts   ?? pacts   ?? {};
@@ -4669,9 +4670,7 @@ function _applyGameState(d) {
 }
 
 function _mergeGameState(d) {
-  if ((d.coins  ?? 0) > coins)       coins       = parseFloat(d.coins);
-  if ((d.earned ?? 0) > totalEarned) totalEarned = parseFloat(d.earned);
-  if ((d.clicks ?? 0) > clicks)      clicks      = parseInt(d.clicks);
+  // Don't merge communal coin totals into personal balance
 
   let changed = false;
   if (d.owned)  Object.keys(d.owned).forEach(k => {

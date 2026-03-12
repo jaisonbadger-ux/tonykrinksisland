@@ -1722,8 +1722,9 @@ function handleObjectClick(obj) {
       break;
     }
     case 'sofa': {
-      const tx=(obj.c+obj.w/2)*TILE;
+      const tx=(obj.c+(obj.w||1)/2)*TILE;
       const ty=(obj.r+0.8)*TILE;
+      myPlayer.tx=tx; myPlayer.ty=ty;
       myPlayer.path=[{x:tx,y:ty}];
       myPlayer.sitting=false;
       clearTimeout(myPlayer._sitTimer);
@@ -1733,7 +1734,9 @@ function handleObjectClick(obj) {
       break;
     }
     case 'beanbag': {
-      myPlayer.path=[{x:obj.c*TILE+TILE/2,y:obj.r*TILE+TILE/2}];
+      const bx=obj.c*TILE+TILE/2, by=obj.r*TILE+TILE/2;
+      myPlayer.tx=bx; myPlayer.ty=by;
+      myPlayer.path=[{x:bx,y:by}];
       myPlayer.sitting=false;
       clearTimeout(myPlayer._sitTimer);
       myPlayer._sitTimer=setTimeout(()=>{
@@ -2732,8 +2735,12 @@ canvas.addEventListener('mousemove',e=>{
   const tip=document.getElementById('tooltip');
   let found=null;
   for(const obj of worldObjects){
-    const sp=worldToScreen(obj.c*TILE+TILE/2,obj.r*TILE+TILE/2);
-    if(Math.abs(sp.x-sx)<44&&Math.abs(sp.y-sy)<44){found=obj;break;}
+    const cx=obj.c*TILE+(obj.w||1)*TILE/2;
+    const cy=obj.r*TILE+(obj.h||1)*TILE/2;
+    const sp=worldToScreen(cx,cy);
+    const hw=Math.max(44,(obj.w||1)*TILE/2);
+    const hh=Math.max(44,(obj.h||1)*TILE/2);
+    if(Math.abs(sp.x-sx)<hw&&Math.abs(sp.y-sy)<hh){found=obj;break;}
   }
   _hoverObj=found;
   if(found){
@@ -2752,8 +2759,12 @@ canvas.addEventListener('click',e=>{
   const sx=e.clientX-rect.left,sy=e.clientY-rect.top;
   for(const obj of worldObjects){
     if(!obj.interactable)continue;
-    const sp=worldToScreen(obj.c*TILE+TILE/2,obj.r*TILE+TILE/2);
-    if(Math.abs(sp.x-sx)<44&&Math.abs(sp.y-sy)<44){handleObjectClick(obj);return;}
+    const cx=obj.c*TILE+(obj.w||1)*TILE/2;
+    const cy=obj.r*TILE+(obj.h||1)*TILE/2;
+    const sp=worldToScreen(cx,cy);
+    const hw=Math.max(44,(obj.w||1)*TILE/2);
+    const hh=Math.max(44,(obj.h||1)*TILE/2);
+    if(Math.abs(sp.x-sx)<hw&&Math.abs(sp.y-sy)<hh){handleObjectClick(obj);return;}
   }
   if(!myPlayer)return;
   if(myPlayer.sitting){myPlayer.sitting=false;clearTimeout(myPlayer._sitTimer);}
