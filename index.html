@@ -941,6 +941,13 @@ input.field:focus, textarea.field:focus { border-color: var(--blue); }
   transition: border-color 0.15s, background 0.15s;
 }
 .jap-btn:hover { border-color: var(--green); background: #0f1820; }
+.jap-btn.disabled { opacity: 0.35; cursor: not-allowed; pointer-events: none; }
+@keyframes cpsPulse {
+  0%   { color: var(--gold); }
+  40%  { color: #fff; text-shadow: 0 0 8px rgba(212,160,23,0.8); }
+  100% { color: var(--gold); text-shadow: none; }
+}
+.cps-tick { animation: cpsPulse 0.35s ease-out; }
 .jap-btn:active { background: #1a2a1a; }
 .jap-btn.disabled { opacity: 0.4; cursor: not-allowed; }
 .jap-cost { color: var(--yellow); font-size: 8px; }
@@ -3150,14 +3157,15 @@ function recalc() {
 }
 
 function fmt(n) {
-  n = Math.floor(n);
   if (n >= 1e18) return (n/1e18).toFixed(2)+'Qi';
   if (n >= 1e15) return (n/1e15).toFixed(2)+'Qa';
   if (n >= 1e12) return (n/1e12).toFixed(2)+'T';
   if (n >= 1e9)  return (n/1e9 ).toFixed(2)+'B';
   if (n >= 1e6)  return (n/1e6 ).toFixed(2)+'M';
   if (n >= 1000) return (n/1000).toFixed(1)+'K';
-  return String(n);
+  if (n >= 1)    return Math.floor(n).toString();
+  if (n > 0)     return n.toFixed(2);
+  return '0';
 }
 
 function doClick(e) {
@@ -3292,7 +3300,7 @@ function renderProducers() {
     let prodMult = 1, gBoost = 1;
     BOOSTS.filter(b => b.type==='prod' && b.prod===p.id && bought[b.id]).forEach(b => prodMult *= b.mult);
     BOOSTS.filter(b => b.type==='global' && bought[b.id]).forEach(b => gBoost *= b.mult);
-    const contrib = n > 0 ? fmt(p.cps * n * prodMult * gBoost * globalMult) + '/sec' : p.cps + '/sec each';
+    const contrib = n > 0 ? fmt(p.cps * n * prodMult * gBoost * globalMult) + '/sec' : fmt(p.cps) + '/sec each';
     return `<div class="prod-row${locked?' prod-locked':''}" data-prod="${p.id}">
       <div class="prod-icon">${p.icon}</div>
       <div class="prod-info">
@@ -3393,7 +3401,11 @@ setInterval(function() {
       _lastCasinoCheck = now;
       try { _cachedCasinoWon = JSON.parse(localStorage.getItem('tk_casino')||'{}').totalWon||0; } catch(e) {}
     }
-    if (now - _lastDisplayTime >= 100) { _lastDisplayTime = now; updateDisplay(); }
+    if (now - _lastDisplayTime >= 100) {
+      _lastDisplayTime = now; updateDisplay();
+      const _cd = document.getElementById('coin-display');
+      if (_cd) { _cd.classList.remove('cps-tick'); void _cd.offsetWidth; _cd.classList.add('cps-tick'); }
+    }
     maybeRender();
   }
 }, 50);
@@ -3890,6 +3902,7 @@ function saveState() {
   if (typeof pushCloudSave === 'function') pushCloudSave();
 }
 
+let _offlineMsg = null;
 function applyOfflineDecay() {
   if (!jap.alive) return;
   const elapsed = Math.max(0, (Date.now() - jap.lastSave) / 1000);
@@ -3898,7 +3911,18 @@ function applyOfflineDecay() {
   ['buzz','smoke','zyn','pills','kush','fun','goon'].forEach(k => { jap[k] = Math.max(0, (jap[k]||0) - DRAIN[k] * secs); });
   const low = ['buzz','smoke','zyn','pills'].filter(k => jap[k] < 20).length;
   if (low > 0) jap.life = Math.max(0, jap.life - LIFE_DRAIN_LOW * low * secs);
-  if (jap.life <= 0) jap.alive = false;
+  if (jap.life <= 0) { jap.alive = false; return; }
+  if (secs >= 60) {
+    const mins = Math.round(secs / 60);
+    const state = getState();
+    if (state === 'dying' || state === 'bad') {
+      _offlineMsg = `was alone for ${mins} min. not in great shape. fix this.`;
+    } else if (state === 'need') {
+      _offlineMsg = `been ${mins} min. getting a bit needy. just saying.`;
+    } else {
+      _offlineMsg = `${mins} min alone. surviving. barely.`;
+    }
+  }
 }
 
 // ── STATE CALC ──
@@ -3920,7 +3944,8 @@ function pickMsg(state) {
   else if (state === 'goon') pool = MSGS.goon_mode;
   else if (state === 'bad') pool = roll < 0.12 ? MSGS.lore : MSGS.bad;
   else if (state === 'need') {
-    const low = ['buzz','smoke','zyn','pills','kush','fun','goon'].find(k => (jap[k]||0) < 20);
+    const lows = ['buzz','smoke','zyn','pills','kush','fun','goon'].filter(k => (jap[k]||0) < 20);
+    const low = lows.sort((a,b) => (jap[a]||0) - (jap[b]||0))[0];
     pool = MSGS['need_' + (low || 'buzz')] || MSGS.need_buzz;
   }
   else if (state === 'happy') {
@@ -4195,7 +4220,8 @@ jap = loadState();
 applyOfflineDecay();
 buildWidget();
 render();
-showMsg(pickMsg(getState()));
+showMsg(_offlineMsg || pickMsg(getState()));
+_offlineMsg = null;
 scheduleMsg();
 tickTimer = setInterval(tick, TICK_MS);
 
