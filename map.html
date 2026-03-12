@@ -209,6 +209,7 @@ body{background:var(--bg);color:var(--text);font-family:'Fira Code',monospace;fo
 #coneoff-btn.pulse-hot { box-shadow: 0 0 56px rgba(0,255,65,1), inset 0 0 20px rgba(0,80,0,0.4); border-color: #afffaf; }
 #coneoff-btn.style-rhythm { border-color: #00ccff; box-shadow: 0 0 16px rgba(0,200,255,0.3), inset 0 0 16px rgba(0,0,0,0.6); }
 #coneoff-btn.style-slow { border-color: #ff69b4; box-shadow: 0 0 16px rgba(255,105,180,0.3), inset 0 0 16px rgba(0,0,0,0.6); }
+#co-bong-canvas { display:block; margin: 0 auto 6px; image-rendering: pixelated; cursor: pointer; }
 </style>
 </head>
 <body>
@@ -723,27 +724,100 @@ function drawObject(obj,sx,sy) {
 
   } else if(obj.type==='bong') {
     const sinceUse=(Date.now()-_lastBongUse)/1000;
-    s.fillStyle='rgba(30,80,80,0.7)';
-    s.beginPath();s.ellipse(sx,sy+8,11,6,0,0,Math.PI*2);s.fill();
-    s.fillStyle='rgba(30,80,80,0.65)';s.fillRect(sx-11,sy-12,22,20);
-    s.fillStyle=`rgba(0,160,180,${0.3+Math.sin(t*0.5)*0.04})`;
-    s.fillRect(sx-10,sy-2,20,10);
-    s.fillStyle='rgba(30,80,80,0.7)';s.fillRect(sx-4,sy-38,8,28);
-    s.fillStyle='rgba(20,60,60,0.8)';s.fillRect(sx-6,sy-42,12,6);
-    s.save();s.translate(sx,sy-5);s.rotate(-0.45);
-    s.fillStyle='rgba(30,80,80,0.7)';s.fillRect(-2,-14,4,14);
+    const lit=sinceUse<8;
+    const glow=lit?Math.max(0,1-sinceUse/8):0;
+    // Shadow
+    s.fillStyle='rgba(0,0,0,0.28)';
+    s.beginPath();s.ellipse(sx+1,sy+15,13,4,0,0,Math.PI*2);s.fill();
+    // ── BASE (water chamber) ──
+    s.fillStyle='rgba(12,70,80,0.82)';
+    s.beginPath();s.ellipse(sx,sy+13,12,4,0,0,Math.PI*2);s.fill();
+    s.fillStyle='rgba(18,90,100,0.72)';
+    s.fillRect(sx-12,sy-4,24,17);
+    // Water fill
+    s.fillStyle=`rgba(8,65,155,${0.4+Math.sin(t*2)*0.06})`;
+    s.fillRect(sx-9,sy+4,18,8);
+    // Water surface ripple
+    s.strokeStyle=`rgba(90,190,255,${0.4+Math.sin(t*3.5)*0.15})`;
+    s.lineWidth=1;
+    s.beginPath();s.moveTo(sx-6,sy+6);s.quadraticCurveTo(sx,sy+5+Math.sin(t*4),sx+6,sy+6);s.stroke();
+    s.beginPath();s.moveTo(sx-4,sy+10);s.quadraticCurveTo(sx+2,sy+9+Math.sin(t*4+1),sx+7,sy+10);s.stroke();
+    // Front face ellipse
+    s.fillStyle='rgba(22,95,105,0.72)';
+    s.beginPath();s.ellipse(sx,sy-4,12,4,0,0,Math.PI*2);s.fill();
+    // Glass sheen
+    s.fillStyle='rgba(160,240,240,0.18)';
+    s.fillRect(sx-12,sy-3,3,14);
+    // Base outline
+    s.strokeStyle='rgba(70,195,205,0.52)';
+    s.lineWidth=1;
+    s.beginPath();s.ellipse(sx,sy-4,12,4,0,0,Math.PI*2);s.stroke();
+    s.beginPath();s.moveTo(sx-12,sy-4);s.lineTo(sx-12,sy+13);s.stroke();
+    s.beginPath();s.moveTo(sx+12,sy-4);s.lineTo(sx+12,sy+13);s.stroke();
+    s.beginPath();s.ellipse(sx,sy+13,12,4,0,0,Math.PI*2);s.stroke();
+    // ── TUBE ──
+    s.fillStyle='rgba(18,88,95,0.7)';
+    s.fillRect(sx-4,sy-40,8,38);
+    // Hollow interior hint
+    s.fillStyle='rgba(4,25,38,0.32)';
+    s.fillRect(sx-2,sy-40,4,38);
+    // Glass sheen
+    s.fillStyle='rgba(160,240,240,0.17)';
+    s.fillRect(sx-4,sy-40,2,38);
+    // Tube outline
+    s.strokeStyle='rgba(70,195,205,0.45)';
+    s.lineWidth=1;
+    s.strokeRect(sx-4,sy-40,8,38);
+    // ── MOUTHPIECE ──
+    s.fillStyle='rgba(18,88,95,0.75)';
+    s.fillRect(sx-6,sy-44,12,6);
+    s.fillStyle='rgba(160,240,240,0.18)';
+    s.fillRect(sx-6,sy-44,2,6);
+    // Open top hole
+    s.fillStyle='rgba(0,0,0,0.55)';
+    s.fillRect(sx-3,sy-44,6,2);
+    s.strokeStyle='rgba(70,195,205,0.52)';
+    s.lineWidth=1;
+    s.strokeRect(sx-6,sy-44,12,6);
+    // ── DOWNSTEM + BOWL ──
+    s.save();
+    s.translate(sx+3,sy-10);
+    s.rotate(-0.48);
+    // Stem
+    s.fillStyle='rgba(18,88,95,0.78)';
+    s.fillRect(-2,-17,4,17);
+    s.strokeStyle='rgba(70,195,205,0.4)';
+    s.lineWidth=1;
+    s.strokeRect(-2,-17,4,17);
+    // Bowl cup
+    s.fillStyle='rgba(22,95,105,0.82)';
+    s.fillRect(-6,-21,12,5);
+    s.strokeStyle='rgba(70,195,205,0.48)';
+    s.strokeRect(-6,-21,12,5);
+    // Herb / ash
+    s.fillStyle=lit?`rgba(90,150,35,${0.7+glow*0.3})`:'#38300f';
+    s.fillRect(-4,-23,8,3);
+    if(lit&&glow>0.05){
+      // Cherry glow halo
+      s.fillStyle=`rgba(255,110,0,${glow*0.22})`;
+      s.beginPath();s.arc(0,-23,7,0,Math.PI*2);s.fill();
+      // Cherry core
+      s.fillStyle=`rgba(255,50,0,${0.82*glow})`;
+      s.fillRect(-3,-24,6,3);
+      s.fillStyle=`rgba(255,200,80,${0.6*glow})`;
+      s.fillRect(-2,-25,4,2);
+    }
     s.restore();
-    s.fillStyle='#5a3808';s.beginPath();s.arc(sx-10,sy-9,5,0,Math.PI*2);s.fill();
-    s.fillStyle='rgba(40,100,100,0.5)';s.strokeStyle='rgba(100,220,220,0.3)';s.lineWidth=1;
-    s.strokeRect(sx-11,sy-12,22,20);
-    if(sinceUse<5) {
-      const fade=1-(sinceUse/5);
-      const wt=sinceUse;
-      for(let i=0;i<3;i++){
-        const phase=wt*2+i*1.2;
-        s.fillStyle=`rgba(160,210,160,${fade*0.25})`;
+    // ── SMOKE ──
+    if(lit&&glow>0){
+      for(let i=0;i<5;i++){
+        const phase=t*1.6+i*1.3;
+        const rise=sinceUse*18+i*8;
+        const alpha=glow*(0.28-i*0.04)*Math.max(0,1-i*0.12);
+        if(alpha<=0)continue;
+        s.fillStyle=`rgba(200,225,200,${alpha})`;
         s.beginPath();
-        s.arc(sx+Math.sin(phase)*5,sy-48-wt*8+i*4,3+wt*1.5+i,0,Math.PI*2);
+        s.arc(sx+Math.sin(phase+i*0.8)*7,sy-46-rise,2+i*1.4,0,Math.PI*2);
         s.fill();
       }
     }
@@ -2563,6 +2637,242 @@ function drawRobboGoblin(x, y, dir, frame, chatMsg, sitting) {
   }
 }
 
+// ── JULO NPC — runner (denies it), craft beer obsessive, model, bad speller, friendly ──
+const JULO_COLOR = '#2ecc71';
+const JULO_QUOTES = [
+  // craft beers with absurd names (bad spelling)
+  "jus cracked a Smoked Mango Thundercroft IPA. absoluet work of art.",
+  "anyone wanna try this Dark Cherry Goblin Stout i brort. gorjus.",
+  "the Hazelnut Wizard Brown Ale at the bottleshop lastnight. changed my life literaly.",
+  "had a Salty Persimmon Session Hazy for brekky. zero regrets.",
+  "bro this Charcoal Lavender Saison is the best thing ive put in my mounth.",
+  "got a four pack of Bluebeary Velvet Pilsner. recomend to evry1.",
+  "the bottleshop guy said the Burnt Caramel Space Dust NEIPA is sold out. genuinly devastaited.",
+  "does anyone think Smoked Pineapple Farmhouse Ale is underated. probs jus me.",
+  "cracked a Salted Licorice Fog Machine Lager. ten out of ten no notes.",
+  "there was a limited run Truffle Fog Wheat Beer and i got the last one. ment to be.",
+  "the Kumquat Barrel Aged Gose at that new bar is realy somthing speciel.",
+  "bro a Raspberry Smoked Rye from that nano-brewery in fitzroy. phenominal.",
+  "Coconut Ash Farmhouse Tripel. i cried a litle bit. not ashamed.",
+  "just found a Fermented Lychee and Eucalyptus Pale Ale. this is it. this is the one.",
+  "Marmalade Smoke Biscuit Porter. sounds rong. tastes amasing.",
+  // running (denial)
+  "lol jus got bck from a quick strol. nothig seriuos.",
+  "been for a bit of a wander this mornin. nothin hectic.",
+  "yeah nah i dont realy run that much tbh.",
+  "i do liek going for the ocasional jog but its not a big deel.",
+  "people think i run alot but i realy dont. mayb twice a week tops.",
+  "jus went for a litle walk. hardly even broke a sweat.",
+  "i dont even own proper runing shoes. these are jus regular nikes.",
+  "yeah nah running isnt realy my thing. i prefer a casual strol.",
+  "lol peeple keep saying i run alot but i genuinly dont. its wired.",
+  // modelling
+  "had a shewt yesterday for a swimware brand. went grate.",
+  "my agent calld and theres a lookbook shewt on thursdaay. stokd.",
+  "casting went realy well today. they loved the look aparently.",
+  "the fotographer said i have naturel bone strukture. dont totaly know what that means but il take it.",
+  "jus got my portfoilio updated. came out realy nice actualy.",
+  "had a fitting for a menswear campain. the coler suted me aparently.",
+  "agency wants me to cut my hair for a shewt and im not sure im redy for that.",
+  "my freind said modling is jus standing around looking good. and yeah. prety much.",
+  "theres a catalog shewt next week. hopfuly the lighting is bettr than last time.",
+  // friendly / general
+  "evry1 doing ok? jus checking in.",
+  "this bungaloe is realy comfy i like it hear.",
+  "hope evry1s having a good one todaay.",
+  "does anyone want a beer? i have too many obvoiusly.",
+  "love this crew honistly. good peeple.",
+  "shout out to evry1 here ur all ledgends.",
+  "jus wanna say evry1 here is realy good company. ok thats it.",
+  "anyone need anythign? im up. well im siting but i can get up.",
+];
+const JULO_RUN_DENIALS = [
+  "nah mate i dont realy run that much tho",
+  "yeah nah its not like i go evry day or anythign",
+  "lol peeple always say that. i barly even run.",
+  "i mean i go for the ocasional jog but its not a THING thing",
+  "nah i wouldnt say im a runner. i jus run somtimes.",
+];
+let juloPlayer = null;
+let _juloMsgTimer = 12000 + Math.random()*10000;
+let _juloGreened = false;
+let _juloGreenTimer = 0;
+let _juloGreenCooldown = 0;
+let _juloRunTimer = 6000 + Math.random()*8000;
+const JULO_HOME = { c:12, r:9 };
+
+function initJulo() {
+  juloPlayer = {
+    id:'julo', name:'JULO', color:JULO_COLOR,
+    x: JULO_HOME.c*TILE+TILE/2, y: JULO_HOME.r*TILE+TILE/2,
+    tx: JULO_HOME.c*TILE+TILE/2, ty: JULO_HOME.r*TILE+TILE/2,
+    dir:'idle', frame:0, chatMsg:'', chatTimer:0,
+    isYou:false, path:[], sitting:false,
+  };
+  players['julo'] = juloPlayer;
+  _juloMsgTimer = 12000 + Math.random()*10000;
+}
+
+function updateJulo(dt) {
+  if(!juloPlayer) return;
+  const p = juloPlayer;
+  if(_juloGreenCooldown > 0) _juloGreenCooldown -= dt;
+
+  // greened out — passed out with nachos
+  if(_juloGreened) {
+    _juloGreenTimer -= dt;
+    if(_juloGreenTimer <= 0) {
+      _juloGreened = false;
+      p.sitting = false;
+      _juloGreenCooldown = 480000 + Math.random()*360000;
+      if(!_npcsMuted) {
+        const wl=['oh. oh no. what hapened. were the nachos ok.','i wasnt asleep i was jus restin my eyes on the nacos.','nah im fine. im totaly fine. who has water.','i dont usally grene out. that was a one off.'][Math.floor(Math.random()*4)];
+        p.chatMsg=wl; p.chatTimer=7000;
+        addChatMessage('JULO',wl,JULO_COLOR,false,false);
+      }
+    }
+    return;
+  }
+
+  // green out trigger — rarely smokes but always greens out
+  if(!_juloGreened && _juloGreenCooldown<=0 && Math.random()<0.00006) {
+    _juloGreened=true;
+    _juloGreenTimer=180000+Math.random()*180000;
+    p.path=[]; p.sitting=true;
+    if(!_npcsMuted) {
+      const gl=['*takes one cone and immediately goes pale*','*sits down very suddenly with nachos*','*stares at celing, stops midsentence*'][Math.floor(Math.random()*3)];
+      p.chatMsg=gl; p.chatTimer=5000;
+      addChatMessage('JULO',gl,JULO_COLOR,false,false);
+    }
+    addSystemMessage('JULO — greened out. face down in nachos.');
+    return;
+  }
+
+  // movement — "just a casual stroll" (he runs)
+  _juloRunTimer -= dt;
+  if(_juloRunTimer <= 0) {
+    _juloRunTimer = 14000 + Math.random()*22000;
+    if(p.path.length===0) {
+      const spots=[{c:10,r:7},{c:14,r:8},{c:9,r:10},{c:13,r:11},{c:11,r:6},{c:7,r:8},{c:15,r:10},{c:12,r:13},{c:8,r:12},{c:16,r:7}];
+      const sp=spots[Math.floor(Math.random()*spots.length)];
+      p.path=[{x:sp.c*TILE+TILE/2,y:sp.r*TILE+TILE/2}];
+      p.sitting=false;
+      if(!_npcsMuted && Math.random()<0.4) {
+        const rd=['jus goin for a quick strol. nothin seriuos.','lol jus movin around a bit. normol stuff.','nah not runnin. jus walking fatser than usuol.'][Math.floor(Math.random()*3)];
+        p.chatMsg=rd; p.chatTimer=5000;
+      }
+    }
+  }
+
+  // drift back near home if too far
+  if(p.path.length===0 && Math.random()<0.001) {
+    const dist=Math.hypot(p.x-(JULO_HOME.c*TILE+TILE/2),p.y-(JULO_HOME.r*TILE+TILE/2));
+    if(dist>TILE*7) p.path=[{x:JULO_HOME.c*TILE+TILE/2,y:JULO_HOME.r*TILE+TILE/2}];
+  }
+  if(p.path.length===0 && Math.random()<0.001) p.sitting=!p.sitting;
+
+  // quotes (40-70s)
+  _juloMsgTimer -= dt;
+  if(_juloMsgTimer<=0) {
+    _juloMsgTimer=40000+Math.random()*30000;
+    if(!_npcsMuted) {
+      const quote=JULO_QUOTES[Math.floor(Math.random()*JULO_QUOTES.length)];
+      p.chatMsg=quote; p.chatTimer=6500;
+      addChatMessage('JULO',quote,JULO_COLOR,false,false);
+    }
+  }
+}
+
+function drawJuloGoblin(x, y, dir, frame, chatMsg, sitting, greened) {
+  const s=ctx;
+  const px=v=>Math.round(v);
+  // shadow
+  s.fillStyle='rgba(0,0,0,0.3)';
+  s.beginPath();s.ellipse(x,y+14,9,3,0,0,Math.PI*2);s.fill();
+  s.save();
+  if(dir==='left'){s.translate(x,y);s.scale(-1,1);s.translate(-x,-y);}
+  // body — athletic sports tee
+  s.fillStyle='#27ae60';s.fillRect(px(x-5),px(y-10),10,14);
+  // side stripes (sporty)
+  s.fillStyle='rgba(255,255,255,0.35)';s.fillRect(px(x+3),px(y-10),2,14);s.fillRect(px(x-5),px(y-10),2,14);
+  // collar
+  s.fillStyle='#1e8449';s.fillRect(px(x-3),px(y-11),6,3);
+  // head
+  s.fillStyle='#d4a870';s.fillRect(px(x-5),px(y-23),10,13);
+  // hair — clean, slightly styled
+  s.fillStyle='#3a2010';s.fillRect(px(x-5),px(y-26),10,5);
+  s.fillRect(px(x-6),px(y-24),2,3);s.fillRect(px(x+4),px(y-24),2,3);
+  // friendly open eyes
+  s.fillStyle='#222';s.fillRect(px(x-3),px(y-18),2,3);s.fillRect(px(x+1),px(y-18),2,3);
+  s.fillStyle='#5a3010';s.fillRect(px(x-2),px(y-17),1,1);s.fillRect(px(x+2),px(y-17),1,1);
+  // friendly smile with dimples
+  s.fillStyle='#a05030';s.fillRect(px(x-2),px(y-13),5,1);
+  s.fillStyle='#d4a870';s.fillRect(px(x-2),px(y-12),1,1);s.fillRect(px(x+2),px(y-12),1,1);
+  // ears
+  s.fillStyle='#d4a870';s.fillRect(px(x-7),px(y-21),2,4);s.fillRect(px(x+5),px(y-21),2,4);
+  // GLASSES — rectangular frames
+  s.strokeStyle='#2c3e50';s.lineWidth=1;
+  s.strokeRect(px(x-4),px(y-19),4,3);s.strokeRect(px(x),px(y-19),4,3);
+  s.fillStyle='rgba(150,220,255,0.12)';
+  s.fillRect(px(x-4),px(y-19),4,3);s.fillRect(px(x),px(y-19),4,3);
+  // bridge + temples
+  s.fillStyle='#2c3e50';s.fillRect(px(x-1),px(y-17),2,1);
+  s.fillRect(px(x-5),px(y-17),1,1);s.fillRect(px(x+4),px(y-17),1,1);
+  if(sitting) {
+    s.fillStyle='#1a5c38';s.fillRect(px(x-6),px(y+4),6,8);s.fillRect(px(x),px(y+4),6,8);
+    s.fillStyle='#d4a870';s.fillRect(px(x-8),px(y-8),3,5);s.fillRect(px(x+5),px(y-8),3,5);
+  } else {
+    const legOff=dir!=='idle'?Math.sin(frame*0.35)*4:0;
+    s.fillStyle='#1a5c38';
+    s.fillRect(px(x-5),px(y+4),4,7+legOff);s.fillRect(px(x+1),px(y+4),4,7-legOff);
+    const armOff=dir!=='idle'?Math.sin(frame*0.35)*3:0;
+    s.fillStyle='#d4a870';
+    s.fillRect(px(x-8),px(y-8+armOff),3,6);s.fillRect(px(x+5),px(y-8-armOff),3,6);
+  }
+  s.restore();
+  // GREENED OUT — head slumps, nachos
+  if(greened) {
+    s.save();
+    s.translate(x,y-16);s.rotate(0.9);
+    s.fillStyle='#d4a870';s.fillRect(px(-5),px(-7),10,12);
+    s.fillStyle='#3a2010';s.fillRect(px(-5),px(-10),10,5);s.fillRect(px(-6),px(-8),2,4);s.fillRect(px(4),px(-8),2,4);
+    s.fillStyle='rgba(0,0,0,0.8)';s.fillRect(px(-3),px(-3),2,1);s.fillRect(px(1),px(-3),2,1);
+    s.strokeStyle='#2c3e50';s.lineWidth=1;s.strokeRect(px(-4),px(-4),3,2);s.strokeRect(px(-1),px(-4),3,2);
+    s.fillStyle='#a05030';s.fillRect(px(-1),px(2),3,1);
+    s.font='bold 9px "VT323"';s.fillStyle='rgba(46,204,113,0.7)';s.textAlign='center';s.fillText('z z z',4,-14);
+    s.restore();
+    // nachos spilling
+    const nx=x+14,ny=y+4;
+    s.fillStyle='rgba(200,160,60,0.8)';s.beginPath();s.ellipse(nx,ny+4,9,4,0,0,Math.PI*2);s.fill();
+    s.fillStyle='#e8b830';
+    s.save();s.translate(nx-6,ny-1);s.rotate(0.3);s.fillRect(0,0,7,5);s.restore();
+    s.save();s.translate(nx+1,ny-3);s.rotate(-0.5);s.fillRect(0,0,6,5);s.restore();
+    s.save();s.translate(nx-3,ny+2);s.rotate(1.0);s.fillRect(0,0,5,4);s.restore();
+    s.fillStyle='rgba(200,60,20,0.6)';s.fillRect(nx-2,ny-1,3,2);s.fillRect(nx+2,ny+1,3,2);
+  }
+  // name tag
+  s.font='10px "Press Start 2P"';s.textAlign='center';
+  const nw=s.measureText('JULO').width+8;
+  s.fillStyle='rgba(46,204,113,0.15)';s.fillRect(x-nw/2,y-40,nw,13);
+  s.fillStyle=JULO_COLOR;s.fillText('JULO',x,y-30);
+  s.font='8px "VT323"';s.fillStyle=greened?'rgba(200,80,20,0.8)':'rgba(46,204,113,0.6)';
+  s.fillText(greened?'[greened out - nachos]':'[runner] [model]',x,y-44);
+  if(chatMsg) {
+    s.font='11px "VT323"';
+    const maxW=130,lines=wrapText(chatMsg,maxW,s);
+    const bh=lines.length*14+10,bw=Math.min(maxW+16,150);
+    const bx=x-bw/2,by=y-58-bh;
+    s.fillStyle='rgba(46,204,113,0.1)';s.strokeStyle=JULO_COLOR;s.lineWidth=1;
+    s.beginPath();s.roundRect(bx,by,bw,bh,3);s.fill();s.stroke();
+    s.fillStyle='rgba(46,204,113,0.1)';
+    s.beginPath();s.moveTo(x-4,by+bh);s.lineTo(x,by+bh+6);s.lineTo(x+4,by+bh);s.fill();
+    s.strokeStyle=JULO_COLOR;
+    s.beginPath();s.moveTo(x-4,by+bh);s.lineTo(x,by+bh+6);s.lineTo(x+4,by+bh);s.stroke();
+    s.fillStyle='#c9d1d9';s.textAlign='center';
+    lines.forEach((l,i)=>s.fillText(l,x,by+13+i*14));
+  }
+}
+
 // ── PLAYERS ──
 const MOVE_SPEED=80;
 let myPlayer=null;
@@ -2589,7 +2899,11 @@ const _BUNGALOW_CFG = {
   authDomain:'tonykrink-63723.firebaseapp.com',
   projectId: 'tonykrink-63723',
 };
-const _SESSION_ID = 'bk_' + Math.random().toString(36).slice(2,10);
+const _SESSION_ID = (() => {
+  let id = localStorage.getItem('tk_bk_id');
+  if (!id) { id = 'bk_' + Math.random().toString(36).slice(2,10); localStorage.setItem('tk_bk_id', id); }
+  return id;
+})();
 let _bDb = null, _myDocRef = null;
 let _lastWrittenX = -999, _lastWrittenY = -999, _lastSyncTime = 0;
 
@@ -2608,6 +2922,8 @@ function _initBungalowFirebase() {
 function _startPresence(name, color) {
   if (!_bDb || !myPlayer) return;
   _myDocRef = _bDb.collection('bungalow_players').doc(_SESSION_ID);
+  // Delete first to clear any stale ghost from a previous visit
+  _myDocRef.delete().catch(()=>{});
   _myDocRef.set({
     name, color,
     x: Math.round(myPlayer.x), y: Math.round(myPlayer.y),
@@ -2654,6 +2970,14 @@ function _startPresence(name, color) {
           robboPlayer.chatTimer=5000;
           addChatMessage('ROBBO',robboPlayer.chatMsg,ROBBO_COLOR,false,false);
         }, 8500);
+        // Julo is very welcoming
+        setTimeout(()=>{
+          if(!juloPlayer||juloPlayer.chatTimer>0)return;
+          const jgreets=['heyy '+d.name+'!! welcum welcum!!','oh sick '+d.name+' made it!! want a beer? i have a Salted Fog Gose thats so good.',''+d.name+'!! ledgend!! jus got bck from a strol come in come in.','yo '+d.name+'!! so good to see u!! grab a beer theres plenty.',''+d.name+' ur here!! amazng. do u run? doesnt mater. come in.'];
+          juloPlayer.chatMsg=jgreets[Math.floor(Math.random()*jgreets.length)];
+          juloPlayer.chatTimer=6000;
+          addChatMessage('JULO',juloPlayer.chatMsg,JULO_COLOR,false,false);
+        }, 11500);
       } else {
         const p = players[id];
         if (Math.hypot((d.x||0) - p.x, (d.y||0) - p.y) > 4) {
@@ -2859,14 +3183,15 @@ function updatePlayersList(){
   if(calPlayer && !all.find(p=>p.id==='cal')) all.push(calPlayer);
   if(farrowPlayer && !all.find(p=>p.id==='farrow')) all.push(farrowPlayer);
   if(robboPlayer && !all.find(p=>p.id==='robbo')) all.push(robboPlayer);
-  const realCount=all.filter(p=>p.id!=='cal'&&p.id!=='farrow'&&p.id!=='robbo').length;
+  if(juloPlayer && !all.find(p=>p.id==='julo')) all.push(juloPlayer);
+  const realCount=all.filter(p=>p.id!=='cal'&&p.id!=='farrow'&&p.id!=='robbo'&&p.id!=='julo').length;
   document.getElementById('online-num').textContent=realCount;
   document.getElementById('online-count').textContent=realCount+' online';
   all.forEach(p=>{
     const div=document.createElement('div');div.className='player-entry';
     const dot=document.createElement('div');dot.className='player-dot';dot.style.background=p.color;
     const name=document.createElement('span');name.className='player-name-tag'+(p.isYou?' you':'');
-    name.textContent=p.name+(p.isYou?' (you)':'')+(p.id==='cal'?' [stoned]':'')+(p.id==='farrow'?' [coding]':'')+(p.id==='robbo'?' [brewing]':'')+(p.sitting?' \u{1F4BA}':'');
+    name.textContent=p.name+(p.isYou?' (you)':'')+(p.id==='cal'?' [stoned]':'')+(p.id==='farrow'?' [coding]':'')+(p.id==='robbo'?' [brewing]':'')+(p.id==='julo'?' [running]':'')+(p.sitting?' \u{1F4BA}':'');
     div.appendChild(dot);div.appendChild(name);
     if (!p.isYou) {
       const cb = document.createElement('button');
@@ -2885,6 +3210,7 @@ function drawPlayers(){
   if(calPlayer) allP.push(calPlayer);
   if(farrowPlayer) allP.push(farrowPlayer);
   if(robboPlayer) allP.push(robboPlayer);
+  if(juloPlayer) allP.push(juloPlayer);
   allP.sort((a,b)=>a.y-b.y).forEach(p=>{
     const sp=worldToScreen(p.x,p.y);
     if(p.id==='cal'){
@@ -2893,6 +3219,8 @@ function drawPlayers(){
       drawFarrowGoblin(sp.x,sp.y,p.dir,p.frame,p.chatMsg||'',p.sitting||false,_farrowAsleep);
     } else if(p.id==='robbo'){
       drawRobboGoblin(sp.x,sp.y,p.dir,p.frame,p.chatMsg||'',p.sitting||false);
+    } else if(p.id==='julo'){
+      drawJuloGoblin(sp.x,sp.y,p.dir,p.frame,p.chatMsg||'',p.sitting||false,_juloGreened);
     } else {
       drawGoblin(sp.x,sp.y,p.color,p.dir,p.frame,p.name,p.chatMsg||'',p.isYou,p.sitting||false);
     }
@@ -2934,6 +3262,7 @@ function enterBungalow(rawName,color){
   initCal();
   initFarrow();
   initRobbo();
+  initJulo();
   setTimeout(()=>{
     if(calPlayer){ calPlayer.chatMsg='oh man those gummies got me'; calPlayer.chatTimer=6000; addChatMessage('CAL','oh man those gummies got me',CAL_COLOR,false,false); }
   }, 2000);
@@ -2943,6 +3272,9 @@ function enterBungalow(rawName,color){
   setTimeout(()=>{
     if(robboPlayer){ robboPlayer.chatMsg='anyone got any kush.'; robboPlayer.chatTimer=6000; addChatMessage('ROBBO','anyone got any kush.',ROBBO_COLOR,false,false); }
   }, 6500);
+  setTimeout(()=>{
+    if(juloPlayer){ juloPlayer.chatMsg='hey evry1!! jus got bck from a quick strol. who wants a beer i have like six difrent ones.'; juloPlayer.chatTimer=8000; addChatMessage('JULO','hey evry1!! jus got bck from a quick strol. who wants a beer i have like six difrent ones.',JULO_COLOR,false,false); }
+  }, 9000);
   setTimeout(()=>{
     sherman.chatMsg = 'BALL BALL BALL'; sherman.chatTimer = 3000;
     addChatMessage('SHERMAN', '*sprints over wagging tail*', '#c07020', false, false);
@@ -2960,7 +3292,7 @@ function loop(ts){
   const dt=Math.min(ts-lastTime,100);lastTime=ts;
   if(myPlayer){
     movePlayersToTargets(dt);updateCamera();updateSmoke(dt);_syncMyPosition();
-    updateCal(dt);updateFarrow(dt);updateRobbo(dt);updateSherman(dt);
+    updateCal(dt);updateFarrow(dt);updateRobbo(dt);updateJulo(dt);updateSherman(dt);
     // barney — very rare autonomous bark (every ~3-5 min)
     _barneyBarkTimer -= dt;
     if(_barneyBarkTimer <= 0) {
@@ -3036,6 +3368,22 @@ const NPC_PROFILES = {
     postLoss:['I knew I should have stretched first.','fair enough. I was thinking about the dry hop timing.','noted. back to the brewery.'],
     midGame: ['steady!','keep going!','almost there!','do it!'],
   },
+  julo: {
+    name: 'JULO', color: JULO_COLOR,
+    forms: [
+      { label:'JUST BACK FROM A JOG', color:'#00ff41', min:48, max:64, chance:0.35,
+        trash:['jus got bck from a litle run. feling grate actualy.','my legs are verry warm rn. shouldnt afect it tho.'] },
+      { label:'CHILLING',            color:'#aaa',    min:28, max:48, chance:0.45,
+        trash:['yes!! lets go!! im so redy for this.','this shud be so fun!! ok lets do it.'] },
+      { label:'SECOND BEER IN',      color:'#ffaa00', min:16, max:28, chance:0.15,
+        trash:['im on a Smoked Juniper Gose. cud slow me down a litle.','yeah im in. jus finishng a Caramelised Kelp Pale Ale.'] },
+      { label:'GREENED OUT',         color:'#ff4444', min:3,  max:14, chance:0.05,
+        trash:['i can do this. i jus need to focus realy hard.','yeah nah im fine. totaly fine. lets go.'] },
+    ],
+    postWin: ['yes!! omg that was so fun!!','i cant beleve i won. well. i can. i train alot. i mean i dont. nvm.','that was amazng!! realy realy fun.'],
+    postLoss:['oh no!! well done tho honistly ur so good.','nah that was grate. ur amazng.','gg!! rematch somtime!! that was so fun.'],
+    midGame: ['go go go!!','yes!!','ur doing amazng!!','lets goooo!!'],
+  },
 };
 
 // ── Score tiers ──
@@ -3061,6 +3409,7 @@ function _coGetRank(rating) {
 
 // ── State ──
 let _coState  = 'idle';
+let _coBongRaf = null;
 let _coScore  = 0;
 let _coTimer  = null;
 let _coMidTimer = null;
@@ -3135,6 +3484,7 @@ function _buildConeOffUI() {
     <div class="score-block" style="color:#222;font-size:18px;align-self:center;padding-bottom:20px;">VS</div>
     <div class="score-block"><div class="sname" id="co-their-name">THEM</div><div class="sval" id="co-their-score">?</div><div class="stier" id="co-their-tier"></div></div>
   </div>
+  <canvas id="co-bong-canvas" width="80" height="110" ontouchstart="coTap(event)" onclick="coTap(event)"></canvas>
   <button id="coneoff-btn" class="disabled" ontouchstart="coTap(event)" onclick="coTap(event)">RIP!</button>
   <div id="co-stamina-wrap"><div id="co-stamina-fill"></div></div>
   <div id="co-mult-badge"></div>
@@ -3436,6 +3786,7 @@ function _openConeOffOverlay(theirName, theirColor, onGameEnd) {
       _coState='playing';
       _coLastTapTime=0;
       document.getElementById('coneoff-btn').classList.remove('disabled');
+      _startBongCanvas();
       const gameDur=_coStyle==='slow_burn'?5000:_coStyle==='rhythm'?4000:3000;
       _coTimer=setTimeout(_endGame,gameDur);
       let rem=gameDur/1000;
@@ -3496,8 +3847,85 @@ function _openConeOffOverlay(theirName, theirColor, onGameEnd) {
   },1000);
 }
 
+function _drawCoBong(){
+  const cv=document.getElementById('co-bong-canvas');
+  if(!cv)return;
+  const s=cv.getContext('2d');
+  const W=cv.width,H=cv.height;
+  s.clearRect(0,0,W,H);
+  const sx=W/2, sy=H-18;
+  const sinceUse=(Date.now()-_coLastTapTime)/1000;
+  const lit=_coLastTapTime>0&&sinceUse<3;
+  const glow=lit?Math.max(0,1-sinceUse/3):0;
+  const t=Date.now()/1000;
+  // shadow
+  s.fillStyle='rgba(0,0,0,0.25)';s.beginPath();s.ellipse(sx+1,sy+8,11,3,0,0,Math.PI*2);s.fill();
+  // base back
+  s.fillStyle='rgba(12,70,80,0.82)';s.beginPath();s.ellipse(sx,sy+5,10,3,0,0,Math.PI*2);s.fill();
+  // base body
+  s.fillStyle='rgba(18,90,100,0.72)';s.fillRect(sx-10,sy-8,20,13);
+  // water
+  s.fillStyle=`rgba(8,65,155,${0.38+Math.sin(t*2)*0.06})`;s.fillRect(sx-7,sy-2,14,6);
+  // ripple
+  s.strokeStyle=`rgba(90,190,255,${0.4+Math.sin(t*3.5)*0.15})`;s.lineWidth=1;
+  s.beginPath();s.moveTo(sx-5,sy);s.quadraticCurveTo(sx,sy-1+Math.sin(t*4),sx+5,sy);s.stroke();
+  // base front ellipse
+  s.fillStyle='rgba(22,95,105,0.72)';s.beginPath();s.ellipse(sx,sy-8,10,3,0,0,Math.PI*2);s.fill();
+  // glass sheen base
+  s.fillStyle='rgba(160,240,240,0.18)';s.fillRect(sx-10,sy-7,2,11);
+  // base outline
+  s.strokeStyle='rgba(70,195,205,0.52)';s.lineWidth=1;
+  s.beginPath();s.ellipse(sx,sy-8,10,3,0,0,Math.PI*2);s.stroke();
+  s.beginPath();s.moveTo(sx-10,sy-8);s.lineTo(sx-10,sy+5);s.stroke();
+  s.beginPath();s.moveTo(sx+10,sy-8);s.lineTo(sx+10,sy+5);s.stroke();
+  s.beginPath();s.ellipse(sx,sy+5,10,3,0,0,Math.PI*2);s.stroke();
+  // tube
+  s.fillStyle='rgba(18,88,95,0.70)';s.fillRect(sx-3,sy-52,6,46);
+  s.fillStyle='rgba(4,25,38,0.32)';s.fillRect(sx-1,sy-52,2,46);
+  s.fillStyle='rgba(160,240,240,0.17)';s.fillRect(sx-3,sy-52,2,46);
+  s.strokeStyle='rgba(70,195,205,0.45)';s.lineWidth=1;s.strokeRect(sx-3,sy-52,6,46);
+  // mouthpiece
+  s.fillStyle='rgba(18,88,95,0.75)';s.fillRect(sx-5,sy-57,10,7);
+  s.fillStyle='rgba(160,240,240,0.18)';s.fillRect(sx-5,sy-57,2,7);
+  s.fillStyle='rgba(0,0,0,0.55)';s.fillRect(sx-2,sy-57,4,2);
+  s.strokeStyle='rgba(70,195,205,0.52)';s.lineWidth=1;s.strokeRect(sx-5,sy-57,10,7);
+  // downstem + bowl
+  s.save();s.translate(sx+2,sy-16);s.rotate(-0.48);
+  s.fillStyle='rgba(18,88,95,0.78)';s.fillRect(-2,-13,3,13);
+  s.strokeStyle='rgba(70,195,205,0.4)';s.lineWidth=1;s.strokeRect(-2,-13,3,13);
+  s.fillStyle='rgba(22,95,105,0.82)';s.fillRect(-5,-17,10,5);
+  s.strokeStyle='rgba(70,195,205,0.48)';s.strokeRect(-5,-17,10,5);
+  s.fillStyle=lit?`rgba(90,150,35,${0.7+glow*0.3})`:'#38300f';s.fillRect(-3,-19,6,3);
+  if(lit&&glow>0.05){
+    s.fillStyle=`rgba(255,110,0,${glow*0.22})`;s.beginPath();s.arc(0,-19,6,0,Math.PI*2);s.fill();
+    s.fillStyle=`rgba(255,50,0,${0.82*glow})`;s.fillRect(-2,-20,5,3);
+    s.fillStyle=`rgba(255,200,80,${0.6*glow})`;s.fillRect(-1,-21,3,2);
+  }
+  s.restore();
+  // smoke
+  if(lit&&glow>0){
+    for(let i=0;i<4;i++){
+      const rise=sinceUse*22+i*9;
+      const alpha=glow*(0.3-i*0.05)*Math.max(0,1-i*0.15);
+      if(alpha<=0)continue;
+      s.fillStyle=`rgba(200,225,200,${alpha})`;
+      s.beginPath();s.arc(sx+Math.sin(t*1.8+i*1.4)*5,sy-59-rise,2+i*1.3,0,Math.PI*2);s.fill();
+    }
+  }
+}
+function _startBongCanvas(){
+  if(_coBongRaf)cancelAnimationFrame(_coBongRaf);
+  function loop(){_drawCoBong();_coBongRaf=requestAnimationFrame(loop);}
+  loop();
+}
+function _stopBongCanvas(){
+  if(_coBongRaf){cancelAnimationFrame(_coBongRaf);_coBongRaf=null;}
+  const cv=document.getElementById('co-bong-canvas');
+  if(cv){const s=cv.getContext('2d');s.clearRect(0,0,cv.width,cv.height);}
+}
 function _endGame(){
   _coState='done';
+  _stopBongCanvas();
   if(_coGameInterval){clearInterval(_coGameInterval);_coGameInterval=null;}
   const btn=document.getElementById('coneoff-btn');
   btn.classList.add('disabled');
