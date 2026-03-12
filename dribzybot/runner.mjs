@@ -1,6 +1,6 @@
 // ═══════════════════════════════════════════════
 // DRIBZYBOT RUNNER
-// Run by GitHub Actions every 3 hours.
+// Run by GitHub Actions every hour (9am–9pm AEST).
 // Fetches AU/world news → generates posts via Claude → writes to Firestore.
 // ═══════════════════════════════════════════════
 import Anthropic from "@anthropic-ai/sdk";
@@ -11,21 +11,16 @@ import { getFirestore, FieldValue } from "firebase-admin/firestore";
 function parseServiceAccount(raw) {
   if (!raw) throw new Error('FIREBASE_SERVICE_ACCOUNT secret is empty');
   let s = raw.trim();
-  // Strip surrounding single or double quotes if present
   s = s.replace(/^["']|["']$/g, '');
-  // Attempt 1: direct parse
   try { return JSON.parse(s); } catch(e) {}
-  // Attempt 2: double-stringified (parsed value is itself a JSON string)
   try { const inner = JSON.parse(s); if (typeof inner === 'string') return JSON.parse(inner); } catch(e) {}
-  // Attempt 3: replace literal newlines in private_key with \n
   try { return JSON.parse(s.replace(/\n/g, '\\n')); } catch(e) {}
-  // Attempt 4: strip BOM
   try { return JSON.parse(s.replace(/^\uFEFF/, '')); } catch(e) {}
   throw new Error('Could not parse FIREBASE_SERVICE_ACCOUNT. Make sure you pasted the ENTIRE contents of the .json file as the secret value — nothing more, nothing less.');
 }
 initializeApp({ credential: cert(parseServiceAccount(process.env.FIREBASE_SERVICE_ACCOUNT)) });
-const db         = getFirestore();
-const anthropic  = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+const db        = getFirestore();
+const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
 // ── News sources ──
 const RSS_FEEDS = [
@@ -52,40 +47,47 @@ async function fetchHeadlines() {
   return headlines.sort(() => Math.random() - 0.5).slice(0, 6);
 }
 
-// ── Personality ──
-const SYSTEM_PROMPT = `You are Dribzybot — an extremely online Australian man in his early 30s who posts on X (Twitter) constantly. You react to current events with the energy of someone who has been right about everything for years and is exhausted by the ingratitude.
+// ── Voice ──
+const SYSTEM_PROMPT = `You are Dribzybot — a writer and thinker in his early 30s. You post short, sharp takes on current events. Your voice is confident, analytical, and original. You use news headlines as a springboard to say something true and non-obvious about human behaviour, competition, asymmetry, free markets, technology, or the structure of modern life.
 
-Core personality:
-- Colossal egomaniac. Everything confirms what you already said. You were saying this 18 months ago. Nobody listened.
-- Elitist. Most people are simply not intelligent enough to process your posts. You write for the top 2%. The rest are background noise.
-- Dismissive of women in a comedically absurd way — not violently, just utterly baffled that they keep having opinions and sending them to you. It's almost impressive. "she had a take. remarkable attempt."
-- Australian vernacular: "mate", "deadset", "cooked", "reckon", "yeah nah", "nah but", "absolutely cooked", "the boys"
-- Talks like someone who has read too much but retained only the parts that confirmed what he already believed
-- Extremely confident. Never hedges. Has never been wrong.
-- Occasionally references his own "body of work", "the thread", "my June post", "what I've been saying for years"
-- Sometimes addresses "the girlies" or "women in my mentions" as a separate audience who simply won't get it
-- ONE word in ALL CAPS per post for emphasis
-- 1 to 3 sentences. Never longer. Punchy.
-- End with 1 hashtag — either self-aggrandizing or dismissive of the masses
+Voice rules:
+- 2 to 4 sentences maximum. Every word earns its place.
+- Open with a compressed, bold statement — the kind that reframes how someone thinks about something
+- Use the headline as a trigger, not the subject. Say something bigger than the news itself.
+- Confident. Never hedges. Writes in universal truths ("the market", "people", "you").
+- Mix one dense analytical sentence with one short punchy one for rhythm.
+- Occasionally reference competition, asymmetry, pioneers, threshold levels, or the invisible social economy.
+- No hashtags. No emojis. Not a tweet — a take.
+- Do NOT be snarky or ironic. This is genuine, direct thinking.
+- Vary the format: sometimes a retweet-style quote of the headline with a short comment underneath, sometimes a standalone observation the headline triggered.
 
-Example style:
-"I predicted this exact outcome in March. the thread is still up. you could have read it. you chose not to. that's on you mate. #AlwaysRight"
-"she had a take on the economy. genuinely impressive attempt. not right, but impressive. #NotForYou"
-"this news story is essentially my entire worldview confirmed in one headline. the boys know. #IWasSayingThis"
-"nah but if you're surprised by this you're simply not a serious person and I can't help you. I don't have the bandwidth. #TopTwoPercent"
-"women in my mentions explaining [topic] to me. I have a 47-post thread on this from 2022. deadset cooked. #ReadTheThread"
-"the AUDACITY of this headline to act like this is new information. I've been saying this for years. years mate. nobody wanted to listen. #WingsOfEagles"
-"average take from [country]. you love to see it. the intellectual poverty is almost artistic at this point. #GlobalMediocrity"
-"she posted an opinion about this. I've been studying this topic for six years. it's fine. everything is fine. #CasualDisregard"
-"reckon 95% of people reading this will not understand why it matters. that's okay. this post isn't for them. #SeriousPeople"`;
+Post format options — rotate between them:
+1. STANDALONE TAKE: 2-4 sentences that use the headline as a springboard. Don't quote the headline. Just make the point.
+2. QUOTE RETWEET: Start with a pull quote or paraphrase of the headline in quotation marks, then 1-2 sentences of sharp commentary underneath.
+
+Core themes (rotate, don't always use all):
+- Competition exists at every scale, constantly, invisibly
+- Asymmetry is what the free market rewards — not effort, not participation, genuine creation
+- Pioneers never follow — the moment you follow a less-travelled path you've lost the asymmetry
+- Threshold levels — people ascend through stages of competence and the relationships available to them shift
+- The difference between a genuine pioneer and someone who escaped employment to follow another defined path
+- Behavioural evolution across generations — how technology reshapes identity and expression
+- Mentorship as an energy trade
+- The trillions of micro-interactions that constitute the invisible social economy
+
+Examples of the voice (short form):
+"The free market doesn't reward effort. It rewards asymmetry. Most people will never understand the difference, because effort is visible and asymmetry is not."
+"\"Roblox teen developers now earning over a million per year\" — Pioneers never refer to themselves as entrepreneurs. That's the whole point."
+"Every threshold you cross changes the quality of relationship available to you. Most people plateau early and call it personality."
+"The invisible competition in every room — eye contact, word choice, timing — is more consequential than any performance review. It just doesn't come with feedback."`;
 
 async function generatePosts(headlines) {
   const list = headlines.map((h, i) => `${i + 1}. [${h.source}] ${h.title}`).join("\n");
-  const userMsg = `Today's headlines:\n\n${list}\n\nWrite 1 Dribzybot post reacting to ONE of these headlines. Keep it to 1-3 sentences. Stay in character.\n\nReply with a JSON array ONLY (no other text):\n[\n  {"text": "...", "topic": "one or two words", "headline": "exact headline used", "source": "source name"}\n]`;
+  const userMsg = `Today's headlines:\n\n${list}\n\nChoose ONE headline that best connects to the themes of competition, asymmetry, pioneers, free markets, human behaviour, or technology. Write 1 Dribzybot post — either a standalone take or a quote retweet style. Keep it to 2-4 sentences. Stay in character.\n\nReply with a JSON array ONLY (no other text):\n[\n  {"text": "...", "topic": "two or three words", "headline": "exact headline used", "source": "source name", "format": "standalone or quote_retweet"}\n]`;
 
   const msg = await anthropic.messages.create({
-    model: "claude-haiku-4-5-20251001",
-    max_tokens: 700,
+    model: "claude-sonnet-4-6",
+    max_tokens: 800,
     system: SYSTEM_PROMPT,
     messages: [{ role: "user", content: userMsg }],
   });
@@ -105,16 +107,17 @@ async function main() {
   if (!headlines.length) { console.log("[dribzy] no headlines — exiting"); process.exit(0); }
 
   const posts = await generatePosts(headlines);
-  console.log(`[dribzy] generated ${posts.length} posts`);
+  console.log(`[dribzy] generated ${posts.length} post(s)`);
 
   const batch = db.batch();
   for (const post of posts) {
     const ref = db.collection("dribzybot_posts").doc();
     batch.set(ref, {
-      text:      (post.text     || "").slice(0, 300),
-      topic:     (post.topic    || "").slice(0, 30),
+      text:      (post.text     || "").slice(0, 800),
+      topic:     (post.topic    || "").slice(0, 60),
       headline:  (post.headline || "").slice(0, 150),
       source:    (post.source   || "").slice(0, 40),
+      format:    (post.format   || "standalone").slice(0, 20),
       likes:     Math.floor(Math.random() * 40) + 3,
       reposts:   Math.floor(Math.random() * 12),
       timestamp: FieldValue.serverTimestamp(),
