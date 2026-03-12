@@ -83,6 +83,122 @@ body{background:var(--bg);color:var(--text);font-family:'Fira Code',monospace;fo
   #console-bar{display:none}
   #game-wrap{flex:1;min-height:0}
 }
+/* ── CONE-OFF ── */
+#coneoff-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.93);
+  z-index: 10000;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Press Start 2P', monospace;
+  color: #fff;
+  padding: 16px;
+  text-align: center;
+}
+#coneoff-overlay.active { display: flex; }
+#co-rank-badge { font-size: 8px; color: #555; margin-bottom: 6px; letter-spacing: 1px; }
+#coneoff-title { font-size: 14px; color: var(--green); margin-bottom: 4px; letter-spacing: 3px; }
+#coneoff-vs { font-size: 9px; color: #555; margin-bottom: 4px; }
+#co-streak-banner { font-size: 10px; min-height: 18px; margin-bottom: 6px; }
+#co-leaderboard { font-size: 8px; color: #333; margin-bottom: 8px; min-height: 20px; }
+.co-lb-title { color: #2a3040; margin-bottom: 2px; letter-spacing: 2px; font-size: 7px; }
+.co-lb-row { display: flex; gap: 8px; justify-content: center; font-size: 7px; }
+.co-lb-rank { color: #2a3040; width: 16px; }
+.co-lb-name { color: #333; width: 80px; text-align: left; overflow: hidden; }
+.co-lb-score { color: #2a4030; width: 24px; text-align: right; }
+#coneoff-countdown { font-size: 44px; color: #fff; margin-bottom: 10px; min-height: 52px; transition: color 0.2s; }
+#coneoff-scores { display: flex; gap: 28px; margin-bottom: 14px; }
+#coneoff-scores .score-block { text-align: center; }
+#coneoff-scores .score-block .sname { font-size: 8px; color: #666; margin-bottom: 3px; }
+#coneoff-scores .score-block .sval { font-size: 32px; color: var(--green); line-height: 1; }
+#coneoff-scores .score-block .sval.me { color: #ffcc00; }
+#coneoff-scores .score-block .stier { font-size: 7px; margin-top: 3px; min-height: 12px; transition: color 0.2s; }
+#coneoff-btn {
+  width: 160px; height: 160px; border-radius: 50%;
+  background: radial-gradient(circle at 38% 33%, #3a5a20, #0d1a08);
+  border: 3px solid var(--green);
+  box-shadow: 0 0 20px rgba(0,255,65,0.4), inset 0 0 16px rgba(0,0,0,0.6);
+  cursor: pointer;
+  font-family: 'Press Start 2P', monospace; font-size: 12px; color: var(--green);
+  transition: transform 0.05s, box-shadow 0.05s;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none; touch-action: manipulation;
+  position: relative; overflow: hidden;
+}
+#coneoff-btn:active, #coneoff-btn.flashed {
+  transform: scale(0.91);
+  box-shadow: 0 0 48px rgba(0,255,65,0.9), inset 0 0 16px rgba(0,0,0,0.6);
+  background: radial-gradient(circle at 38% 33%, #5a8a30, #1a3010);
+}
+#coneoff-btn.disabled { opacity: 0.3; pointer-events: none; }
+#co-pb-bar { font-size: 8px; color: #333; min-height: 14px; margin-top: 8px; transition: color 0.3s; }
+#coneoff-keys { font-size: 8px; color: #333; margin-top: 6px; }
+#coneoff-record { font-family: 'VT323', monospace; font-size: 14px; color: #444; text-align: center; margin-top: 6px; }
+#coneoff-result { display: none; text-align: center; padding: 0 12px; }
+#coneoff-result .res-title { font-size: 20px; margin-bottom: 8px; }
+#coneoff-result .res-score-detail { font-size: 11px; color: #888; margin-bottom: 6px; }
+#coneoff-result .res-tier { font-size: 8px; color: #666; margin-bottom: 8px; min-height: 14px; }
+#coneoff-result .res-sub { font-size: 8px; color: #555; margin-bottom: 10px; line-height: 1.9; white-space: pre-line; }
+#coneoff-result .res-rating { font-size: 8px; color: #444; margin-bottom: 14px; }
+#coneoff-result .res-close, #coneoff-result .res-rematch {
+  background: #111820; border: 1px solid #2a3040; color: #555;
+  font-family: 'Press Start 2P', monospace; font-size: 8px;
+  padding: 7px 16px; cursor: pointer; margin: 3px;
+}
+#coneoff-result .res-rematch { border-color: #1a3020; color: var(--green); }
+/* challenge notification */
+#challenge-notif {
+  display: none; position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+  background: #0a0e14; border: 2px solid var(--green);
+  box-shadow: 0 0 16px rgba(0,255,65,0.5);
+  font-family: 'Press Start 2P', monospace; font-size: 8px;
+  color: #fff; padding: 10px 14px; z-index: 10001; text-align: center; min-width: 240px;
+}
+#challenge-notif .cn-title { color: var(--green); margin-bottom: 6px; font-size: 10px; }
+#challenge-notif .cn-btns { display: flex; gap: 8px; margin-top: 10px; justify-content: center; }
+#challenge-notif .cn-btns button {
+  background: #111820; border: 1px solid #2a3040; color: #aaa;
+  font-family: 'Press Start 2P', monospace; font-size: 8px; padding: 6px 12px; cursor: pointer;
+}
+#challenge-notif .cn-btns button.accept { border-color: var(--green); color: var(--green); }
+/* challenge menu */
+#challenge-menu {
+  display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%);
+  background: #0a0e14; border: 2px solid #1a2030;
+  font-family: 'Press Start 2P', monospace; font-size: 9px;
+  color: #fff; padding: 14px; z-index: 10001; min-width: 230px;
+}
+#challenge-menu .cm-title { color: var(--green); margin-bottom: 10px; font-size: 10px; text-align: center; }
+.cm-npc-form { font-size: 8px; background: #0d1218; padding: 7px 10px; margin-bottom: 10px; border-left: 2px solid #1a3020; line-height: 1.8; }
+#challenge-menu .cm-row { margin-bottom: 8px; }
+#challenge-menu .cm-row label { color: #444; font-size: 7px; display: block; margin-bottom: 4px; letter-spacing: 1px; }
+.cm-opt {
+  background: #111820; border: 1px solid #1a2030; color: #555;
+  font-family: 'Press Start 2P', monospace; font-size: 7px;
+  padding: 5px 7px; cursor: pointer; margin: 2px;
+}
+.cm-opt.selected { border-color: var(--green); color: var(--green); }
+.cm-stats { font-size: 7px; color: #333; border-top: 1px solid #1a2030; padding-top: 8px; margin-bottom: 8px; line-height: 1.8; }
+#challenge-menu .cm-send {
+  width: 100%; margin-top: 6px;
+  background: #0d1a0d; border: 1px solid var(--green); color: var(--green);
+  font-family: 'Press Start 2P', monospace; font-size: 9px; padding: 8px; cursor: pointer;
+}
+#challenge-menu .cm-cancel {
+  width: 100%; margin-top: 4px;
+  background: none; border: 1px solid #1a2030; color: #333;
+  font-family: 'Press Start 2P', monospace; font-size: 7px; padding: 6px; cursor: pointer;
+}
+/* challenge btn in players list */
+.challenge-btn {
+  margin-left: auto; font-size: 9px; padding: 2px 6px;
+  background: #111820; border: 1px solid #1a2030; color: #445;
+  cursor: pointer; font-family: 'Press Start 2P', monospace; flex-shrink: 0;
+}
+.challenge-btn:hover { border-color: var(--green); color: var(--green); }
 </style>
 </head>
 <body>
@@ -2731,6 +2847,14 @@ function updatePlayersList(){
     const name=document.createElement('span');name.className='player-name-tag'+(p.isYou?' you':'');
     name.textContent=p.name+(p.isYou?' (you)':'')+(p.id==='cal'?' [stoned]':'')+(p.id==='farrow'?' [coding]':'')+(p.id==='robbo'?' [brewing]':'')+(p.sitting?' \u{1F4BA}':'');
     div.appendChild(dot);div.appendChild(name);
+    if (!p.isYou) {
+      const cb = document.createElement('button');
+      cb.className = 'challenge-btn';
+      cb.textContent = '⚔';
+      cb.title = 'Challenge ' + p.name;
+      cb.onclick = () => openChallengeMenu(p.id);
+      div.appendChild(cb);
+    }
     list.appendChild(div);
   });
 }
@@ -2805,6 +2929,8 @@ function enterBungalow(rawName,color){
   }, 1200);
   _initBungalowFirebase();
   setTimeout(()=>_startPresence(name,color), 600);
+  setTimeout(() => { _buildConeOffUI(); }, 100);
+  setTimeout(() => { _listenForChallenges(); }, 2000);
 }
 
 // ── MAIN LOOP ──
@@ -2838,6 +2964,544 @@ function loop(ts){
   for(let y=0;y<canvas.height;y+=4)ctx.fillRect(0,y,canvas.width,1);
   requestAnimationFrame(loop);
 }
+
+// ══════════════════════════════════════════════════════════════
+// CONE-OFF PvP SYSTEM
+// ══════════════════════════════════════════════════════════════
+
+// ── NPC profiles ──
+const NPC_PROFILES = {
+  cal: {
+    name: 'CAL', color: CAL_COLOR,
+    forms: [
+      { label:'FRESH',  color:'#00ff41', min:42, max:55, chance:0.10,
+        trash:['I\'m actually feeling good today. watch yourself.','fresh cal has entered. I\'m dangerous right now.'] },
+      { label:'NORMAL', color:'#aaa',    min:28, max:42, chance:0.50,
+        trash:['let\'s go. I\'ve been waiting for someone to challenge me.','come on then. I\'m ready.'] },
+      { label:'BAKED',  color:'#ffaa00', min:15, max:28, chance:0.28,
+        trash:['I can still do this. I think. yeah.','I had three gummies but I\'m fine. totally fine.'] },
+      { label:'COOKED', color:'#ff4444', min:5,  max:15, chance:0.12,
+        trash:['I might be too cooked for this. whatever.','I went somewhere. I\'m back now. maybe.'] },
+    ],
+    postWin: ['that was a good game. I\'m not upset.','I want a rematch. not right now. but I want it on record.','you got me. this time.'],
+    postLoss:['that was genuinely hard and I\'m not sure why','I had a moment. it happens.','should have eaten less gummies. noted.'],
+    midGame: ['get it mate!','GO GO GO!','oh he\'s clicking!','let\'s GO!'],
+  },
+  farrow: {
+    name: 'FARROW', color: FARROW_COLOR,
+    forms: [
+      { label:'LOCKED IN',  color:'#00ccff', min:52, max:68, chance:0.30,
+        trash:['keyboard warrior mode. nothing personal.','I chart bitcoin for six hours a day. my fingers are ready.'] },
+      { label:'FOCUSED',    color:'#aaa',    min:40, max:52, chance:0.50,
+        trash:['I have been clicking things professionally for years.','you know I spend 8 hours a day on a keyboard right.'] },
+      { label:'DISTRACTED', color:'#ffaa00', min:25, max:40, chance:0.20,
+        trash:['fine but I\'m watching a chart at the same time.','quick one. bitcoin just did something weird.'] },
+    ],
+    postWin: ['been clicking crypto charts for years mate. years.','keyboard skills transfer directly. as I said.','this was inevitable.'],
+    postLoss:['I was watching the btc chart mid-game. different result.','impressive. I will recalibrate.','okay. fair enough.'],
+    midGame: ['go! go! go!','impressive click speed honestly','I\'m keeping up. barely.','this is close.'],
+  },
+  robbo: {
+    name: 'ROBBO', color: ROBBO_COLOR,
+    forms: [
+      { label:'INSPIRED', color:'#00ff41', min:32, max:45, chance:0.12,
+        trash:['I just finished a brew. I\'m feeling powerful.','don\'t underestimate brewer\'s hands mate.'] },
+      { label:'STEADY',   color:'#aaa',    min:18, max:32, chance:0.60,
+        trash:['yeah alright. let\'s have a go.','hands are a bit sticky from the mash. might affect things.'] },
+      { label:'OVER IT',  color:'#ff4444', min:6,  max:18, chance:0.28,
+        trash:['I was in the middle of kegging. just so you know.','yeah fine. quickly. I\'ve got a fermentor to check.'] },
+    ],
+    postWin: ['brewer\'s hands. better than you\'d think.','yeah not bad for a man who just moved 30 litres.','hands smell like hops. not ideal.'],
+    postLoss:['I knew I should have stretched first.','fair enough. I was thinking about the dry hop timing.','noted. back to the brewery.'],
+    midGame: ['steady!','keep going!','almost there!','do it!'],
+  },
+};
+
+// ── Score tiers ──
+function _coScoreTier(score) {
+  if (score >= 65) return { label:'SUPERNATURAL', color:'#ff69b4' };
+  if (score >= 52) return { label:'LEGENDARY',    color:'#ffcc00' };
+  if (score >= 40) return { label:'ELITE',         color:'#00ccff' };
+  if (score >= 30) return { label:'SEASONED',      color:'#00ff41' };
+  if (score >= 20) return { label:'AVERAGE',       color:'#aaa'    };
+  if (score >= 12) return { label:'ROOKIE',        color:'#777'    };
+  return                   { label:'FRESH LUNGS',  color:'#444'    };
+}
+
+// ── Rank titles ──
+function _coGetRank(rating) {
+  if (rating >= 1800) return { title:'CONE GOD',        color:'#ff69b4' };
+  if (rating >= 1500) return { title:'LEGENDARY LUNGS', color:'#ffcc00' };
+  if (rating >= 1250) return { title:'CONE KING',       color:'#00ccff' };
+  if (rating >= 1000) return { title:'SEASONED RIPPER', color:'#00ff41' };
+  if (rating >=  750) return { title:'EXPERIENCED',     color:'#aaa'    };
+  return                     { title:'CASUAL RIPPER',   color:'#555'    };
+}
+
+// ── State ──
+let _coState  = 'idle';
+let _coScore  = 0;
+let _coTimer  = null;
+let _coMidTimer = null;
+let _coTheirScore = null;
+let _coChallengeId = null;
+let _coUnsub  = null;
+let _coTarget = null;
+let _coBet    = 'bragging_rights';
+let _cmTargetId = null;
+let _coOnEnd  = null;
+let _pend     = null;
+let _coNpcForm = null;
+
+let _coWins   = parseInt(localStorage.getItem('bk_co_wins')   || '0');
+let _coLosses = parseInt(localStorage.getItem('bk_co_losses') || '0');
+let _coStreak = parseInt(localStorage.getItem('bk_co_streak') || '0');
+let _coPB     = parseInt(localStorage.getItem('bk_co_pb')     || '0');
+let _coRating = parseInt(localStorage.getItem('bk_co_rating') || '1000');
+
+// ── Build UI ──
+function _buildConeOffUI() {
+  document.body.insertAdjacentHTML('beforeend', `
+<div id="coneoff-overlay">
+  <div id="co-rank-badge"></div>
+  <div id="coneoff-title">CONE-OFF</div>
+  <div id="coneoff-vs"></div>
+  <div id="co-streak-banner"></div>
+  <div id="co-leaderboard"></div>
+  <div id="coneoff-countdown"></div>
+  <div id="coneoff-scores">
+    <div class="score-block"><div class="sname" id="co-my-name">YOU</div><div class="sval me" id="co-my-score">0</div><div class="stier" id="co-my-tier"></div></div>
+    <div class="score-block" style="color:#222;font-size:18px;align-self:center;padding-bottom:20px;">VS</div>
+    <div class="score-block"><div class="sname" id="co-their-name">THEM</div><div class="sval" id="co-their-score">?</div><div class="stier" id="co-their-tier"></div></div>
+  </div>
+  <button id="coneoff-btn" class="disabled" ontouchstart="coTap(event)" onclick="coTap(event)">RIP!</button>
+  <div id="co-pb-bar"></div>
+  <div id="coneoff-keys">[ SPACE or tap to rip ]</div>
+  <div id="coneoff-record"></div>
+  <div id="coneoff-result">
+    <div class="res-title" id="res-title"></div>
+    <div class="res-score-detail" id="res-score-detail"></div>
+    <div class="res-tier" id="res-tier"></div>
+    <div class="res-sub" id="res-sub"></div>
+    <div class="res-rating" id="res-rating"></div>
+    <button class="res-rematch" onclick="coRematch()">[ REMATCH ]</button>
+    <button class="res-close" onclick="closeConeOff()">[ CLOSE ]</button>
+  </div>
+</div>
+<div id="challenge-notif">
+  <div class="cn-title">⚔ CONE-OFF CHALLENGE!</div>
+  <div id="cn-body"></div>
+  <div class="cn-btns">
+    <button class="accept" onclick="acceptChallenge()">ACCEPT</button>
+    <button onclick="declineChallenge()">DECLINE</button>
+  </div>
+</div>
+<div id="challenge-menu">
+  <div class="cm-title" id="cm-title">CHALLENGE</div>
+  <div class="cm-npc-form" id="cm-npc-form" style="display:none;"></div>
+  <div class="cm-row">
+    <label>STAKES</label>
+    <button class="cm-opt selected" data-bet="bragging_rights" onclick="cmSelect(this,'bet')">PRIDE</button>
+    <button class="cm-opt" data-bet="round" onclick="cmSelect(this,'bet')">ROUND OF DRINKS</button>
+    <button class="cm-opt" data-bet="cone_king" onclick="cmSelect(this,'bet')">CONE KING TITLE</button>
+  </div>
+  <div class="cm-stats" id="cm-stats"></div>
+  <button class="cm-send" onclick="sendChallenge()">⚔ CONE-OFF</button>
+  <button class="cm-cancel" onclick="closeChallengeMenu()">cancel</button>
+</div>`);
+
+  document.addEventListener('keydown', e => {
+    if (_coState !== 'playing') return;
+    if (e.code === 'Space' || e.code === 'Enter') { e.preventDefault(); coTap(); }
+  });
+}
+
+// ── NPC form roller ──
+function _rollNpcForm(npcId) {
+  const forms = NPC_PROFILES[npcId].forms;
+  const r = Math.random();
+  let cum = 0;
+  for (const f of forms) { cum += f.chance; if (r < cum) return f; }
+  return forms[forms.length - 1];
+}
+
+// ── Challenge menu ──
+window.openChallengeMenu = function(targetId) {
+  _cmTargetId = targetId;
+  const isNpc = ['cal','farrow','robbo'].includes(targetId);
+  const tName = isNpc ? targetId.toUpperCase() : (players[targetId]?.name || targetId.toUpperCase());
+  document.getElementById('cm-title').textContent = '⚔ CHALLENGE ' + tName;
+  const formEl = document.getElementById('cm-npc-form');
+  if (isNpc) {
+    _coNpcForm = _rollNpcForm(targetId);
+    const trashLine = NPC_PROFILES[targetId].forms.find(f => f.label === _coNpcForm.label)?.trash[0] || '';
+    formEl.style.display = 'block';
+    formEl.innerHTML = `form: <span style="color:${_coNpcForm.color}">${_coNpcForm.label}</span><br><span style="font-size:7px;color:#333">"${trashLine}"</span>`;
+  } else {
+    formEl.style.display = 'none';
+  }
+  const rank = _coGetRank(_coRating);
+  document.getElementById('cm-stats').innerHTML =
+    `your rating: <span style="color:${rank.color}">${_coRating}</span> — <span style="color:${rank.color}">${rank.title}</span><br>W:${_coWins} L:${_coLosses}  streak:${_coStreak}  PB:${_coPB} rips`;
+  document.getElementById('challenge-menu').style.display = 'block';
+};
+window.closeChallengeMenu = function() {
+  document.getElementById('challenge-menu').style.display = 'none';
+};
+window.cmSelect = function(btn, group) {
+  document.querySelectorAll(`.cm-opt[data-${group}]`).forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+};
+window.sendChallenge = function() {
+  const betBtn = document.querySelector('.cm-opt[data-bet].selected');
+  _coBet = betBtn?.dataset.bet || 'bragging_rights';
+  closeChallengeMenu();
+  if (['cal','farrow','robbo'].includes(_cmTargetId)) {
+    _startNpcChallenge(_cmTargetId);
+  } else {
+    _sendFirestoreChallenge(_cmTargetId);
+  }
+};
+
+// ── NPC challenge ──
+function _startNpcChallenge(npcId) {
+  const profile = NPC_PROFILES[npcId];
+  if (!_coNpcForm) _coNpcForm = _rollNpcForm(npcId);
+  const form = _coNpcForm;
+  _coTarget = { npc: npcId, name: profile.name, color: profile.color };
+  // NPC trash talk
+  const trashLines = form.trash || [];
+  if (trashLines.length && !_npcsMuted) {
+    setTimeout(() => addChatMessage(profile.name, trashLines[Math.floor(Math.random()*trashLines.length)], profile.color, false, false), 500);
+  }
+  const npcScore = Math.floor(Math.random() * (form.max - form.min + 1)) + form.min;
+  _openConeOffOverlay(profile.name, profile.color, () => {
+    // Count up their score dramatically
+    let shown = 0;
+    const steps = 12;
+    const inc = Math.ceil(npcScore / steps);
+    const countUp = setInterval(() => {
+      shown = Math.min(shown + inc, npcScore);
+      document.getElementById('co-their-score').textContent = shown;
+      const t = _coScoreTier(shown);
+      document.getElementById('co-their-tier').textContent = t.label;
+      document.getElementById('co-their-tier').style.color  = t.color;
+      if (shown >= npcScore) {
+        clearInterval(countUp);
+        _coTheirScore = npcScore;
+        const postLines = _coScore > npcScore ? profile.postLoss : profile.postWin;
+        const postLine = postLines[Math.floor(Math.random()*postLines.length)];
+        _finishConeOff(true, postLine, form.label);
+      }
+    }, 90);
+  });
+}
+
+// ── Firestore challenge ──
+function _sendFirestoreChallenge(targetId) {
+  if (!_bDb || !myPlayer) { addSystemMessage('need multiplayer mode to challenge real players'); return; }
+  const tp = players[targetId];
+  if (!tp) { addSystemMessage('that player is no longer here'); return; }
+  addSystemMessage('cone-off challenge sent to ' + tp.name + '...');
+  _bDb.collection('bungalow_challenges').add({
+    type: 'cone_off',
+    challenger: { id: _SESSION_ID, name: myPlayer.name, color: myPlayer.color, rating: _coRating },
+    target:     { id: targetId, name: tp.name, color: tp.color },
+    bet: _coBet, status: 'pending',
+    challengerScore: null, targetScore: null, winner: null,
+    created: firebase.firestore.FieldValue.serverTimestamp(),
+    expires: Date.now() + 60000,
+  }).catch(e => addSystemMessage('challenge failed: ' + e.message));
+}
+
+function _listenForChallenges() {
+  if (!_bDb) return;
+  _bDb.collection('bungalow_challenges').where('target.id','==',_SESSION_ID).where('status','==','pending')
+    .onSnapshot(snap => {
+      snap.docChanges().forEach(ch => {
+        if (ch.type === 'added') {
+          const d = ch.doc.data();
+          if (d.expires && Date.now() > d.expires) return;
+          _showChallengeNotif(ch.doc.id, d);
+        }
+      });
+    });
+  _bDb.collection('bungalow_challenges').where('challenger.id','==',_SESSION_ID).where('status','==','active')
+    .onSnapshot(snap => {
+      snap.docChanges().forEach(ch => {
+        if ((ch.type==='modified'||ch.type==='added') && _coState==='idle') {
+          const d = ch.doc.data();
+          _coChallengeId = ch.doc.id; _coBet = d.bet; _coTarget = d.target;
+          _openConeOffOverlay(d.target.name, d.target.color, () => _submitScore(ch.doc.id, 'challenger'));
+          _watchOpponentScore(ch.doc.id, 'targetScore');
+        }
+      });
+    });
+}
+
+function _showChallengeNotif(docId, data) {
+  _pend = { docId, data };
+  const betLabel = {bragging_rights:'bragging rights',round:'round of drinks',cone_king:'CONE KING title'}[data.bet]||'pride';
+  document.getElementById('cn-body').innerHTML =
+    `<b>${data.challenger.name}</b> challenges you to a CONE-OFF!<br>stakes: ${betLabel}` +
+    (data.challenger.rating ? `<br><span style="color:#444;font-size:7px">their rating: ${data.challenger.rating}</span>` : '');
+  document.getElementById('challenge-notif').style.display = 'block';
+}
+window.acceptChallenge = function() {
+  if (!_pend||!_bDb) return;
+  document.getElementById('challenge-notif').style.display='none';
+  const {docId,data}=_pend;
+  _coChallengeId=docId; _coBet=data.bet; _coTarget=data.challenger;
+  _bDb.collection('bungalow_challenges').doc(docId).update({status:'active'}).catch(()=>{});
+  _openConeOffOverlay(data.challenger.name, data.challenger.color, () => _submitScore(docId,'target'));
+  _watchOpponentScore(docId,'challengerScore');
+};
+window.declineChallenge = function() {
+  document.getElementById('challenge-notif').style.display='none';
+  if (_pend?.docId&&_bDb) _bDb.collection('bungalow_challenges').doc(_pend.docId).update({status:'done',winner:'declined'}).catch(()=>{});
+  _pend=null;
+};
+function _submitScore(docId, role) {
+  if (!_bDb) return;
+  const field = role==='challenger' ? 'challengerScore' : 'targetScore';
+  _bDb.collection('bungalow_challenges').doc(docId).update({[field]: _coScore}).catch(()=>{});
+}
+function _watchOpponentScore(docId, field) {
+  if (_coUnsub) _coUnsub();
+  _coUnsub = _bDb.collection('bungalow_challenges').doc(docId).onSnapshot(snap => {
+    const d = snap.data(); if (!d) return;
+    if (d[field]!=null) {
+      _coTheirScore=d[field];
+      document.getElementById('co-their-score').textContent=_coTheirScore;
+      const t=_coScoreTier(_coTheirScore);
+      document.getElementById('co-their-tier').textContent=t.label;
+      document.getElementById('co-their-tier').style.color=t.color;
+    }
+    if (d.challengerScore!=null && d.targetScore!=null) {
+      if (_coUnsub){_coUnsub();_coUnsub=null;}
+      _finishConeOff(false,'',null);
+    }
+  });
+}
+
+// ── Leaderboard ──
+function _loadLeaderboard() {
+  if (!_bDb) return;
+  _bDb.collection('bungalow_co_scores').orderBy('score','desc').limit(5).get().then(snap => {
+    if (snap.empty) return;
+    const el = document.getElementById('co-leaderboard'); if (!el) return;
+    let html='<div class="co-lb-title">── TOP RIPPERS ──</div>';
+    let i=0;
+    snap.forEach(doc => {
+      const d=doc.data();
+      html+=`<div class="co-lb-row"><span class="co-lb-rank">#${++i}</span><span class="co-lb-name">${d.name}</span><span class="co-lb-score">${d.score}</span></div>`;
+    });
+    el.innerHTML=html;
+  }).catch(()=>{});
+}
+function _saveScore(score) {
+  if (!_bDb||!myPlayer||score<10) return;
+  _bDb.collection('bungalow_co_scores').add({name:myPlayer.name,score,rating:_coRating,ts:firebase.firestore.FieldValue.serverTimestamp()}).catch(()=>{});
+}
+
+// ── ELO ──
+function _updateElo(won, draw, isNpc, formLabel) {
+  const npcMap={FRESH:28,'LOCKED IN':32,INSPIRED:22,NORMAL:15,FOCUSED:18,STEADY:12,BAKED:8,DISTRACTED:6,'OVER IT':4,COOKED:3};
+  const base = isNpc ? (npcMap[formLabel]||10) : 25;
+  const delta = won ? base : (draw ? 0 : -Math.floor(base*0.5));
+  _coRating = Math.max(0, _coRating+delta);
+  localStorage.setItem('bk_co_rating',_coRating);
+  return delta;
+}
+
+// ── Open overlay ──
+function _openConeOffOverlay(theirName, theirColor, onGameEnd) {
+  _coState='countdown'; _coScore=0; _coTheirScore=null; _coOnEnd=onGameEnd;
+  document.getElementById('co-my-name').textContent=myPlayer?.name||'YOU';
+  document.getElementById('co-their-name').textContent=theirName;
+  document.getElementById('co-their-name').style.color=theirColor;
+  document.getElementById('co-their-score').textContent='?';
+  document.getElementById('co-my-score').textContent='0';
+  document.getElementById('co-my-tier').textContent='';
+  document.getElementById('co-their-tier').textContent='';
+  document.getElementById('coneoff-result').style.display='none';
+  document.getElementById('coneoff-btn').style.display='';
+  document.getElementById('coneoff-btn').classList.add('disabled');
+  const rank=_coGetRank(_coRating);
+  document.getElementById('co-rank-badge').innerHTML=`<span style="color:${rank.color}">${rank.title}</span> &nbsp;·&nbsp; ${_coRating} rating`;
+  const betLabels={bragging_rights:'pride on the line',round:'round of drinks on the line',cone_king:'CONE KING TITLE on the line'};
+  document.getElementById('coneoff-vs').textContent=(myPlayer?.name||'YOU')+' vs '+theirName+' — '+(betLabels[_coBet]||'pride on the line');
+  const streakEl=document.getElementById('co-streak-banner');
+  if (_coStreak>=3){streakEl.textContent='🔥 HOT STREAK x'+_coStreak;streakEl.style.color='#ff6600';}else{streakEl.textContent='';}
+  document.getElementById('co-pb-bar').textContent=_coPB>0?'PB: '+_coPB+' rips':'';
+  document.getElementById('co-pb-bar').style.color='#444';
+  document.getElementById('coneoff-record').textContent='W:'+_coWins+' L:'+_coLosses;
+  document.getElementById('coneoff-overlay').classList.add('active');
+  _loadLeaderboard();
+  // Countdown
+  let count=3;
+  const cd=document.getElementById('coneoff-countdown');
+  cd.textContent=count; cd.style.color='#fff';
+  const countInterval=setInterval(()=>{
+    count--;
+    if(count>0){cd.textContent=count;}
+    else{
+      clearInterval(countInterval);
+      cd.textContent='RIP!'; cd.style.color='#00ff41';
+      _coState='playing';
+      document.getElementById('coneoff-btn').classList.remove('disabled');
+      _coTimer=setTimeout(_endGame,3000);
+      let rem=3.0;
+      const remInt=setInterval(()=>{
+        rem-=0.05;
+        if(rem<=0){clearInterval(remInt);cd.textContent='0.0';}
+        else{
+          cd.textContent=rem.toFixed(1);
+          if(rem<1)cd.style.color='#ff4444';
+          else if(rem<2)cd.style.color='#ffaa00';
+        }
+      },50);
+      // Mid-game Cal commentary at 1.5s
+      if(!_npcsMuted){
+        _coMidTimer=setTimeout(()=>{
+          if(calPlayer&&calPlayer.chatTimer<200){
+            const cheers=['go! go! go!','GET IN!','keep tapping!','COME ON!','oh he\'s cooking!','DO IT!'];
+            calPlayer.chatMsg=cheers[Math.floor(Math.random()*cheers.length)];
+            calPlayer.chatTimer=1800;
+            addChatMessage('CAL',calPlayer.chatMsg,CAL_COLOR,false,false);
+          }
+        },1500);
+      }
+    }
+  },1000);
+}
+
+function _endGame(){
+  _coState='done';
+  document.getElementById('coneoff-btn').classList.add('disabled');
+  document.getElementById('co-my-score').textContent=_coScore;
+  const t=_coScoreTier(_coScore);
+  document.getElementById('co-my-tier').textContent=t.label;
+  document.getElementById('co-my-tier').style.color=t.color;
+  if(_coOnEnd)_coOnEnd();
+}
+
+// ── Tap ──
+window.coTap = function(e){
+  if(e){e.preventDefault();e.stopPropagation();}
+  if(_coState!=='playing')return;
+  _coScore++;
+  document.getElementById('co-my-score').textContent=_coScore;
+  const t=_coScoreTier(_coScore);
+  document.getElementById('co-my-tier').textContent=t.label;
+  document.getElementById('co-my-tier').style.color=t.color;
+  const btn=document.getElementById('coneoff-btn');
+  btn.classList.add('flashed');
+  setTimeout(()=>btn.classList.remove('flashed'),55);
+  if(_coScore>_coPB){
+    document.getElementById('co-pb-bar').textContent='★ NEW PB: '+_coScore+' rips!';
+    document.getElementById('co-pb-bar').style.color='#ffcc00';
+  }
+};
+
+// ── Finish ──
+function _finishConeOff(isNpc, npcFlavor, formLabel){
+  const myScore=_coScore, theirScore=_coTheirScore??0;
+  const won=myScore>theirScore, draw=myScore===theirScore;
+  const tName=_coTarget?.name||'THEM';
+  const isNewPB=myScore>_coPB;
+  if(isNewPB){_coPB=myScore;localStorage.setItem('bk_co_pb',_coPB);}
+  if(won){_coWins++;_coStreak++;localStorage.setItem('bk_co_wins',_coWins);localStorage.setItem('bk_co_streak',_coStreak);}
+  else if(!draw){_coLosses++;_coStreak=0;localStorage.setItem('bk_co_losses',_coLosses);localStorage.setItem('bk_co_streak','0');}
+  const eloDelta=_updateElo(won,draw,isNpc,formLabel);
+  const rank=_coGetRank(_coRating);
+  if(isNewPB)_saveScore(myScore);
+  const myTier=_coScoreTier(myScore), theirTier=_coScoreTier(theirScore);
+  const titleEl=document.getElementById('res-title');
+  const subEl=document.getElementById('res-sub');
+  document.getElementById('res-score-detail').innerHTML=`<span style="color:#ffcc00">${myScore}</span> vs <span style="color:#666">${theirScore}</span>`;
+  document.getElementById('res-tier').innerHTML=`your rips: <span style="color:${myTier.color}">${myTier.label}</span>`+(isNewPB?' <span style="color:#ffcc00">★ NEW PB!</span>':'');
+  const deltaStr=eloDelta>0?'+'+eloDelta:(eloDelta<0?''+eloDelta:'±0');
+  document.getElementById('res-rating').innerHTML=`rating: <span style="color:${rank.color}">${_coRating}</span> (${deltaStr}) — <span style="color:${rank.color}">${rank.title}</span>`;
+  if(draw){
+    titleEl.textContent='DRAW';titleEl.style.color='#ffcc00';
+    subEl.textContent=myScore+' rips each.\nexactly the same. unbelievable.';
+  }else if(won){
+    titleEl.textContent=_coStreak>=5?'UNSTOPPABLE':_coStreak>=3?'ON FIRE':'YOU WIN';
+    titleEl.style.color='#00ff41';
+    const winTaunts=[
+      tName+' tried. genuinely. good attempt.',
+      'the gap: '+(myScore-theirScore)+' rips. not even close.',
+      _coStreak>1?'streak: '+_coStreak+'. the boys know.':'W:'+_coWins+'. doing the work.',
+      tName+': devastating. truly.',
+    ];
+    subEl.textContent=winTaunts[Math.floor(Math.random()*winTaunts.length)];
+  }else{
+    titleEl.textContent='YOU LOSE';titleEl.style.color='#ff4444';
+    const loseTaunts=[
+      tName+' had '+(theirScore-myScore)+' more rips. mate.',
+      'have a lie down. have a think.',
+      tName+' is better at this than you. that\'s just the facts.',
+      'L:'+_coLosses+'. eventually you\'ll learn.',
+    ];
+    subEl.textContent=loseTaunts[Math.floor(Math.random()*loseTaunts.length)];
+  }
+  document.getElementById('coneoff-record').textContent='W:'+_coWins+' L:'+_coLosses+'  streak:'+_coStreak;
+  document.getElementById('coneoff-result').style.display='block';
+  document.getElementById('coneoff-btn').style.display='none';
+  document.getElementById('coneoff-countdown').textContent='';
+  // Chat announce
+  const resultLine=won
+    ?myPlayer.name+' beat '+tName+' '+myScore+'-'+theirScore+' in a cone-off!'
+    :draw
+    ?myPlayer.name+' and '+tName+' drew '+myScore+' rips each.'
+    :tName+' beat '+myPlayer.name+' '+theirScore+'-'+myScore+' in a cone-off.';
+  addSystemMessage(resultLine);
+  if(isNewPB)addSystemMessage('★ '+(myPlayer?.name||'someone')+' set a new PB: '+myScore+' rips!');
+  // NPC reaction
+  setTimeout(()=>{
+    if(_npcsMuted)return;
+    if(isNpc&&npcFlavor){
+      addChatMessage(_coTarget.name,npcFlavor,_coTarget.color,false,false);
+    }else if(calPlayer&&calPlayer.chatTimer<500){
+      const cc=won
+        ?['yeah mate THAT\'S WHAT I\'M TALKING ABOUT','get in. absolute get in.','I knew you had it. I called it.']
+        :['bro. bro. you okay?','it\'s just a cone-off. you\'ll recover.','happens to the best of us.'];
+      calPlayer.chatMsg=cc[Math.floor(Math.random()*cc.length)];
+      calPlayer.chatTimer=6000;
+      addChatMessage('CAL',calPlayer.chatMsg,CAL_COLOR,false,false);
+    }
+  },800);
+  if(_coChallengeId&&_bDb){
+    _bDb.collection('bungalow_challenges').doc(_coChallengeId).update({
+      winner:draw?'draw':(won?(_pend?'target':'challenger'):(_pend?'challenger':'target')),
+      status:'done',
+    }).catch(()=>{});
+    _coChallengeId=null;
+  }
+  _coState='idle';
+}
+
+window.closeConeOff = function(){
+  document.getElementById('coneoff-overlay').classList.remove('active');
+  _coState='idle';
+  if(_coTimer){clearTimeout(_coTimer);_coTimer=null;}
+  if(_coMidTimer){clearTimeout(_coMidTimer);_coMidTimer=null;}
+  if(_coUnsub){_coUnsub();_coUnsub=null;}
+};
+
+window.coRematch = function(){
+  if(!_coTarget){closeConeOff();return;}
+  document.getElementById('coneoff-result').style.display='none';
+  document.getElementById('coneoff-btn').style.display='';
+  if(_coTarget.npc){
+    _coNpcForm=_rollNpcForm(_coTarget.npc);
+    _startNpcChallenge(_coTarget.npc);
+  }else{
+    closeConeOff();
+    openChallengeMenu(_coTarget.id);
+  }
+};
 
 // ── AUTH CHECK — determine login state before showing modal ──
 (function() {
