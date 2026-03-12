@@ -4363,13 +4363,18 @@ async function _onAuthChanged(user) {
 }
 
 async function _loadProfile(uid) {
+  // If already set in memory (e.g. just registered), don't overwrite with a Firestore
+  // read that may not have landed yet — just persist to localStorage and return.
+  if (_currentProfile && _currentProfile.username && _currentProfile.username !== 'anon') {
+    try { localStorage.setItem('tk_profile', JSON.stringify(_currentProfile)); } catch(e) {}
+    return;
+  }
   try {
     const snap = await _db.doc(`users/${uid}/data/profile`).get();
     _currentProfile = snap.exists ? snap.data() : null;
   } catch(e) {
     _currentProfile = null;
   }
-  // Fall back gracefully — username is always set at registration
   if (!_currentProfile) {
     _currentProfile = { avatarId: 'goblin', username: 'anon' };
   }
@@ -5469,36 +5474,69 @@ window.authSwitchTab = function(tab) {
   _clearAuthError();
 };
 
+// Convert username to a stable internal email (user never sees this)
+function _usernameToEmail(username) {
+  return username.toLowerCase().replace(/[^a-z0-9]/g, '_') + '@tonykrinks.island';
+}
+
 window.authLogin = async function() {
   _clearAuthError();
-  const email = document.getElementById('auth-email').value.trim();
-  const pass  = document.getElementById('auth-pass').value;
-  if (!email || !pass) { _showAuthError('email and password required.'); return; }
+  const rawUsername = document.getElementById('auth-username').value.trim();
+  const pass        = document.getElementById('auth-pass').value;
+  if (!rawUsername || !pass) { _showAuthError('username and password required.'); return; }
+  const email = _usernameToEmail(rawUsername);
   try {
     await _auth.signInWithEmailAndPassword(email, pass);
   } catch(e) {
-    _showAuthError(e.message.replace('Firebase: ', '').replace(/ \(auth\/.*\)/, ''));
+    // Map Firebase errors to friendlier messages that don't mention email
+    const msg = e.message.replace('Firebase: ', '').replace(/ \(auth\/.*\)/, '');
+    if (e.code === 'auth/user-not-found' || e.code === 'auth/invalid-credential') {
+      _showAuthError('username or password incorrect.');
+    } else if (e.code === 'auth/wrong-password') {
+      _showAuthError('wrong password.');
+    } else {
+      _showAuthError(msg);
+    }
   }
 };
 
 window.authRegister = async function() {
   _clearAuthError();
-  const email    = document.getElementById('auth-reg-email').value.trim();
-  const pass     = document.getElementById('auth-reg-pass').value;
+  const pass        = document.getElementById('auth-reg-pass').value;
   const rawUsername = document.getElementById('auth-reg-username').value.trim();
   const username    = _sanitizeName(rawUsername, 16);
-  if (!email || !pass || !rawUsername) { _showAuthError('all fields required.'); return; }
-  if (rawUsername !== username) { _showAuthError('username: letters, numbers, spaces, _ - . ! only.'); return; }
+  if (!pass || !rawUsername) { _showAuthError('username and password required.'); return; }
+  if (rawUsername !== username) { _showAuthError('username: letters, numbers, _ - . ! only.'); return; }
   if (username.length < 2) { _showAuthError('username must be at least 2 characters.'); return; }
+  if (pass.length < 6) { _showAuthError('password must be at least 6 characters.'); return; }
+  // Check username availability before creating account
+  try {
+    const taken = await _db.doc(`usernames/${username.toLowerCase()}`).get();
+    if (taken.exists) { _showAuthError('username already taken.'); return; }
+  } catch(e) { /* Firestore rules may not allow read — proceed and let write fail */ }
+  // Set profile in memory BEFORE creating the Firebase account so onAuthStateChanged
+  // doesn't race with the Firestore write and show 'anon'.
+  _currentProfile = { username, avatarId: _selectedAvatarId };
+  try { localStorage.setItem('tk_profile', JSON.stringify(_currentProfile)); } catch(e) {}
+  const email = _usernameToEmail(username);
   try {
     const cred = await _auth.createUserWithEmailAndPassword(email, pass);
-    await _db.doc(`users/${cred.user.uid}/data/profile`).set({
-      username,
-      avatarId:  _selectedAvatarId,
-      createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
+    await Promise.all([
+      _db.doc(`users/${cred.user.uid}/data/profile`).set({
+        username,
+        avatarId:  _selectedAvatarId,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      }),
+      _db.doc(`usernames/${username.toLowerCase()}`).set({ uid: cred.user.uid }),
+    ]);
   } catch(e) {
-    _showAuthError(e.message.replace('Firebase: ', '').replace(/ \(auth\/.*\)/, ''));
+    _currentProfile = null; // roll back optimistic set on failure
+    const msg = e.message.replace('Firebase: ', '').replace(/ \(auth\/.*\)/, '');
+    if (e.code === 'auth/email-already-in-use') {
+      _showAuthError('username already taken.');
+    } else {
+      _showAuthError(msg);
+    }
   }
 };
 
@@ -5554,16 +5592,15 @@ document.addEventListener('DOMContentLoaded', _renderAvatarGrid);
 
     <!-- LOGIN FORM -->
     <div id="auth-login-form">
-      <input  class="auth-field" id="auth-email" type="email"    placeholder="email" autocomplete="email">
-      <input  class="auth-field" id="auth-pass"  type="password" placeholder="password" autocomplete="current-password">
+      <input  class="auth-field" id="auth-username" type="text"     placeholder="username" autocomplete="username">
+      <input  class="auth-field" id="auth-pass"     type="password" placeholder="password" autocomplete="current-password">
       <button class="auth-btn" onclick="authLogin()">[ ENTER THE ISLAND ]</button>
     </div>
 
     <!-- REGISTER FORM -->
     <div id="auth-reg-form" style="display:none;">
-      <input  class="auth-field" id="auth-reg-email"    type="email"    placeholder="email" autocomplete="email">
+      <input  class="auth-field" id="auth-reg-username" type="text"     placeholder="username (2–16 chars)" maxlength="16">
       <input  class="auth-field" id="auth-reg-pass"     type="password" placeholder="password (6+ chars)" autocomplete="new-password">
-      <input  class="auth-field" id="auth-reg-username" type="text"     placeholder="username (2–20 chars)" maxlength="20">
       <div style="font-size:10px;color:var(--muted);margin-bottom:8px;letter-spacing:1px;">CHOOSE YOUR AVATAR</div>
       <div class="avatar-grid" id="avatar-grid"></div>
       <button class="auth-btn" onclick="authRegister()">[ CREATE ACCOUNT ]</button>
