@@ -2484,7 +2484,7 @@ function newDialogue(targetId, _noCount) {
   ).join('');
   // Update tweet share link
   const tweetText = dlg.map(l => l.n + ': ' + l.t).join('\n') +
-    '\n\n🏝️ Tony Krink\'s Island — ' + window.location.origin + '\n#Seinfeld #SeinfeldBot #BajookieIsland';
+    '\n\n🏝️ tonykrink.com\n#Seinfeld #SeinfeldBot #BajookieIsland';
   const tweetHref = 'https://twitter.com/intent/tweet?text=' + encodeURIComponent(tweetText.slice(0, 280));
   const shareEl = document.getElementById(targetId + '-tweet');
   if (shareEl) shareEl.href = tweetHref;
