@@ -1308,7 +1308,7 @@ input.field:focus, textarea.field:focus { border-color: var(--blue); }
           <div class="stat-row"><span>🎰 casino won</span><span id="stat-casino-won" style="color:var(--gold);">0</span></div>
 
           <div style="font-size:10px;color:var(--cyan);letter-spacing:2px;border-bottom:1px solid var(--border2);padding-bottom:4px;margin:10px 0 6px;">🌐 ISLAND TOTALS</div>
-          <div class="stat-row"><span>coins (all time)</span><span id="island-total-coins" style="color:var(--cyan);">—</span></div>
+          <div class="stat-row"><span>all-time bajookies</span><span id="island-total-coins" style="color:var(--gold);font-weight:700;">—</span></div>
           <div class="stat-row"><span>total clicks</span><span id="island-total-clicks" style="color:var(--cyan);">—</span></div>
           <div class="stat-row"><span>time</span><span id="stat-time">--:--:--</span></div>
           <div class="stat-row"><span>vibe index</span><span style="color:var(--green);">█████████░ 94%</span></div>
@@ -1742,19 +1742,22 @@ input.field:focus, textarea.field:focus { border-color: var(--blue); }
     <span class="prompt">leaderboard</span> &nbsp;&mdash;&nbsp; top contributors to the island. updated live.
   </div>
 
+  <!-- ALL-TIME BAJOOKIE TOTAL -->
   <div class="box" style="margin-bottom:16px;">
-    <div class="box-header"><span>&#127758; island totals</span><span id="lb-era-display" style="color:var(--gold);"></span></div>
-    <div class="box-body">
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;text-align:center;">
-        <div><div style="font-size:18px;font-weight:700;color:var(--gold);" id="lb-total-coins">-</div><div style="font-size:10px;color:var(--muted);">total coins earned</div></div>
-        <div><div style="font-size:18px;font-weight:700;color:var(--blue2);" id="lb-total-clicks">-</div><div style="font-size:10px;color:var(--muted);">total clicks</div></div>
-        <div><div style="font-size:18px;font-weight:700;color:var(--green);" id="lb-total-visits">-</div><div style="font-size:10px;color:var(--muted);">total visitors</div></div>
-        <div><div style="font-size:18px;font-weight:700;color:var(--pink);" id="lb-era">1</div><div style="font-size:10px;color:var(--muted);">current era</div></div>
+    <div class="box-header"><span>&#127758; all-time island bajookie</span><span id="lb-era-display" style="color:var(--gold);"></span></div>
+    <div class="box-body" style="text-align:center;padding:18px 14px 14px;">
+      <div style="font-family:'Press Start 2P',monospace;font-size:28px;color:var(--gold);letter-spacing:2px;line-height:1.2;" id="lb-total-coins">-</div>
+      <div style="font-size:10px;color:var(--muted);margin-top:6px;letter-spacing:2px;">BAJOOKIES EARNED BY THE ISLAND — ALL TIME</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:16px;padding-top:14px;border-top:1px solid var(--border2);">
+        <div><div style="font-size:15px;font-weight:700;color:var(--blue2);" id="lb-total-clicks">-</div><div style="font-size:10px;color:var(--muted);">total clicks</div></div>
+        <div><div style="font-size:15px;font-weight:700;color:var(--green);" id="lb-total-visits">-</div><div style="font-size:10px;color:var(--muted);">visitors</div></div>
+        <div><div style="font-size:15px;font-weight:700;color:var(--pink);" id="lb-era">1</div><div style="font-size:10px;color:var(--muted);">era</div></div>
       </div>
     </div>
   </div>
 
-  <div class="box">
+  <!-- LEADERBOARD TABS -->
+  <div class="box" style="margin-bottom:16px;">
     <div class="upg-tab-bar">
       <button class="upg-tab active" onclick="lbTab('earners',this)">&#128176; TOP EARNERS</button>
       <button class="upg-tab" onclick="lbTab('clickers',this)">&#128070; TOP CLICKERS</button>
@@ -1764,6 +1767,7 @@ input.field:focus, textarea.field:focus { border-color: var(--blue); }
     <div id="lb-list" style="min-height:200px;"></div>
   </div>
 
+  <!-- YOUR STATS (logged in only) -->
   <div id="lb-my-stats" style="display:none;"></div>
 </div>
 
@@ -5026,14 +5030,17 @@ window._loadLeaderboard = async function(tab) {
         const m = mySnap.data();
         const fN = fmtFn;
         myEl.style.display = 'block';
-        myEl.innerHTML = `<div class="box-header"><span>\uD83D\uDCCA your stats</span></div>
-          <div style="padding:12px 14px;display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:11px;">
-            <div>coins earned: <span style="color:var(--gold);">${fN(m.coinsEarned||0)}</span></div>
-            <div>clicks: <span style="color:var(--blue2);">${fN(m.totalClicks||0)}</span></div>
-            <div>japingus fed: <span style="color:var(--green);">${m.japingusFed||0}</span></div>
-            <div>casino won: <span style="color:var(--gold);">${fN(m.totalWon||0)}</span></div>
-            <div>biggest win: <span style="color:var(--pink);">${fN(m.biggestWin||0)}</span></div>
-            <div>jackpots: <span style="color:var(--yellow);">${m.jackpotsHit||0}</span></div>
+        myEl.innerHTML = `
+          <div class="box" style="border-color:var(--blue);background:rgba(88,166,255,0.04);">
+            <div class="box-header"><span>&#128202; your stats</span><span style="font-size:10px;color:var(--muted);">${m.username || ''}</span></div>
+            <div style="padding:14px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;text-align:center;">
+              <div><div style="font-size:16px;font-weight:700;color:var(--gold);">${fN(m.coinsEarned||0)}</div><div style="font-size:10px;color:var(--muted);">bajookies earned</div></div>
+              <div><div style="font-size:16px;font-weight:700;color:var(--blue2);">${fN(m.totalClicks||0)}</div><div style="font-size:10px;color:var(--muted);">clicks</div></div>
+              <div><div style="font-size:16px;font-weight:700;color:var(--green);">${m.japingusFed||0}</div><div style="font-size:10px;color:var(--muted);">japingus fed</div></div>
+              <div><div style="font-size:16px;font-weight:700;color:var(--gold);">${fN(m.totalWon||0)}</div><div style="font-size:10px;color:var(--muted);">casino won</div></div>
+              <div><div style="font-size:16px;font-weight:700;color:var(--pink);">${fN(m.biggestWin||0)}</div><div style="font-size:10px;color:var(--muted);">biggest win</div></div>
+              <div><div style="font-size:16px;font-weight:700;color:var(--yellow);">${m.jackpotsHit||0}</div><div style="font-size:10px;color:var(--muted);">jackpots</div></div>
+            </div>
           </div>`;
       }
     }
