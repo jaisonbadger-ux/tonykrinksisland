@@ -221,6 +221,25 @@ let _farrowAsleep     = false;
 let _farrowSleepTimer = 0;
 let _farrowSleepCooldown = 0;
 let _barneyBarkTimer  = 220000 + Math.random()*120000; // 3.5–5.5 min between rare barks
+
+// ── SHERMAN ──
+const SHERMAN_HOME_C = 17, SHERMAN_HOME_R = 8;
+const BALL_START_C   = 18, BALL_START_R   = 7;
+const sherman = {
+  x: SHERMAN_HOME_C * TILE + TILE/2,
+  y: SHERMAN_HOME_R * TILE + TILE/2,
+  homeX: SHERMAN_HOME_C * TILE + TILE/2,
+  homeY: SHERMAN_HOME_R * TILE + TILE/2,
+  state: 'idle',   // idle | fetch | return | wait
+  targetX: 0, targetY: 0,
+  speed: 95,
+  fetchCount: 0,
+  hasBall: false,
+  chatMsg: '', chatTimer: 0,
+  wagAngle: 0, wagDir: 1,
+  legFrame: 0, legTimer: 0,
+  idleTimer: 3000 + Math.random()*4000,
+};
 let _robboCal_timer   = 80000  + Math.random()*90000;  // cal/robbo bicker timer
 const RECORDS = [
   { artist:'Nirvana',       title:'In Bloom',               col:'#1a5055' },
@@ -308,6 +327,8 @@ const worldObjects = [
   { type:'chip_packet', c:7,  r:9,  label:'empty chip packet (cheese & onion)' },
   // ── Barney ── always on couch
   { type:'barney', c:6, r:6, label:'barney (click him)', interactable:true },
+  // ── Sherman's ball ── interactable, position updated when thrown
+  { type:'sherman_ball', c:BALL_START_C, r:BALL_START_R, label:'throw ball for sherman!', interactable:true },
   // ── Xbox setup ──
   { type:'xbox', c:3, r:3, label:'xbox (barney\'s)' },
   // ── Bulletin board ──
@@ -1300,6 +1321,208 @@ function drawObject(obj,sx,sy) {
   }
 }
 
+// ── DRAW SHERMAN ──
+function drawSherman() {
+  if(!myPlayer) return;
+  const sp = worldToScreen(sherman.x, sherman.y);
+  const sx = sp.x, sy = sp.y;
+  const s = ctx;
+  const p = v => Math.round(v);
+
+  // shadow
+  s.fillStyle = 'rgba(0,0,0,0.22)';
+  s.beginPath(); s.ellipse(sx, sy+10, 9, 3, 0, 0, Math.PI*2); s.fill();
+
+  // tail wag
+  sherman.wagAngle += 0.15 * sherman.wagDir;
+  if(Math.abs(sherman.wagAngle) > 0.6) sherman.wagDir *= -1;
+  const isMoving = sherman.state === 'fetch' || sherman.state === 'return';
+  const wagSpeed = isMoving || sherman.state==='wait' ? 0.25 : 0.08;
+  sherman.wagAngle += wagSpeed * sherman.wagDir;
+
+  // tail
+  const tailX = sx + 9 * Math.cos(sherman.wagAngle);
+  const tailY = sy - 4 + 5 * Math.sin(sherman.wagAngle);
+  s.fillStyle = '#111';
+  s.beginPath(); s.arc(p(tailX), p(tailY), 4, 0, Math.PI*2); s.fill();
+  // fluffy tail tip
+  s.fillStyle = '#222';
+  s.beginPath(); s.arc(p(tailX+2*Math.cos(sherman.wagAngle)), p(tailY+2*Math.sin(sherman.wagAngle)), 3, 0, Math.PI*2); s.fill();
+
+  // legs — animate when moving
+  if(isMoving) { sherman.legTimer += 16; if(sherman.legTimer > 120) { sherman.legFrame=(sherman.legFrame+1)%4; sherman.legTimer=0; } }
+  const lf = sherman.legFrame;
+  const legOffs = [[-5,-5+Math.sin(lf*Math.PI/2)*3],[3,-5+Math.sin((lf+2)*Math.PI/2)*3],
+                   [-5, 2+Math.sin((lf+1)*Math.PI/2)*3],[3, 2+Math.sin((lf+3)*Math.PI/2)*3]];
+  s.fillStyle = '#111';
+  for(const [lx,ly] of legOffs) { s.fillRect(p(sx+lx),p(sy+ly),4,8); }
+  // little paws
+  s.fillStyle = '#1a1a1a';
+  for(const [lx,ly] of legOffs) { s.fillRect(p(sx+lx-1),p(sy+ly+6),6,3); }
+
+  // body — fluffy black cavoodle
+  s.fillStyle = '#111';
+  s.beginPath(); s.ellipse(sx, sy-2, 10, 9, 0, 0, Math.PI*2); s.fill();
+  // fluffy texture bumps
+  s.fillStyle = '#1c1c1c';
+  s.beginPath(); s.arc(p(sx-5), p(sy-4), 4, 0, Math.PI*2); s.fill();
+  s.beginPath(); s.arc(p(sx+5), p(sy-5), 4, 0, Math.PI*2); s.fill();
+  s.beginPath(); s.arc(p(sx),   p(sy-8), 4, 0, Math.PI*2); s.fill();
+  s.beginPath(); s.arc(p(sx-4), p(sy+1), 3, 0, Math.PI*2); s.fill();
+  s.beginPath(); s.arc(p(sx+4), p(sy),   3, 0, Math.PI*2); s.fill();
+
+  // head
+  s.fillStyle = '#111';
+  s.beginPath(); s.arc(p(sx), p(sy-18), 9, 0, Math.PI*2); s.fill();
+  // fluffy head texture
+  s.fillStyle = '#1c1c1c';
+  s.beginPath(); s.arc(p(sx-5), p(sy-22), 5, 0, Math.PI*2); s.fill();
+  s.beginPath(); s.arc(p(sx+5), p(sy-22), 5, 0, Math.PI*2); s.fill();
+  s.beginPath(); s.arc(p(sx),   p(sy-24), 5, 0, Math.PI*2); s.fill();
+
+  // floppy ears
+  s.fillStyle = '#0d0d0d';
+  s.beginPath(); s.ellipse(p(sx-9), p(sy-16), 4, 7, -0.3, 0, Math.PI*2); s.fill();
+  s.beginPath(); s.ellipse(p(sx+9), p(sy-16), 4, 7, 0.3, 0, Math.PI*2); s.fill();
+
+  // eyes — brown, cute
+  s.fillStyle = '#3d1a00';
+  s.beginPath(); s.arc(p(sx-3), p(sy-19), 2.5, 0, Math.PI*2); s.fill();
+  s.beginPath(); s.arc(p(sx+3), p(sy-19), 2.5, 0, Math.PI*2); s.fill();
+  // eye shine
+  s.fillStyle = '#fff';
+  s.beginPath(); s.arc(p(sx-2), p(sy-20), 0.8, 0, Math.PI*2); s.fill();
+  s.beginPath(); s.arc(p(sx+4), p(sy-20), 0.8, 0, Math.PI*2); s.fill();
+
+  // nose
+  s.fillStyle = '#331a00';
+  s.beginPath(); s.ellipse(p(sx), p(sy-15), 2.5, 1.5, 0, 0, Math.PI*2); s.fill();
+
+  // ball in mouth when returning
+  if(sherman.hasBall) {
+    s.fillStyle = '#1a6bcc'; s.beginPath(); s.arc(p(sx+8), p(sy-13), 5, 0, Math.PI*2); s.fill();
+    s.strokeStyle = '#2288ff'; s.lineWidth = 1;
+    for(let i=0;i<6;i++) {
+      const a = i * Math.PI/3;
+      s.beginPath(); s.moveTo(p(sx+8+2*Math.cos(a)), p(sy-13+2*Math.sin(a)));
+      s.lineTo(p(sx+8+5*Math.cos(a)), p(sy-13+5*Math.sin(a))); s.stroke();
+    }
+  }
+
+  // name label
+  s.font = '8px "Press Start 2P"'; s.textAlign = 'center';
+  const snw = s.measureText('SHERMAN').width + 8;
+  s.fillStyle = 'rgba(30,30,30,0.4)'; s.fillRect(sx-snw/2, sy-40, snw, 12);
+  s.fillStyle = '#c07020'; s.fillText('SHERMAN', sx, sy-31);
+
+  // fetch count
+  if(sherman.fetchCount > 0) {
+    s.font = '8px "VT323"'; s.fillStyle = 'rgba(200,150,50,0.7)';
+    s.fillText('fetched: ' + sherman.fetchCount + 'x', sx, sy-44);
+  }
+
+  // chat bubble
+  if(sherman.chatMsg && sherman.chatTimer > 0) {
+    sherman.chatTimer -= 16;
+    s.font = '14px "VT323"';
+    const bsw = s.measureText(sherman.chatMsg).width + 16;
+    s.fillStyle = 'rgba(30,30,30,0.25)'; s.strokeStyle = '#555'; s.lineWidth = 1;
+    s.beginPath(); s.roundRect(sx-bsw/2, sy-62, bsw, 20, 3); s.fill(); s.stroke();
+    s.fillStyle = '#d4a017'; s.textAlign = 'center';
+    s.fillText(sherman.chatMsg, sx, sy-47);
+  }
+
+  // draw the ball on the ground (when not being carried)
+  if(!sherman.hasBall) {
+    const ballObj = worldObjects.find(o => o.type==='sherman_ball');
+    if(ballObj) {
+      const bsp = worldToScreen(ballObj.c*TILE+TILE/2, ballObj.r*TILE+TILE/2);
+      s.fillStyle = '#1a6bcc';
+      s.beginPath(); s.arc(p(bsp.x), p(bsp.y), 6, 0, Math.PI*2); s.fill();
+      s.strokeStyle = '#2288ff'; s.lineWidth = 1.2;
+      for(let i=0;i<6;i++) {
+        const a = i * Math.PI/3;
+        s.beginPath(); s.moveTo(p(bsp.x+2*Math.cos(a)), p(bsp.y+2*Math.sin(a)));
+        s.lineTo(p(bsp.x+6*Math.cos(a)), p(bsp.y+6*Math.sin(a))); s.stroke();
+      }
+    }
+  }
+}
+
+// ── UPDATE SHERMAN ──
+function updateSherman(dt) {
+  if(!myPlayer) return;
+  const ballObj = worldObjects.find(o => o.type==='sherman_ball');
+
+  if(sherman.state === 'fetch') {
+    // run to ball
+    const tx = ballObj.c*TILE+TILE/2, ty = ballObj.r*TILE+TILE/2;
+    const dx = tx - sherman.x, dy = ty - sherman.y;
+    const dist = Math.sqrt(dx*dx+dy*dy);
+    if(dist < 8) {
+      // picked up
+      sherman.hasBall = true;
+      sherman.state = 'return';
+      sherman.targetX = sherman.homeX;
+      sherman.targetY = sherman.homeY;
+      sherman.chatMsg = ['woof!','*runs back*','yip!'][Math.floor(Math.random()*3)];
+      sherman.chatTimer = 2000;
+    } else {
+      const step = Math.min(dist, sherman.speed * dt/1000);
+      sherman.x += (dx/dist)*step; sherman.y += (dy/dist)*step;
+    }
+  } else if(sherman.state === 'return') {
+    const dx = sherman.homeX - sherman.x, dy = sherman.homeY - sherman.y;
+    const dist = Math.sqrt(dx*dx+dy*dy);
+    if(dist < 6) {
+      sherman.x = sherman.homeX; sherman.y = sherman.homeY;
+      sherman.hasBall = false;
+      sherman.state = 'wait';
+      sherman.fetchCount++;
+      // reset ball to home position
+      if(ballObj) { ballObj.c = BALL_START_C; ballObj.r = BALL_START_R; }
+      const returnMsgs = ['*drops ball* ready!','again!! again!!','*wags uncontrollably*','good boy did the thing','FETCH AGAIN PLS'];
+      sherman.chatMsg = returnMsgs[Math.floor(Math.random()*returnMsgs.length)];
+      sherman.chatTimer = 3500;
+      addChatMessage('SHERMAN', sherman.chatMsg, '#c07020', false, false);
+    } else {
+      const step = Math.min(dist, sherman.speed * dt/1000);
+      sherman.x += (dx/dist)*step; sherman.y += (dy/dist)*step;
+    }
+  } else if(sherman.state === 'idle' || sherman.state === 'wait') {
+    sherman.idleTimer -= dt;
+    if(sherman.idleTimer <= 0) {
+      sherman.idleTimer = 4000 + Math.random()*5000;
+      if(!_npcsMuted && Math.random() < 0.3) {
+        const idleMsgs = ['woof.','...','*sniffs*','woof?','*yawn*','bork.'];
+        sherman.chatMsg = idleMsgs[Math.floor(Math.random()*idleMsgs.length)];
+        sherman.chatTimer = 2000;
+      }
+    }
+  }
+}
+
+// ── THROW BALL FOR SHERMAN ──
+function throwBallForSherman() {
+  if(!myPlayer) return;
+  if(sherman.state === 'fetch' || sherman.state === 'return') {
+    addSystemMessage("sherman's already on it!"); return;
+  }
+  const ballObj = worldObjects.find(o => o.type==='sherman_ball');
+  if(!ballObj) return;
+  // throw to a random open spot in the room
+  const throwSpots = [{c:13,r:5},{c:15,r:10},{c:19,r:6},{c:12,r:9},{c:16,r:4},{c:20,r:9},{c:14,r:7}];
+  const spot = throwSpots[Math.floor(Math.random()*throwSpots.length)];
+  ballObj.c = spot.c; ballObj.r = spot.r;
+  sherman.state = 'fetch';
+  sherman.hasBall = false;
+  const throwMsgs = ['*ball thrown*','fetch, sherm!','go get it boy!','*chucks the ball*'];
+  const msg = throwMsgs[Math.floor(Math.random()*throwMsgs.length)];
+  addSystemMessage(msg);
+  if(myPlayer) { myPlayer.chatMsg = msg; myPlayer.chatTimer = 3000; addChatMessage(myPlayer.name, msg, myPlayer.color, true); }
+  sherman.chatMsg = 'BALL BALL BALL'; sherman.chatTimer = 1500;
+}
+
 // ── HANDLE OBJECT CLICK ──
 const ZYN_MSGS = [
   "you pick up a used zyn tin. mcgann was here.",
@@ -1505,6 +1728,10 @@ function handleObjectClick(obj) {
         farrowPlayer.chatTimer=5000;
         addChatMessage('FARROW',farrowPlayer.chatMsg,FARROW_COLOR,false,false);
       }
+      break;
+    }
+    case 'sherman_ball': {
+      throwBallForSherman();
       break;
     }
   }
@@ -2571,6 +2798,11 @@ function enterBungalow(rawName,color){
   setTimeout(()=>{
     if(robboPlayer){ robboPlayer.chatMsg='anyone got any kush.'; robboPlayer.chatTimer=6000; addChatMessage('ROBBO','anyone got any kush.',ROBBO_COLOR,false,false); }
   }, 6500);
+  setTimeout(()=>{
+    sherman.chatMsg = 'BALL BALL BALL'; sherman.chatTimer = 3000;
+    addChatMessage('SHERMAN', '*sprints over wagging tail*', '#c07020', false, false);
+    addSystemMessage('sherman sees you. click the blue ball to play fetch!');
+  }, 1200);
   _initBungalowFirebase();
   setTimeout(()=>_startPresence(name,color), 600);
 }
@@ -2581,7 +2813,7 @@ function loop(ts){
   const dt=Math.min(ts-lastTime,100);lastTime=ts;
   if(myPlayer){
     movePlayersToTargets(dt);updateCamera();updateSmoke(dt);_syncMyPosition();
-    updateCal(dt);updateFarrow(dt);updateRobbo(dt);
+    updateCal(dt);updateFarrow(dt);updateRobbo(dt);updateSherman(dt);
     // barney — very rare autonomous bark (every ~3-5 min)
     _barneyBarkTimer -= dt;
     if(_barneyBarkTimer <= 0) {
@@ -2598,7 +2830,7 @@ function loop(ts){
     }
   }
   ctx.clearRect(0,0,canvas.width,canvas.height);
-  drawWorld();drawPlayers();drawSmoke();
+  drawWorld();drawSherman();drawPlayers();drawSmoke();
   const grad=ctx.createRadialGradient(canvas.width/2,canvas.height/2,canvas.height*0.3,canvas.width/2,canvas.height/2,canvas.height*0.85);
   grad.addColorStop(0,'rgba(0,0,0,0)');grad.addColorStop(1,'rgba(0,0,0,0.55)');
   ctx.fillStyle=grad;ctx.fillRect(0,0,canvas.width,canvas.height);
