@@ -199,6 +199,16 @@ body{background:var(--bg);color:var(--text);font-family:'Fira Code',monospace;fo
   cursor: pointer; font-family: 'Press Start 2P', monospace; flex-shrink: 0;
 }
 .challenge-btn:hover { border-color: var(--green); color: var(--green); }
+/* style system */
+#co-style-info { font-size: 7px; color: #444; min-height: 12px; margin-bottom: 4px; letter-spacing: 1px; }
+#co-stamina-wrap { width: 150px; height: 5px; background: #0d1218; border: 1px solid #1a2030; margin: 4px auto 0; overflow: hidden; display: none; }
+#co-stamina-fill { height: 100%; width: 100%; transition: width 0.08s, background 0.3s; background: #00ff41; }
+#co-mult-badge { font-size: 14px; min-height: 20px; margin-top: 4px; }
+.co-float { position: absolute; font-family: 'Press Start 2P', monospace; font-size: 8px; pointer-events: none; z-index: 2; animation: coFloat 0.75s ease-out forwards; }
+@keyframes coFloat { 0%{opacity:1;transform:translateY(0) scale(1)} 100%{opacity:0;transform:translateY(-44px) scale(0.8)} }
+#coneoff-btn.pulse-hot { box-shadow: 0 0 56px rgba(0,255,65,1), inset 0 0 20px rgba(0,80,0,0.4); border-color: #afffaf; }
+#coneoff-btn.style-rhythm { border-color: #00ccff; box-shadow: 0 0 16px rgba(0,200,255,0.3), inset 0 0 16px rgba(0,0,0,0.6); }
+#coneoff-btn.style-slow { border-color: #ff69b4; box-shadow: 0 0 16px rgba(255,105,180,0.3), inset 0 0 16px rgba(0,0,0,0.6); }
 </style>
 </head>
 <body>
@@ -3069,6 +3079,46 @@ let _coLosses = parseInt(localStorage.getItem('bk_co_losses') || '0');
 let _coStreak = parseInt(localStorage.getItem('bk_co_streak') || '0');
 let _coPB     = parseInt(localStorage.getItem('bk_co_pb')     || '0');
 let _coRating = parseInt(localStorage.getItem('bk_co_rating') || '1000');
+// style system
+let _coStyle       = 'full_send'; // full_send | rhythm | slow_burn
+let _coStamina     = 100;
+let _coMult        = 1;
+let _coGameInterval= null;
+let _coLastTapTime = 0;
+let _coPulseStart  = 0;
+
+const _CO_STYLE_INFO = {
+  full_send: '3s — pure mash but stamina depletes. pace yourself.',
+  rhythm:    '4s — tap when the button glows for +2. miss = +1.',
+  slow_burn: '5s — build a x2.5 multiplier with consistent rhythm.',
+};
+
+function _updateStaminaBar() {
+  const fill = document.getElementById('co-stamina-fill');
+  if (!fill) return;
+  fill.style.width = _coStamina + '%';
+  fill.style.background = _coStamina > 60 ? '#00ff41' : _coStamina > 30 ? '#ffaa00' : '#ff4444';
+}
+function _updateMultBadge() {
+  const el = document.getElementById('co-mult-badge');
+  if (!el) return;
+  if (_coStyle === 'full_send') { el.textContent = ''; return; }
+  const color = _coMult >= 2 ? '#ffcc00' : _coMult >= 1.5 ? '#ff69b4' : _coMult > 1.1 ? '#00ccff' : '#444';
+  el.innerHTML = `<span style="color:${color};font-family:'Press Start 2P',monospace;font-size:11px;">x${_coMult.toFixed(1)}</span>`;
+}
+function _spawnFloat(text, color) {
+  const ov = document.getElementById('coneoff-overlay');
+  if (!ov) return;
+  const el = document.createElement('div');
+  el.className = 'co-float';
+  el.textContent = text;
+  el.style.color = color;
+  el.style.left = (Math.random() * 50 + 25) + '%';
+  el.style.top = '58%';
+  ov.style.position = 'fixed'; // ensure absolute children work
+  ov.appendChild(el);
+  el.addEventListener('animationend', () => el.remove());
+}
 
 // ── Build UI ──
 function _buildConeOffUI() {
@@ -3086,7 +3136,10 @@ function _buildConeOffUI() {
     <div class="score-block"><div class="sname" id="co-their-name">THEM</div><div class="sval" id="co-their-score">?</div><div class="stier" id="co-their-tier"></div></div>
   </div>
   <button id="coneoff-btn" class="disabled" ontouchstart="coTap(event)" onclick="coTap(event)">RIP!</button>
+  <div id="co-stamina-wrap"><div id="co-stamina-fill"></div></div>
+  <div id="co-mult-badge"></div>
   <div id="co-pb-bar"></div>
+  <div id="co-style-info"></div>
   <div id="coneoff-keys">[ SPACE or tap to rip ]</div>
   <div id="coneoff-record"></div>
   <div id="coneoff-result">
@@ -3110,6 +3163,13 @@ function _buildConeOffUI() {
 <div id="challenge-menu">
   <div class="cm-title" id="cm-title">CHALLENGE</div>
   <div class="cm-npc-form" id="cm-npc-form" style="display:none;"></div>
+  <div class="cm-row">
+    <label>STYLE</label>
+    <button class="cm-opt selected" data-style="full_send" onclick="cmSelect(this,'style')">FULL SEND</button>
+    <button class="cm-opt" data-style="rhythm" onclick="cmSelect(this,'style')">RHYTHM</button>
+    <button class="cm-opt" data-style="slow_burn" onclick="cmSelect(this,'style')">SLOW BURN</button>
+  </div>
+  <div id="cm-style-desc" style="font-size:7px;color:#444;margin-bottom:8px;line-height:1.7;"></div>
   <div class="cm-row">
     <label>STAKES</label>
     <button class="cm-opt selected" data-bet="bragging_rights" onclick="cmSelect(this,'bet')">PRIDE</button>
@@ -3162,10 +3222,16 @@ window.closeChallengeMenu = function() {
 window.cmSelect = function(btn, group) {
   document.querySelectorAll(`.cm-opt[data-${group}]`).forEach(b => b.classList.remove('selected'));
   btn.classList.add('selected');
+  if (group === 'style') {
+    const desc = document.getElementById('cm-style-desc');
+    if (desc) desc.textContent = _CO_STYLE_INFO[btn.dataset.style] || '';
+  }
 };
 window.sendChallenge = function() {
-  const betBtn = document.querySelector('.cm-opt[data-bet].selected');
-  _coBet = betBtn?.dataset.bet || 'bragging_rights';
+  const betBtn   = document.querySelector('.cm-opt[data-bet].selected');
+  const styleBtn = document.querySelector('.cm-opt[data-style].selected');
+  _coBet   = betBtn?.dataset.bet     || 'bragging_rights';
+  _coStyle = styleBtn?.dataset.style || 'full_send';
   closeChallengeMenu();
   if (['cal','farrow','robbo'].includes(_cmTargetId)) {
     _startNpcChallenge(_cmTargetId);
@@ -3328,6 +3394,14 @@ function _updateElo(won, draw, isNpc, formLabel) {
 // ── Open overlay ──
 function _openConeOffOverlay(theirName, theirColor, onGameEnd) {
   _coState='countdown'; _coScore=0; _coTheirScore=null; _coOnEnd=onGameEnd;
+  _coStamina=100; _coMult=1; _coLastTapTime=0; _coPulseStart=0;
+  if (_coGameInterval){clearInterval(_coGameInterval);_coGameInterval=null;}
+  // reset style visuals
+  const _btn=document.getElementById('coneoff-btn');
+  if(_btn){_btn.classList.remove('style-rhythm','style-slow','pulse-hot');}
+  document.getElementById('co-stamina-wrap').style.display='none';
+  document.getElementById('co-mult-badge').textContent='';
+  document.getElementById('co-style-info').textContent='';
   document.getElementById('co-my-name').textContent=myPlayer?.name||'YOU';
   document.getElementById('co-their-name').textContent=theirName;
   document.getElementById('co-their-name').style.color=theirColor;
@@ -3360,9 +3434,11 @@ function _openConeOffOverlay(theirName, theirColor, onGameEnd) {
       clearInterval(countInterval);
       cd.textContent='RIP!'; cd.style.color='#00ff41';
       _coState='playing';
+      _coLastTapTime=0;
       document.getElementById('coneoff-btn').classList.remove('disabled');
-      _coTimer=setTimeout(_endGame,3000);
-      let rem=3.0;
+      const gameDur=_coStyle==='slow_burn'?5000:_coStyle==='rhythm'?4000:3000;
+      _coTimer=setTimeout(_endGame,gameDur);
+      let rem=gameDur/1000;
       const remInt=setInterval(()=>{
         rem-=0.05;
         if(rem<=0){clearInterval(remInt);cd.textContent='0.0';}
@@ -3372,7 +3448,40 @@ function _openConeOffOverlay(theirName, theirColor, onGameEnd) {
           else if(rem<2)cd.style.color='#ffaa00';
         }
       },50);
-      // Mid-game Cal commentary at 1.5s
+      // style-specific setup
+      const stEl=document.getElementById('co-stamina-wrap');
+      const siEl=document.getElementById('co-style-info');
+      const cbtn=document.getElementById('coneoff-btn');
+      if(_coStyle==='full_send'){
+        stEl.style.display=''; _updateStaminaBar();
+        siEl.textContent='STAMINA — pace yourself';
+        _coGameInterval=setInterval(()=>{
+          if(_coState!=='playing')return;
+          _coStamina=Math.min(100,_coStamina+1); // recover 20/sec
+          _updateStaminaBar();
+        },50);
+      } else if(_coStyle==='rhythm'){
+        stEl.style.display='none';
+        siEl.textContent='RHYTHM — tap the glow for +2';
+        cbtn.classList.add('style-rhythm');
+        _coPulseStart=Date.now();
+        _coGameInterval=setInterval(()=>{
+          if(_coState!=='playing')return;
+          const phase=(Date.now()-_coPulseStart)%500;
+          cbtn.classList.toggle('pulse-hot',phase<130);
+        },25);
+      } else if(_coStyle==='slow_burn'){
+        stEl.style.display='none';
+        siEl.textContent='SLOW BURN — build your multiplier';
+        cbtn.classList.add('style-slow');
+        _updateMultBadge();
+        _coGameInterval=setInterval(()=>{
+          if(_coState!=='playing'||_coLastTapTime===0)return;
+          const gap=Date.now()-_coLastTapTime;
+          if(gap>600){_coMult=Math.max(1,_coMult-0.015);_updateMultBadge();}
+        },50);
+      }
+      // Mid-game Cal commentary
       if(!_npcsMuted){
         _coMidTimer=setTimeout(()=>{
           if(calPlayer&&calPlayer.chatTimer<200){
@@ -3381,7 +3490,7 @@ function _openConeOffOverlay(theirName, theirColor, onGameEnd) {
             calPlayer.chatTimer=1800;
             addChatMessage('CAL',calPlayer.chatMsg,CAL_COLOR,false,false);
           }
-        },1500);
+        },gameDur*0.5);
       }
     }
   },1000);
@@ -3389,7 +3498,11 @@ function _openConeOffOverlay(theirName, theirColor, onGameEnd) {
 
 function _endGame(){
   _coState='done';
-  document.getElementById('coneoff-btn').classList.add('disabled');
+  if(_coGameInterval){clearInterval(_coGameInterval);_coGameInterval=null;}
+  const btn=document.getElementById('coneoff-btn');
+  btn.classList.add('disabled');
+  btn.classList.remove('style-rhythm','style-slow','pulse-hot');
+  _coScore=Math.floor(_coScore); // finalise fractional scores
   document.getElementById('co-my-score').textContent=_coScore;
   const t=_coScoreTier(_coScore);
   document.getElementById('co-my-tier').textContent=t.label;
@@ -3401,16 +3514,46 @@ function _endGame(){
 window.coTap = function(e){
   if(e){e.preventDefault();e.stopPropagation();}
   if(_coState!=='playing')return;
-  _coScore++;
-  document.getElementById('co-my-score').textContent=_coScore;
-  const t=_coScoreTier(_coScore);
+  const now=Date.now();
+  let pts=1, floatTxt='+1', floatCol='#00ff41';
+
+  if(_coStyle==='full_send'){
+    _coStamina=Math.max(0,_coStamina-11);
+    _updateStaminaBar();
+    if(_coStamina<25){
+      if(Math.random()<0.45){pts=0;floatTxt='tired...';floatCol='#ff4444';}
+      else{pts=1;floatTxt='+1';floatCol='#ff8800';}
+    } else if(_coStamina<50){
+      floatCol='#ffaa00';
+    }
+  } else if(_coStyle==='rhythm'){
+    const phase=(Date.now()-_coPulseStart)%500;
+    if(phase<140||phase>370){pts=2;floatTxt='+2 RHYTHM!';floatCol='#00ccff';}
+    else{pts=1;floatTxt='+1';floatCol='#445';}
+  } else if(_coStyle==='slow_burn'){
+    const gap=_coLastTapTime>0?now-_coLastTapTime:300;
+    if(gap>=180&&gap<=480){_coMult=Math.min(2.5,_coMult+0.08);}
+    else if(gap<120){_coMult=Math.max(1,_coMult-0.12);}
+    else{_coMult=Math.max(1,_coMult-0.04);}
+    _updateMultBadge();
+    pts=_coMult;
+    floatTxt=_coMult>=2?'+'+_coMult.toFixed(1)+'x!!':'+'+_coMult.toFixed(1)+'x';
+    floatCol=_coMult>=2?'#ffcc00':_coMult>=1.5?'#ff69b4':'#00ff41';
+  }
+
+  _coLastTapTime=now;
+  _coScore+=pts;
+  const displayScore=Math.floor(_coScore);
+  document.getElementById('co-my-score').textContent=displayScore;
+  const t=_coScoreTier(displayScore);
   document.getElementById('co-my-tier').textContent=t.label;
   document.getElementById('co-my-tier').style.color=t.color;
   const btn=document.getElementById('coneoff-btn');
   btn.classList.add('flashed');
   setTimeout(()=>btn.classList.remove('flashed'),55);
-  if(_coScore>_coPB){
-    document.getElementById('co-pb-bar').textContent='★ NEW PB: '+_coScore+' rips!';
+  _spawnFloat(floatTxt,floatCol);
+  if(displayScore>_coPB){
+    document.getElementById('co-pb-bar').textContent='★ NEW PB: '+displayScore+' rips!';
     document.getElementById('co-pb-bar').style.color='#ffcc00';
   }
 };
@@ -3430,7 +3573,8 @@ function _finishConeOff(isNpc, npcFlavor, formLabel){
   const myTier=_coScoreTier(myScore), theirTier=_coScoreTier(theirScore);
   const titleEl=document.getElementById('res-title');
   const subEl=document.getElementById('res-sub');
-  document.getElementById('res-score-detail').innerHTML=`<span style="color:#ffcc00">${myScore}</span> vs <span style="color:#666">${theirScore}</span>`;
+  const styleLabel={full_send:'FULL SEND',rhythm:'RHYTHM',slow_burn:'SLOW BURN'}[_coStyle]||'';
+  document.getElementById('res-score-detail').innerHTML=`<span style="color:#ffcc00">${myScore}</span> vs <span style="color:#666">${theirScore}</span><br><span style="color:#333;font-size:7px;">${styleLabel}</span>`;
   document.getElementById('res-tier').innerHTML=`your rips: <span style="color:${myTier.color}">${myTier.label}</span>`+(isNewPB?' <span style="color:#ffcc00">★ NEW PB!</span>':'');
   const deltaStr=eloDelta>0?'+'+eloDelta:(eloDelta<0?''+eloDelta:'±0');
   document.getElementById('res-rating').innerHTML=`rating: <span style="color:${rank.color}">${_coRating}</span> (${deltaStr}) — <span style="color:${rank.color}">${rank.title}</span>`;
@@ -3498,7 +3642,10 @@ window.closeConeOff = function(){
   _coState='idle';
   if(_coTimer){clearTimeout(_coTimer);_coTimer=null;}
   if(_coMidTimer){clearTimeout(_coMidTimer);_coMidTimer=null;}
+  if(_coGameInterval){clearInterval(_coGameInterval);_coGameInterval=null;}
   if(_coUnsub){_coUnsub();_coUnsub=null;}
+  const btn=document.getElementById('coneoff-btn');
+  if(btn)btn.classList.remove('style-rhythm','style-slow','pulse-hot');
 };
 
 window.coRematch = function(){
