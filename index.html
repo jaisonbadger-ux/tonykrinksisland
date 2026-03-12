@@ -1151,7 +1151,7 @@ input.field:focus, textarea.field:focus { border-color: var(--blue); }
 
 <!-- TICKER -->
 <div class="ticker">
-  <span class="ticker-inner">
+  <span class="ticker-inner" id="ticker-inner">
     &nbsp;&nbsp;&nbsp;
     <span class="hi">sys:</span> welcome to tony krink's island &nbsp;·&nbsp;
     <span class="warn">warn:</span> bajookie flows are at maximum capacity &nbsp;·&nbsp;
@@ -1160,9 +1160,48 @@ input.field:focus, textarea.field:focus { border-color: var(--blue); }
     <span class="hi">sys:</span> the bajookie clicker will never be finished. this is intentional. &nbsp;·&nbsp;
     <span class="warn">info:</span> farrow has not eaten anything except twiggy sticks in four days. &nbsp;·&nbsp;
     <span class="hi">sys:</span> click the bajookie coin. there is no reason. click anyway. &nbsp;·&nbsp;
+    <span class="warn">cal:</span> <span id="cal-tracker">cal has found the ketamine again</span> &nbsp;·&nbsp;
     &nbsp;&nbsp;&nbsp;
   </span>
 </div>
+<script>
+(function() {
+  const CAL_UPDATES = [
+    'cal has found the ketamine again',
+    'cal is claiming the couch is his bed now. this is day 4.',
+    'cal has not moved in 6 hours. welfare check pending.',
+    'cal just ate 4 gummies and called it dinner',
+    'cal has a great idea. nobody asked.',
+    'cal has misplaced something important',
+    'cal has found it. it was in his hand.',
+    'cal just announced he is going sober. this has happened before.',
+    'cal is on the roof. reasons unclear.',
+    'cal finished the goon. again.',
+    'cal says everything is fine. it is not fine.',
+    'cal is currently explaining something nobody understands',
+    'cal claims he invented bajookie. legally this is being reviewed.',
+    'cal has a scheme. details to follow.',
+    'cal is asleep. finally. everyone is relieved.',
+    'cal woke up. everyone is less relieved.',
+    'cal is staring at the wall. he says it is meditation.',
+    'cal borrowed something. it will not be returned.',
+    'cal has entered the bungalow. the vibe has shifted.',
+    'cal says he\'s "mostly fine". this is the worst possible answer.',
+    'cal has found a new interest. it lasted 11 minutes.',
+    'cal is cooking something. smoke alarm involved.',
+    'cal has opinions about the clicker. they are incorrect.',
+  ];
+  const el = document.getElementById('cal-tracker');
+  if (!el) return;
+  let idx = Math.floor(Math.random() * CAL_UPDATES.length);
+  setInterval(function() {
+    idx = (idx + 1) % CAL_UPDATES.length;
+    el.style.opacity = '0';
+    setTimeout(function() { el.textContent = CAL_UPDATES[idx]; el.style.opacity = '1'; }, 400);
+  }, 12000);
+  el.style.transition = 'opacity 0.4s';
+})();
+</script>
 
 <!-- NAV -->
 <div class="nav">
@@ -2445,8 +2484,8 @@ function newDialogue(targetId, _noCount) {
   ).join('');
   // Update tweet share link
   const tweetText = dlg.map(l => l.n + ': ' + l.t).join('\n') +
-    '\n\n🏝️ Tony Krink\'s Island\n#Seinfeld #SeinfeldBot #BajookieIsland';
-  const tweetHref = 'https://twitter.com/intent/tweet?text=' + encodeURIComponent(tweetText.slice(0, 270));
+    '\n\n🏝️ Tony Krink\'s Island — ' + window.location.origin + '\n#Seinfeld #SeinfeldBot #BajookieIsland';
+  const tweetHref = 'https://twitter.com/intent/tweet?text=' + encodeURIComponent(tweetText.slice(0, 280));
   const shareEl = document.getElementById(targetId + '-tweet');
   if (shareEl) shareEl.href = tweetHref;
   if (_noCount) return;
