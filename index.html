@@ -4186,7 +4186,7 @@ function render() {
   const w = getEl('japingus-widget');
   if (!w) return;
 
-  w.className = '';
+  w.className = collapsed ? 'jap-collapsed' : '';
   if (['bad','dying','dead','goon'].includes(state)) w.classList.add('state-' + state);
 
   if ((state === 'bad' || state === 'dying') && collapsed) {
