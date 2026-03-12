@@ -4371,7 +4371,7 @@ async function _loadProfile(uid) {
   }
   // Fall back gracefully — username is always set at registration
   if (!_currentProfile) {
-    _currentProfile = { avatarId: 'goblin', username: (_currentUser?.email || '').split('@')[0] || 'anon' };
+    _currentProfile = { avatarId: 'goblin', username: 'anon' };
   }
   try { localStorage.setItem('tk_profile', JSON.stringify(_currentProfile)); } catch(e) {}
 }
