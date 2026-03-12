@@ -692,6 +692,8 @@ input.field:focus, textarea.field:focus { border-color: var(--blue); }
 .slot-machine.win-flash { animation:winFlash 0.5s ease 3; }
 
 @keyframes winFlash { 0%,100%{border-color:var(--gold)} 50%{border-color:#fff; box-shadow:0 0 30px rgba(255,255,255,0.5)} }
+@keyframes jackpotShake { 0%,100%{transform:translate(0,0)} 15%{transform:translate(-6px,3px)} 30%{transform:translate(6px,-3px)} 45%{transform:translate(-4px,5px)} 60%{transform:translate(5px,-2px)} 75%{transform:translate(-3px,4px)} }
+.jackpot-shake { animation: jackpotShake 0.5s ease 4; }
 
 .slot-reels { display:flex; justify-content:center; gap:12px; margin:16px 0; }
 
@@ -1311,8 +1313,8 @@ input.field:focus, textarea.field:focus { border-color: var(--blue); }
           <div class="stat-row"><span>all-time bajookies</span><span id="island-total-coins" style="color:var(--gold);font-weight:700;">—</span></div>
           <div class="stat-row"><span>total clicks</span><span id="island-total-clicks" style="color:var(--cyan);">—</span></div>
           <div class="stat-row"><span>time</span><span id="stat-time">--:--:--</span></div>
-          <div class="stat-row"><span>vibe index</span><span style="color:var(--green);">█████████░ 94%</span></div>
-          <div class="stat-row"><span>cal</span><span style="color:#1a88cc;" id="home-cal-status">stoned in the bungalow</span></div>
+          <div class="stat-row"><span>vibe index</span><span id="home-vibe-index" style="color:var(--green);">loading...</span></div>
+          <div class="stat-row"><span>bungalow</span><span id="home-bungalow-status" style="color:#1a88cc;">checking...</span></div>
           <div class="stat-row"><span>japingus</span><span id="home-jap-status" style="color:var(--muted);">checking...</span></div>
           <div style="margin-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:6px;">
             <button class="btn btn-gold btn-block" onclick="showTab('clicker',null)">🪙 clicker</button>
@@ -3178,11 +3180,13 @@ function doClick(e) {
   checkMs(); save(); updateDisplay();
 }
 
-function spawnFloat(x, y, txt) {
+function spawnFloat(x, y, txt, color) {
   const el = document.createElement('div');
   el.className = 'float-num';
   el.textContent = txt;
-  el.style.cssText = `left:${x-20}px;top:${y-20}px;`;
+  const col = color || (clickPow >= 1e6 ? '#bc8cff' : clickPow >= 10000 ? '#f0c674' : clickPow >= 1000 ? '#58a6ff' : '#3fb950');
+  const sz  = clickPow >= 1e6 ? '16px' : clickPow >= 10000 ? '14px' : '13px';
+  el.style.cssText = `left:${x-20}px;top:${y-20}px;color:${col};font-size:${sz};`;
   document.body.appendChild(el);
   setTimeout(() => el.remove(), 900);
 }
@@ -3521,7 +3525,42 @@ initGame(); // run immediately on page load (no auth required)
     if (!el) return;
     el.textContent = JAP_STATE_LABELS[state] || state;
     el.style.color = JAP_STATE_COLORS[state] || 'var(--muted)';
+    // Update vibe index based on japingus state
+    const vibeEl = document.getElementById('home-vibe-index');
+    if (vibeEl) {
+      const VIBE = {
+        happy:'██████████ 100%', okay:'████████░░ 78%', need:'█████░░░░░ 52%',
+        bad:'███░░░░░░░ 31%',   dying:'█░░░░░░░░░ 9%',  goon:'█████████░ 95%', dead:'░░░░░░░░░░ 0%',
+      };
+      const VIBE_COL = {
+        happy:'var(--green)', okay:'var(--cyan)', need:'var(--gold)',
+        bad:'var(--orange)', dying:'var(--red)', goon:'#cc44ff', dead:'var(--dim)',
+      };
+      vibeEl.textContent = VIBE[state] || '███████░░░ 69%';
+      vibeEl.style.color = VIBE_COL[state] || 'var(--muted)';
+    }
   };
+})();
+
+// ── BUNGALOW ONLINE COUNT (home sidebar) ──
+(function() {
+  function _pollBungalowCount() {
+    if (!window._db) { setTimeout(_pollBungalowCount, 3000); return; }
+    window._db.collection('bungalow_players').onSnapshot(snap => {
+      const now = Date.now();
+      const online = snap.docs.filter(d => d.data().lastSeen && now - d.data().lastSeen < 45000).length;
+      const el = document.getElementById('home-bungalow-status');
+      if (!el) return;
+      if (online === 0) {
+        el.textContent = 'empty rn';
+        el.style.color = 'var(--dim)';
+      } else {
+        el.textContent = online + ' goblin' + (online !== 1 ? 's' : '') + ' inside';
+        el.style.color = '#1a88cc';
+      }
+    }, () => {});
+  }
+  setTimeout(_pollBungalowCount, 2000);
 })();
 
 
@@ -5412,6 +5451,9 @@ window.spinSlots = async function() {
       const amtEl   = document.getElementById('jackpot-amount');
       if (overlay) overlay.classList.add('show');
       if (amtEl)   amtEl.textContent = '+' + payout.toLocaleString() + ' bajookie coins';
+      // Screen shake on jackpot
+      document.body.classList.add('jackpot-shake');
+      setTimeout(() => document.body.classList.remove('jackpot-shake'), 2200);
     }
 
     const resultEl = document.getElementById('spin-result');
@@ -5426,6 +5468,17 @@ window.spinSlots = async function() {
 
 window._initCasino = function() {
   _updateCasinoDisplay();
+};
+
+// ALL IN — bet everything you have
+window.setAllIn = function() {
+  const bal = typeof coins !== 'undefined' ? Math.floor(coins) : 0;
+  if (bal < 1) return;
+  const btn = document.querySelector('.bet-btn[onclick="setAllIn()"]');
+  document.querySelectorAll('.bet-btn').forEach(b => b.classList.remove('active'));
+  _casino.bet = bal;
+  const betDisplay = document.getElementById('bet-display');
+  if (betDisplay) betDisplay.textContent = fmt(bal);
 };
 
 // ──────────────────────────────────────────────
@@ -5793,12 +5846,21 @@ async function _initNostr() {
   };
 
   // Override postMsg — publish to Nostr
+  const MSG_COOLDOWN_MS = 30000;
   window.postMsg = async function(full) {
     const nameEl = document.getElementById(full ? 'fb-name' : 'hb-name');
     const msgEl  = document.getElementById(full ? 'fb-msg'  : 'hb-msg');
     const name = (nameEl?.value.trim()) || (window._currentProfile?.username) || 'anonymous';
     const text = msgEl?.value.trim();
     if (!text) return;
+    // Rate limit: 30s between posts
+    const lastPost = parseInt(localStorage.getItem('tk_last_post') || '0');
+    const remaining = Math.ceil((MSG_COOLDOWN_MS - (Date.now() - lastPost)) / 1000);
+    if (remaining > 0) {
+      _setStatus(`⏳ wait ${remaining}s before posting again`, 'warn');
+      return;
+    }
+    localStorage.setItem('tk_last_post', Date.now().toString());
 
     const btn = document.getElementById('brd-send-btn');
     if (btn) { btn.disabled = true; btn.textContent = '⏳ transmitting…'; }
