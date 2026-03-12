@@ -4367,7 +4367,7 @@ async function _onAuthChanged(user) {
 }
 
 async function _loadProfile(uid) {
-  // If already set in memory (e.g. just registered), don't overwrite with a Firestore
+  // If already set in memory with a real username (e.g. just registered), skip Firestore
   // read that may not have landed yet — just persist to localStorage and return.
   if (_currentProfile && _currentProfile.username && _currentProfile.username !== 'anon') {
     try { localStorage.setItem('tk_profile', JSON.stringify(_currentProfile)); } catch(e) {}
@@ -4376,10 +4376,22 @@ async function _loadProfile(uid) {
   try {
     const snap = await _db.doc(`users/${uid}/data/profile`).get();
     _currentProfile = snap.exists ? snap.data() : null;
+    if (!snap.exists) console.warn('[profile] doc not found for uid:', uid);
   } catch(e) {
+    console.warn('[profile] Firestore read failed — falling back to localStorage. Error:', e.message);
     _currentProfile = null;
   }
-  if (!_currentProfile) {
+  // Firestore failed or doc missing — try localStorage cache before defaulting to anon
+  if (!_currentProfile || !_currentProfile.username || _currentProfile.username === 'anon') {
+    try {
+      const cached = JSON.parse(localStorage.getItem('tk_profile') || '{}');
+      if (cached.username && cached.username !== 'anon') {
+        console.log('[profile] using localStorage cache:', cached.username);
+        _currentProfile = cached;
+      }
+    } catch(e) {}
+  }
+  if (!_currentProfile || !_currentProfile.username) {
     _currentProfile = { avatarId: 'goblin', username: 'anon' };
   }
   try { localStorage.setItem('tk_profile', JSON.stringify(_currentProfile)); } catch(e) {}
