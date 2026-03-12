@@ -2,10 +2,9 @@ name: Dribzybot — Post to Firestore
 
 on:
   schedule:
-    # Every hour, 9am–9pm AEDT (UTC+11 in daylight saving, UTC+10 standard)
-    # AEDT 9am = UTC 22:00 (prev day), AEDT 9pm = UTC 10:00
-    # Running UTC 22–10 covers 9am–9pm AEDT (adjust to 23–11 when clocks go back to AEST in April)
-    - cron: "0 22,23,0,1,2,3,4,5,6,7,8,9,10 * * *"
+    # Every hour, 9am–9pm AEST (UTC+10, standard time)
+    # AEST 9am = UTC 23:00 (prev day), AEST 9pm = UTC 11:00
+    - cron: "0 23,0,1,2,3,4,5,6,7,8,9,10,11 * * *"
   workflow_dispatch:
 
 jobs:
