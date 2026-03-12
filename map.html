@@ -3549,7 +3549,7 @@ function _rollNpcForm(npcId) {
 // ── Challenge menu ──
 window.openChallengeMenu = function(targetId) {
   _cmTargetId = targetId;
-  const isNpc = ['cal','farrow','robbo'].includes(targetId);
+  const isNpc = ['cal','farrow','robbo','julo'].includes(targetId);
   const tName = isNpc ? targetId.toUpperCase() : (players[targetId]?.name || targetId.toUpperCase());
   document.getElementById('cm-title').textContent = '⚔ CHALLENGE ' + tName;
   const formEl = document.getElementById('cm-npc-form');
@@ -3583,7 +3583,7 @@ window.sendChallenge = function() {
   _coBet   = betBtn?.dataset.bet     || 'bragging_rights';
   _coStyle = styleBtn?.dataset.style || 'full_send';
   closeChallengeMenu();
-  if (['cal','farrow','robbo'].includes(_cmTargetId)) {
+  if (['cal','farrow','robbo','julo'].includes(_cmTargetId)) {
     _startNpcChallenge(_cmTargetId);
   } else {
     _sendFirestoreChallenge(_cmTargetId);
