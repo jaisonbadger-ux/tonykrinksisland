@@ -3004,7 +3004,7 @@ function _startPresence(name, color) {
     updatePlayersList();
   }, err => console.warn('Bungalow snapshot error:', err));
 
-  setInterval(()=>{ if(_myDocRef) _myDocRef.update({lastSeen:Date.now()}).catch(()=>{}); }, 15000);
+  window._presenceInterval = setInterval(()=>{ if(_myDocRef) _myDocRef.update({lastSeen:Date.now()}).catch(()=>{}); }, 15000);
 }
 
 function _syncMyPosition() {
@@ -3641,9 +3641,13 @@ function _sendFirestoreChallenge(targetId) {
   }).catch(e => addSystemMessage('challenge failed: ' + e.message));
 }
 
+let _unsubChallengeTarget = null;
+let _unsubChallengeActive = null;
 function _listenForChallenges() {
   if (!_bDb) return;
-  _bDb.collection('bungalow_challenges').where('target.id','==',_SESSION_ID).where('status','==','pending')
+  if (_unsubChallengeTarget) { _unsubChallengeTarget(); _unsubChallengeTarget = null; }
+  if (_unsubChallengeActive) { _unsubChallengeActive(); _unsubChallengeActive = null; }
+  _unsubChallengeTarget = _bDb.collection('bungalow_challenges').where('target.id','==',_SESSION_ID).where('status','==','pending')
     .onSnapshot(snap => {
       snap.docChanges().forEach(ch => {
         if (ch.type === 'added') {
@@ -3653,7 +3657,7 @@ function _listenForChallenges() {
         }
       });
     });
-  _bDb.collection('bungalow_challenges').where('challenger.id','==',_SESSION_ID).where('status','==','active')
+  _unsubChallengeActive = _bDb.collection('bungalow_challenges').where('challenger.id','==',_SESSION_ID).where('status','==','active')
     .onSnapshot(snap => {
       snap.docChanges().forEach(ch => {
         if ((ch.type==='modified'||ch.type==='added') && _coState==='idle') {

@@ -4121,7 +4121,7 @@ function applyOfflineDecay() {
   if (!jap.alive) return;
   const elapsed = Math.max(0, (Date.now() - jap.lastSave) / 1000);
   if (elapsed < 2) return;
-  const secs = Math.min(elapsed, 30 * 60);
+  const secs = Math.min(elapsed, 8 * 60 * 60);
   ['buzz','smoke','zyn','pills','kush','fun','goon'].forEach(k => { jap[k] = Math.max(0, (jap[k]||0) - DRAIN[k] * secs); });
   const low = ['buzz','smoke','zyn','pills'].filter(k => jap[k] < 20).length;
   if (low > 0) jap.life = Math.max(0, jap.life - LIFE_DRAIN_LOW * low * secs);
