@@ -1,0 +1,1127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>~/krink-cricket — tony krink's island</title>
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<style>
+:root{--bg:#0d1117;--card:#161b22;--text:#c9d1d9;--border:#21262d;--blue:#58a6ff;--green:#3fb950;--gold:#d4a017;--cyan:#39c5cf;--pink:#f778ba;--red:#f85149;--dim:#484f58;--muted:#8b949e;--neon:#00ff41;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Fira Code',monospace;font-size:13px;overflow:hidden;}
+#topbar{background:#010409;border-bottom:1px solid var(--border);padding:0 14px;height:36px;display:flex;align-items:center;flex-shrink:0;z-index:100;font-size:12px;}
+.tb-tab{padding:0 14px;height:100%;display:flex;align-items:center;color:var(--muted);text-decoration:none;border-right:1px solid var(--border);transition:color .15s,background .15s;font-size:11px;white-space:nowrap;}
+.tb-tab:hover{color:var(--text);background:rgba(255,255,255,.04);}
+.tb-tab.active{color:var(--neon);background:rgba(0,255,65,.06);border-bottom:2px solid var(--neon);}
+.tb-title{color:var(--gold);font-weight:600;padding:0 14px;border-right:1px solid var(--border);font-size:11px;}
+.tb-spacer{flex:1;}
+
+#wrap{display:flex;flex-direction:column;height:calc(100vh - 36px);}
+
+/* SCOREBOARD */
+#scoreboard{background:#010409;border-bottom:1px solid var(--border);padding:8px 16px;display:flex;align-items:center;gap:24px;flex-shrink:0;}
+.sc-item{display:flex;flex-direction:column;align-items:center;}
+.sc-label{font-size:9px;color:var(--dim);letter-spacing:1px;text-transform:uppercase;}
+.sc-val{font-family:'Press Start 2P',monospace;font-size:14px;color:#fff;line-height:1.4;}
+.sc-val.runs{color:var(--gold);}
+.sc-val.wickets{color:var(--red);}
+.sc-val.overs{color:var(--cyan);}
+#target-wrap{margin-left:auto;text-align:right;}
+#target-label{font-size:10px;color:var(--muted);}
+#target-val{font-family:'Press Start 2P',monospace;font-size:11px;color:var(--pink);}
+#commentary{flex:1;font-size:12px;color:var(--muted);padding:0 16px;font-style:italic;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+
+/* MAIN */
+#main{flex:1;display:flex;gap:0;overflow:hidden;}
+#game-area{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;}
+#gameCanvas{display:block;image-rendering:pixelated;}
+
+/* SHOT BUTTONS */
+#shot-panel{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);display:flex;gap:10px;z-index:10;}
+.shot-btn{font-family:'Press Start 2P',monospace;font-size:9px;padding:10px 18px;border:2px solid;cursor:pointer;transition:all .1s;background:rgba(0,0,0,0.8);letter-spacing:1px;user-select:none;-webkit-user-select:none;}
+.shot-btn:active{transform:scale(0.95);}
+.shot-btn.pull{border-color:var(--pink);color:var(--pink);}
+.shot-btn.pull:hover,.shot-btn.pull.selected{background:rgba(247,120,186,0.15);box-shadow:0 0 12px rgba(247,120,186,0.4);}
+.shot-btn.drive{border-color:var(--gold);color:var(--gold);}
+.shot-btn.drive:hover,.shot-btn.drive.selected{background:rgba(212,160,23,0.15);box-shadow:0 0 12px rgba(212,160,23,0.4);}
+.shot-btn.block{border-color:var(--cyan);color:var(--cyan);}
+.shot-btn.block:hover,.shot-btn.block.selected{background:rgba(57,197,207,0.15);box-shadow:0 0 12px rgba(57,197,207,0.4);}
+.shot-btn:disabled{opacity:0.3;cursor:not-allowed;}
+
+/* TIMING BAR */
+#timing-wrap{position:absolute;bottom:70px;left:50%;transform:translateX(-50%);width:280px;display:none;}
+#timing-bg{height:14px;background:rgba(255,255,255,0.05);border:1px solid var(--border);position:relative;overflow:hidden;}
+#timing-fill{height:100%;width:100%;background:linear-gradient(90deg,var(--red),var(--gold),var(--green),var(--gold),var(--red));transition:none;}
+#timing-cursor{position:absolute;top:0;height:100%;width:3px;background:#fff;box-shadow:0 0 6px #fff;left:0;}
+#timing-label{font-size:9px;color:var(--dim);text-align:center;margin-top:4px;font-family:'Press Start 2P',monospace;}
+
+/* RESULT FLASH */
+#result-flash{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-family:'Press Start 2P',monospace;font-size:28px;pointer-events:none;opacity:0;text-shadow:0 0 20px currentColor;z-index:20;text-align:center;}
+#result-sub{font-size:10px;margin-top:8px;opacity:0.8;}
+
+/* START / GAMEOVER OVERLAY */
+#overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(1,4,9,0.92);z-index:30;}
+#overlay h1{font-family:'Press Start 2P',monospace;font-size:18px;color:var(--gold);margin-bottom:8px;text-shadow:0 0 20px rgba(212,160,23,0.5);}
+#overlay .subtitle{color:var(--muted);font-size:11px;margin-bottom:24px;text-align:center;max-width:320px;line-height:1.8;}
+#overlay .big-score{font-family:'Press Start 2P',monospace;font-size:36px;color:var(--neon);margin:12px 0;text-shadow:0 0 20px rgba(0,255,65,0.5);}
+#overlay .big-score-label{font-size:10px;color:var(--muted);margin-bottom:20px;}
+#start-btn,#restart-btn{font-family:'Press Start 2P',monospace;font-size:11px;padding:12px 28px;background:transparent;border:2px solid var(--neon);color:var(--neon);cursor:pointer;letter-spacing:1px;transition:all .15s;}
+#start-btn:hover,#restart-btn:hover{background:rgba(0,255,65,0.1);box-shadow:0 0 20px rgba(0,255,65,0.3);}
+#name-input{font-family:'Fira Code',monospace;font-size:13px;padding:8px 12px;background:#010409;border:1px solid var(--border);color:var(--text);margin-bottom:12px;text-align:center;width:200px;}
+#name-input:focus{outline:none;border-color:var(--neon);}
+.ov-label{font-size:10px;color:var(--dim);margin-bottom:4px;}
+.ov-btn{font-family:'Press Start 2P',monospace;font-size:10px;padding:8px 16px;background:transparent;border:1px solid var(--border);color:var(--muted);cursor:pointer;transition:all .15s;}
+.ov-btn:hover{border-color:var(--neon);color:var(--neon);}
+.ov-btn.active{border-color:var(--neon);color:var(--neon);background:rgba(0,255,65,0.08);}
+#powerplay-flash{position:absolute;top:20px;left:50%;transform:translateX(-50%);font-family:'Press Start 2P',monospace;font-size:11px;color:var(--neon);background:rgba(0,255,65,0.1);border:1px solid var(--neon);padding:6px 14px;pointer-events:none;opacity:0;transition:opacity 0.5s;z-index:25;}
+#milestone-flash{position:absolute;top:50px;left:50%;transform:translateX(-50%);font-family:'Press Start 2P',monospace;font-size:10px;color:var(--gold);pointer-events:none;opacity:0;transition:opacity 0.5s;z-index:25;text-align:center;}
+
+/* LEADERBOARD PANEL */
+#lb-panel{width:220px;background:#010409;border-left:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;}
+#lb-header{padding:10px 12px;border-bottom:1px solid var(--border);font-size:10px;color:var(--neon);letter-spacing:1px;}
+#lb-list{flex:1;overflow-y:auto;padding:8px;}
+#lb-list::-webkit-scrollbar{width:3px;}
+#lb-list::-webkit-scrollbar-thumb{background:var(--border);}
+.lb-entry{display:flex;align-items:center;gap:8px;padding:5px 4px;border-bottom:1px solid rgba(255,255,255,0.03);font-size:11px;}
+.lb-rank{color:var(--dim);width:18px;text-align:right;flex-shrink:0;}
+.lb-rank.gold{color:var(--gold);}
+.lb-rank.silver{color:#aaa;}
+.lb-rank.bronze{color:#cd7f32;}
+.lb-name{flex:1;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.lb-score{color:var(--cyan);font-weight:600;flex-shrink:0;}
+.lb-you{color:var(--neon)!important;}
+
+/* BALL HISTORY */
+#ball-history{padding:8px 12px;border-top:1px solid var(--border);display:flex;flex-wrap:wrap;gap:4px;}
+.ball-dot{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:600;font-family:'Press Start 2P',monospace;}
+.ball-dot.six{background:var(--neon);color:#000;}
+.ball-dot.four{background:var(--blue);color:#000;}
+.ball-dot.runs-1,.ball-dot.runs-2,.ball-dot.runs-3{background:var(--muted);color:#000;}
+.ball-dot.runs-0{background:var(--dim);color:var(--text);}
+.ball-dot.wicket{background:var(--red);color:#fff;}
+.ball-dot.wide{background:var(--gold);color:#000;font-size:7px;}
+
+/* STATS */
+#stats-bar{padding:8px 12px;border-bottom:1px solid var(--border);font-size:10px;color:var(--dim);}
+#stats-bar span{color:var(--muted);}
+
+/* Responsive */
+@media(max-width:600px){
+  #lb-panel{display:none;}
+  .shot-btn{padding:12px 14px;font-size:8px;}
+}
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <span class="tb-title">tony krink's island</span>
+  <a href="index.html" class="tb-tab">~/home</a>
+  <a href="map.html" class="tb-tab">~/bungalow</a>
+  <a href="cricket.html" class="tb-tab active">~/krink-cricket</a>
+  <span class="tb-spacer"></span>
+</div>
+
+<div id="wrap">
+  <div id="scoreboard">
+    <div class="sc-item">
+      <div class="sc-label">runs</div>
+      <div class="sc-val runs" id="sc-runs">0</div>
+    </div>
+    <div class="sc-item">
+      <div class="sc-label">wickets</div>
+      <div class="sc-val wickets" id="sc-wkts">0</div>
+    </div>
+    <div class="sc-item">
+      <div class="sc-label">overs</div>
+      <div class="sc-val overs" id="sc-overs">0.0</div>
+    </div>
+    <div class="sc-item">
+      <div class="sc-label">run rate</div>
+      <div class="sc-val" id="sc-rr" style="color:var(--muted);font-size:11px;">0.00</div>
+    </div>
+    <div id="commentary">select a shot and time your click</div>
+    <div id="target-wrap" style="display:none;">
+      <div id="target-label">target</div>
+      <div id="target-val">—</div>
+    </div>
+  </div>
+
+  <div id="main">
+    <div id="game-area">
+      <canvas id="gameCanvas"></canvas>
+
+      <div id="timing-wrap">
+        <div id="timing-bg">
+          <div id="timing-fill"></div>
+          <div id="timing-cursor"></div>
+        </div>
+        <div id="timing-label">CLICK TO PLAY SHOT</div>
+      </div>
+
+      <div id="shot-panel">
+        <button class="shot-btn pull" id="btn-pull" onclick="selectShot('pull')">PULL<br><span style="font-size:7px;opacity:0.6;">aerial</span></button>
+        <button class="shot-btn drive" id="btn-drive" onclick="selectShot('drive')">DRIVE<br><span style="font-size:7px;opacity:0.6;">ground</span></button>
+        <button class="shot-btn block" id="btn-block" onclick="selectShot('block')">BLOCK<br><span style="font-size:7px;opacity:0.6;">safe</span></button>
+      </div>
+
+      <div id="result-flash"></div>
+      <div id="powerplay-flash"></div>
+      <div id="milestone-flash"></div>
+
+      <div id="overlay">
+        <h1>KRINK CRICKET</h1>
+        <div class="subtitle">time your shots · hit the gaps · don't get out</div>
+        <div class="ov-label">your name</div>
+        <input id="name-input" type="text" maxlength="16" placeholder="enter name..." autocomplete="off">
+        <div class="ov-label" style="margin-top:14px;">overs</div>
+        <div style="display:flex;gap:8px;margin-bottom:16px;">
+          <button class="ov-btn" id="ov-5" onclick="selectOvers(5)">5</button>
+          <button class="ov-btn" id="ov-10" onclick="selectOvers(10)">10</button>
+          <button class="ov-btn active" id="ov-20" onclick="selectOvers(20)">20</button>
+        </div>
+        <button id="start-btn" onclick="startGame()">BAT FIRST</button>
+      </div>
+    </div>
+
+    <div id="lb-panel">
+      <div id="lb-header">// LEADERBOARD</div>
+      <div id="stats-bar">best: <span id="stat-best">—</span> &nbsp; avg: <span id="stat-avg">—</span></div>
+      <div id="lb-list"><div style="color:var(--dim);padding:8px;font-size:10px;">loading...</div></div>
+      <div id="ball-history"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Firebase ──
+const fbApp = firebase.initializeApp({
+  apiKey:"AIzaSyDpFlMknPObiiH0AAyJ8Hhacla_NIe-lzA",
+  authDomain:"tonykrink-63723.firebaseapp.com",
+  projectId:"tonykrink-63723"
+});
+const db = firebase.firestore();
+
+// ── Canvas setup ──
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+
+function resizeCanvas() {
+  const area = document.getElementById('game-area');
+  const w = area.clientWidth;
+  const h = area.clientHeight;
+  canvas.width = w;
+  canvas.height = h;
+}
+resizeCanvas();
+window.addEventListener('resize', () => { resizeCanvas(); drawScene(); });
+
+// ── Game state ──
+const G = {
+  runs: 0, wickets: 0, balls: 0,
+  state: 'idle',
+  selectedShot: null,
+  timingPos: 0, timingDir: 1, timingSpeed: 2.2,
+  ballType: 'normal',
+  resultTimer: 0,
+  lastRuns: 0,
+  combo: 0,
+  ballHistory: [],
+  playerName: 'batter',
+  fielders: [],
+  bowlerX: 0, bowlerAnim: 0,
+  batAnim: 0, batDir: 0,
+  ballX: 0, ballY: 0, ballActive: false,
+  ballTargetX: 0, ballTargetY: 0,
+  crowdEnergy: 0,
+  totalOvers: 20, // 5, 10, or 20
+  powerplay: true, // first 6 balls = powerplay (no fielders outside circle)
+  halfCentury: false, century: false,
+  partnership: 0, // runs since last wicket
+  highestPartnership: 0,
+  currentBowler: 'pace',
+  batsmanFaceTime: 0, // balls faced this "innings" - affects confidence
+};
+
+let selectedOvers = 20;
+function selectOvers(n) {
+  selectedOvers = n;
+  document.querySelectorAll('.ov-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('ov-' + n).classList.add('active');
+}
+
+// ── Fielding setups ──
+function setFielding() {
+  if (G.powerplay) {
+    // Powerplay: all fielders inside 30 yards — easy boundaries
+    G.fielders = [20, 35, 50, 65, 80, 25, 45, 60, 40];
+    return;
+  }
+  const runs = G.runs;
+  const over = Math.floor(G.balls / 6);
+  const deathStart = G.totalOvers - 4;
+  if (over >= deathStart) {
+    // Death: packed boundary
+    G.fielders = [2, 10, 18, 28, 38, 48, 58, 68, 78, 88, 95];
+  } else if (runs < 30) {
+    G.fielders = [10, 25, 40, 55, 70, 85, 15, 60, 80];
+  } else if (runs < 80) {
+    G.fielders = [5, 20, 35, 50, 65, 80, 90, 10, 45];
+  } else if (runs < 130) {
+    G.fielders = [5, 15, 30, 45, 60, 75, 88, 8, 52];
+  } else {
+    G.fielders = [3, 12, 25, 38, 52, 66, 78, 90, 6];
+  }
+}
+
+// ── Ball type selection ──
+function pickBallType() {
+  const over = Math.floor(G.balls / 6);
+  const r = Math.random();
+  if (over >= 15) {
+    // death overs - more yorkers
+    if (r < 0.30) return 'yorker';
+    if (r < 0.50) return 'bouncer';
+    if (r < 0.70) return 'fulltoss';
+    return 'normal';
+  } else if (over >= 10) {
+    if (r < 0.20) return 'bouncer';
+    if (r < 0.40) return 'spinner';
+    if (r < 0.55) return 'yorker';
+    return 'normal';
+  } else {
+    if (r < 0.15) return 'bouncer';
+    if (r < 0.30) return 'spinner';
+    if (r < 0.40) return 'fulltoss';
+    return 'normal';
+  }
+}
+
+// ── Timing speed ──
+function getTimingSpeed() {
+  const over = Math.floor(G.balls / 6);
+  const base = 1.8 + (over * 0.08);
+  if (G.ballType === 'spinner') return base * 0.75;
+  if (G.ballType === 'bouncer') return base * 1.2;
+  if (G.ballType === 'yorker') return base * 1.15;
+  return base;
+}
+
+// ── Shot result engine ──
+function calcResult(shot, timing) {
+  // timing: 0=perfect, 1=good, 2=okay, 3=poor, 4=miss
+  const ballType = G.ballType;
+
+  // Miss = bowled (except block)
+  if (timing === 4) {
+    if (shot === 'block') return { runs: 0, out: false, type: 'miss', msg: 'PLAYED AND MISSED' };
+    return { runs: 0, out: true, type: 'bowled', msg: 'BOWLED!' };
+  }
+
+  // Ball-shot interaction
+  let outChance = 0;
+  let maxRuns = 4;
+  let runBias = [0, 1, 2, 4]; // poor→perfect
+
+  if (shot === 'pull') {
+    if (ballType === 'bouncer') { outChance = timing * 0.05; maxRuns = 6; runBias = [4, 6, 4, 6]; }
+    else if (ballType === 'yorker') { outChance = 0.6 + timing * 0.1; maxRuns = 2; runBias = [0, 0, 1, 2]; }
+    else if (ballType === 'fulltoss') { outChance = timing * 0.08; maxRuns = 6; runBias = [2, 4, 6, 6]; }
+    else { outChance = timing * 0.12; maxRuns = 6; runBias = [1, 4, 4, 6]; }
+  } else if (shot === 'drive') {
+    if (ballType === 'bouncer') { outChance = 0.4 + timing * 0.15; maxRuns = 2; runBias = [0, 1, 2, 1]; }
+    else if (ballType === 'yorker') { outChance = timing * 0.15; maxRuns = 4; runBias = [0, 1, 2, 4]; }
+    else if (ballType === 'fulltoss') { outChance = timing * 0.05; maxRuns = 4; runBias = [2, 4, 4, 4]; }
+    else if (ballType === 'spinner') { outChance = timing * 0.10; maxRuns = 4; runBias = [0, 1, 2, 4]; }
+    else { outChance = timing * 0.08; maxRuns = 4; runBias = [1, 2, 4, 4]; }
+  } else { // block
+    if (ballType === 'bouncer') { outChance = timing * 0.05; maxRuns = 1; runBias = [0, 0, 0, 1]; }
+    else { outChance = 0; maxRuns = 1; runBias = [0, 0, 1, 1]; }
+  }
+
+  // Field position check — did we hit a gap?
+  const fieldCoverage = G.fielders.length / 100;
+  const gapChance = 1 - fieldCoverage * 0.4;
+
+  // Out?
+  if (Math.random() < outChance) {
+    const outTypes = shot === 'pull' ? ['caught deep'] : shot === 'drive' ? ['caught mid-off','caught cover'] : ['lbw'];
+    return { runs: 0, out: true, type: outTypes[Math.floor(Math.random() * outTypes.length)], msg: outTypes[Math.floor(Math.random() * outTypes.length)].toUpperCase() + '!' };
+  }
+
+  // Runs
+  const idx = Math.min(timing, runBias.length - 1);
+  let runs = runBias[idx];
+  if (runs === 4 && Math.random() > gapChance) runs = Math.floor(Math.random() * 3) + 1; // fielder cuts off boundary
+  if (runs === 6 && Math.random() < 0.1) runs = 4; // just over rope
+
+  const types = { 0: 'dot', 1: 'runs-1', 2: 'runs-2', 3: 'runs-3', 4: 'four', 6: 'six' };
+  const keyMap = { 0: 'dot', 1: 'one', 2: 'two', 3: 'three', 4: 'four', 6: 'six' };
+  const msg = getCommentaryLine(keyMap[runs] || 'dot') || (runs + ' runs');
+  return { runs, out: false, type: types[runs] || 'runs-1', msg };
+}
+
+// ── Timing assessment ──
+function assessTiming(pos) {
+  // pos 0-100, green zone is 38-62
+  const dist = Math.abs(pos - 50);
+  if (dist <= 6)  return 0; // perfect
+  if (dist <= 12) return 1; // good
+  if (dist <= 20) return 2; // okay
+  if (dist <= 30) return 3; // poor
+  return 4; // miss
+}
+
+// ── Start / reset ──
+function startGame() {
+  const nameInput = document.getElementById('name-input');
+  G.playerName = (nameInput ? nameInput.value.trim() : '') || 'batter';
+  G.runs = 0; G.wickets = 0; G.balls = 0;
+  G.state = 'selecting'; G.combo = 0;
+  G.ballHistory = [];
+  G.ballActive = false;
+  G.crowdEnergy = 20;
+  G.totalOvers = selectedOvers;
+  G.powerplay = true;
+  G.halfCentury = false; G.century = false;
+  G.partnership = 0; G.highestPartnership = 0;
+  G.batsmanFaceTime = 0;
+  showPowerplay('POWERPLAY — open field, no restrictions');
+  setFielding();
+  updateScoreboard();
+  document.getElementById('overlay').style.display = 'none';
+  document.getElementById('timing-wrap').style.display = 'none';
+  enableShots(true);
+  setBallTypeCommentary();
+  G.ballType = pickBallType();
+  setComment(getCommentaryLine('powerplay_start'));
+  drawScene();
+  requestAnimationFrame(gameLoop);
+}
+
+function setBallTypeCommentary() {}
+
+// ── Commentary pools ──
+const COMMENTARY = {
+  ball_bouncer: [
+    "WARNE: oh he's going over the top here — short-pitched aggression",
+    "BENAUD: short of a length. the question is: can he pull?",
+    "WARNE: big short ball! this is a serious delivery",
+    "O'KEEFFE: *laughs* going for the ribcage there, bit of a hint!",
+    "BENAUD: well, he has bowled him short.",
+  ],
+  ball_yorker: [
+    "WARNE: full and straight — the best ball in cricket right now",
+    "BENAUD: if he hits that, he deserves every run he gets.",
+    "O'KEEFFE: toe-crusher! going for the big one here",
+    "WARNE: the yorker. the most dangerous delivery on earth.",
+    "BENAUD: right in the block-hole.",
+  ],
+  ball_spinner: [
+    "WARNE: now THIS is what cricket's about — drift, turn, danger...",
+    "BENAUD: over the wicket. looking for the angle.",
+    "O'KEEFFE: *chuckles* spin on — let's see if he can read it",
+    "WARNE: I love a spinner in the middle overs. love it.",
+    "BENAUD: he'll be looking to beat the bat.",
+  ],
+  ball_fulltoss: [
+    "O'KEEFFE: full toss! free hit territory if there ever was one",
+    "WARNE: oh he's given him a free one there!",
+    "BENAUD: that will be punished if he gets hold of it.",
+    "O'KEEFFE: *laughs* the bowler won't be happy with that",
+  ],
+  ball_normal: [
+    "BENAUD: good length. probing line.",
+    "WARNE: good delivery — testing the batter here",
+    "O'KEEFFE: nice and straight, seeing what the batter's made of",
+    "BENAUD: full of length. awaiting the response.",
+    "WARNE: landed it right on a decent length",
+    "BENAUD: and here we go.",
+  ],
+  dot: [
+    "BENAUD: dot ball. pressure building.",
+    "WARNE: beaten! well bowled.",
+    "O'KEEFFE: dot! no run. the bowler pumps the fist",
+    "BENAUD: defended. no run.",
+    "WARNE: tight! kept quiet for once",
+    "O'KEEFFE: dot ball — the crowd goes... completely silent",
+  ],
+  one: [
+    "BENAUD: pushed into the gap. one run.",
+    "O'KEEFFE: quick single! that's sharp running",
+    "WARNE: a single, keeps the scoreboard ticking",
+    "BENAUD: rotates the strike.",
+  ],
+  two: [
+    "WARNE: good running between the wickets — two there",
+    "BENAUD: two runs. excellent cricket.",
+    "O'KEEFFE: great running! two easy",
+    "WARNE: nice placement, easy two",
+  ],
+  three: [
+    "O'KEEFFE: THREE! extraordinary running! *laughs*",
+    "WARNE: three runs — superb placement AND great running",
+    "BENAUD: three. well run.",
+  ],
+  four: [
+    "WARNE: MAGNIFICENT! crack of the bat and it's away!",
+    "BENAUD: FOUR. beautifully timed.",
+    "O'KEEFFE: BOUNDARY! *laughs* that's gone like a rocket!",
+    "WARNE: ohhh that is a SHOT! right through the covers!",
+    "BENAUD: races to the boundary. four runs.",
+    "O'KEEFFE: FOUR! the fielder didn't even move",
+    "WARNE: top shot! absolutely top shot!",
+    "BENAUD: and it reaches the rope.",
+    "O'KEEFFE: cracked away! four all day!",
+    "WARNE: beautiful bat speed — that's going all the way",
+  ],
+  six: [
+    "WARNE: THAT IS MAGNIFICENT CRICKET! SIX!",
+    "O'KEEFFE: INTO THE CROWD! *laughing* someone just lost a drink!",
+    "BENAUD: and that, as they say, is that. SIX.",
+    "WARNE: MAXIMUM! oh I love watching that shot!",
+    "O'KEEFFE: *barely containing himself* SIX! straight over the top!",
+    "WARNE: absolutely CREAMED! beautiful bat speed!",
+    "BENAUD: six. enormous.",
+    "O'KEEFFE: gone! all the way! the bowler needs a moment",
+    "WARNE: get UP there! oh yes! SIX!",
+    "BENAUD: the crowd appreciates that.",
+  ],
+  out_bowled: [
+    "BENAUD: bowled him. the stumps are all over the place.",
+    "WARNE: CLEAN BOWLED! through the gate! what a delivery!",
+    "O'KEEFFE: *gasps* bowled! timber! the bails are gone!",
+    "BENAUD: he's bowled. middle stump.",
+    "WARNE: absolutely demolished the stumps. beauty of a delivery.",
+    "O'KEEFFE: *laughing* bowled! he had absolutely no idea!",
+  ],
+  out_caught_deep: [
+    "BENAUD: caught. on the boundary.",
+    "WARNE: gone! holed out to deep! tried to go big and paid the price.",
+    "O'KEEFFE: caught out there! *laughing* went for the hero shot!",
+    "BENAUD: the fielder takes the catch. well caught.",
+    "WARNE: you cannot fault that fielding. excellent catch.",
+  ],
+  out_caught_midoff: [
+    "BENAUD: caught mid-off. driven straight to him.",
+    "WARNE: oh no — straight to the fielder! never hit it there!",
+    "O'KEEFFE: catches! right at mid-off! *laughs* soft dismissal",
+    "BENAUD: hit straight to mid-off. soft dismissal.",
+  ],
+  out_caught_cover: [
+    "WARNE: caught at cover! placement let him down there",
+    "BENAUD: caught cover. the fielder did well.",
+    "O'KEEFFE: oh! cover takes it! *laughs* went for it a bit early",
+  ],
+  out_lbw: [
+    "BENAUD: LBW. plumb in front.",
+    "WARNE: that is absolutely stone dead in front! no question!",
+    "O'KEEFFE: LBW! *laughs* he's not happy but he has to go!",
+    "BENAUD: hit on the pad. given out LBW. I think that is out.",
+  ],
+  fifty: [
+    "WARNE: FIFTY RUNS! what a start! absolutely magnificent!",
+    "BENAUD: and there it is. fifty runs.",
+    "O'KEEFFE: HALF CENTURY! *laughing* he is in the zone!",
+    "WARNE: fifty! he's playing beautifully here",
+    "BENAUD: fifty runs. the crowd appreciates that.",
+  ],
+  century: [
+    "BENAUD: one hundred runs. exceptional batting.",
+    "WARNE: A CENTURY! OH THIS IS BEAUTIFUL CRICKET! WHAT A KNOCK!",
+    "O'KEEFFE: ONE HUNDRED! *nearly weeping* extraordinary!",
+    "WARNE: hundred! the crowd is going absolutely berserk!",
+    "BENAUD: and he has his century. the bat is raised.",
+  ],
+  streak_2: [
+    "WARNE: two in a row to the fence! they can't stop him!",
+    "O'KEEFFE: consecutive boundaries! *laughs* fielders just giving up!",
+    "BENAUD: back-to-back boundaries.",
+  ],
+  streak_3: [
+    "WARNE: THREE CONSECUTIVE BOUNDARIES! this is SPECIAL batting!",
+    "O'KEEFFE: three in a row! *laughing* the captain's having words!",
+    "BENAUD: three boundaries in succession. extraordinary.",
+  ],
+  streak_4plus: [
+    "WARNE: I cannot believe what I am watching! this is LEGENDARY!",
+    "O'KEEFFE: FOUR BOUNDARIES IN A ROW! *laughing hysterically* what IS happening!",
+    "BENAUD: and another. quite simply the best batting I have seen today.",
+  ],
+  powerplay_start: [
+    "WARNE: powerplay — gaps everywhere, this is the time to cash in!",
+    "O'KEEFFE: POWERPLAY! *laughs* no fielders on the boundary! go on son!",
+    "BENAUD: powerplay. fielding restrictions in effect.",
+  ],
+  powerplay_end: [
+    "WARNE: that's the end of powerplay — they'll set the field now",
+    "O'KEEFFE: powerplay done! field spreads — trickier from here",
+    "BENAUD: powerplay over. fielders spreading.",
+  ],
+  death_overs: [
+    "WARNE: death overs! this is where legends are MADE!",
+    "O'KEEFFE: DEATH OVERS! *laughing* big hitting time! go on!",
+    "BENAUD: death overs. the game reaches its conclusion.",
+  ],
+};
+
+function getCommentaryLine(key) {
+  const pool = COMMENTARY[key];
+  if (!pool || pool.length === 0) return '';
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
+function getBallWarning() {
+  return getCommentaryLine('ball_' + G.ballType) || 'good length delivery';
+}
+
+// ── Shot selection ──
+function selectShot(shot) {
+  if (G.state !== 'selecting') return;
+  G.selectedShot = shot;
+  document.querySelectorAll('.shot-btn').forEach(b => b.classList.remove('selected'));
+  document.getElementById('btn-' + shot).classList.add('selected');
+  startTiming();
+}
+
+function startTiming() {
+  G.state = 'timing';
+  G.timingPos = 0;
+  G.timingDir = 1;
+  G.timingSpeed = getTimingSpeed();
+  document.getElementById('timing-wrap').style.display = 'block';
+  enableShots(false);
+  // Allow click anywhere on game area to play shot
+  canvas.onclick = playShot;
+  document.getElementById('timing-wrap').onclick = playShot;
+}
+
+function playShot() {
+  if (G.state !== 'timing') return;
+  canvas.onclick = null;
+  document.getElementById('timing-wrap').onclick = null;
+  const timing = assessTiming(G.timingPos);
+  document.getElementById('timing-wrap').style.display = 'none';
+  processResult(timing);
+}
+
+// ── Process ball result ──
+function processResult(timing) {
+  G.state = 'result';
+  G.balls++;
+  const result = calcResult(G.selectedShot, timing);
+
+  // Update combo
+  if (result.runs >= 4) { G.combo++; } else { G.combo = 0; }
+
+  // Crowd energy
+  G.crowdEnergy = Math.min(100, G.crowdEnergy + result.runs * 3 + (result.runs >= 6 ? 20 : 0));
+
+  G.ballHistory.push({ type: result.out ? 'wicket' : result.type, runs: result.runs, label: result.out ? 'W' : (result.runs === 0 ? '·' : result.runs) });
+
+  if (result.out) {
+    G.wickets++;
+    G.crowdEnergy = Math.max(10, G.crowdEnergy - 30);
+    showResultFlash(result.msg, 'var(--red)');
+    setComment(getOutComment(result.type));
+    addBallDot('wicket', 'W');
+    if (G.wickets >= 10) {
+      setTimeout(endGame, 1200);
+    } else {
+      setTimeout(() => { G.state = 'selecting'; enableShots(true); G.ballType = pickBallType(); setComment(getBallWarning()); setFielding(); updateScoreboard(); updateBallHistory(); }, 1200);
+    }
+  } else {
+    G.runs += result.runs;
+    G.lastRuns = result.runs;
+    showResultFlash(result.runs >= 4 ? (result.runs >= 6 ? '⬛ SIX!' : '◼ FOUR!') : (result.runs > 0 ? '+' + result.runs : '·'), result.runs >= 6 ? 'var(--neon)' : result.runs >= 4 ? 'var(--gold)' : 'var(--muted)');
+    if (result.runs >= 4) showCombo();
+    setComment(result.msg + (G.combo >= 3 ? ` — ${G.combo} consecutive boundaries!` : ''));
+    addBallDot(result.type, result.runs === 0 ? '·' : result.runs);
+    updateScoreboard();
+    // Milestones
+    checkMilestones();
+
+    const maxBalls = G.totalOvers * 6;
+    if (G.balls >= maxBalls) {
+      setTimeout(endGame, 1000);
+    } else {
+      setTimeout(() => {
+        G.state = 'selecting';
+        enableShots(true);
+        // Powerplay ends after over 6
+        const over = Math.floor(G.balls / 6);
+        if (G.powerplay && over >= 6) {
+          G.powerplay = false;
+          showPowerplay('POWERPLAY OVER — fielders spreading');
+          setComment(getCommentaryLine('powerplay_end'));
+        }
+        // Death overs warning
+        const deathStart = G.totalOvers - 4;
+        if (over === deathStart && G.balls % 6 === 0) {
+          showPowerplay('DEATH OVERS — go big or go home');
+          setComment(getCommentaryLine('death_overs'));
+        }
+        if (G.balls % 6 === 0) { G.ballType = pickBallType(); if (over !== deathStart) setComment(getBallWarning()); setFielding(); }
+        else { G.ballType = pickBallType(); setComment(getBallWarning()); }
+        updateScoreboard();
+        updateBallHistory();
+      }, 800);
+    }
+  }
+}
+
+function checkMilestones() {
+  if (!G.halfCentury && G.runs >= 50) {
+    G.halfCentury = true;
+    const line = getCommentaryLine('fifty');
+    showMilestone('★ FIFTY! ★');
+    setComment(line);
+  }
+  if (!G.century && G.runs >= 100) {
+    G.century = true;
+    const line = getCommentaryLine('century');
+    showMilestone('★★ CENTURY!! ★★');
+    setComment(line);
+    G.crowdEnergy = 100;
+  }
+  if (G.runs >= 150 && G.runs % 50 === 0) {
+    showMilestone('★★★ ' + G.runs + ' RUNS!');
+    setComment("WARNE: I have run out of words. I genuinely have. " + G.runs + " runs!");
+  }
+}
+
+function showPowerplay(msg) {
+  const el = document.getElementById('powerplay-flash');
+  if (!el) return;
+  el.textContent = msg;
+  el.style.opacity = '1';
+  setTimeout(() => { el.style.opacity = '0'; }, 3000);
+}
+
+function showMilestone(msg) {
+  const el = document.getElementById('milestone-flash');
+  if (!el) return;
+  el.textContent = msg;
+  el.style.opacity = '1';
+  setTimeout(() => { el.style.opacity = '0'; }, 2500);
+}
+
+function getOutComment(type) {
+  const keyMap = {
+    'bowled': 'out_bowled',
+    'caught deep': 'out_caught_deep',
+    'caught mid-off': 'out_caught_midoff',
+    'caught cover': 'out_caught_cover',
+    'lbw': 'out_lbw',
+  };
+  return getCommentaryLine(keyMap[type] || 'out_bowled') || 'OUT!';
+}
+
+// ── End game ──
+function endGame() {
+  G.state = 'over';
+  enableShots(false);
+  document.getElementById('timing-wrap').style.display = 'none';
+  saveScore();
+  showGameOver();
+}
+
+function showGameOver() {
+  const ov = document.getElementById('overlay');
+  const rr = G.balls > 0 ? ((G.runs / G.balls) * 6).toFixed(2) : '0.00';
+  const grade = G.runs >= 200 ? '★★★★★ LEGENDARY' : G.runs >= 150 ? '★★★★ OUTSTANDING' : G.runs >= 100 ? '★★★ EXCELLENT' : G.runs >= 60 ? '★★ GOOD KNOCK' : G.runs >= 30 ? '★ DECENT' : 'KEEP PRACTISING';
+  ov.innerHTML = `
+    <h1>INNINGS OVER</h1>
+    <div class="big-score">${G.runs}</div>
+    <div class="big-score-label">${G.wickets} wickets · ${formatOvers(G.balls)} overs · RR ${rr}</div>
+    <div class="subtitle" style="margin:8px 0 16px;color:var(--gold);">${grade}</div>
+    <div style="display:flex;gap:8px;margin-bottom:16px;">
+      <button class="ov-btn ${selectedOvers===5?'active':''}" onclick="selectOvers(5)">5</button>
+      <button class="ov-btn ${selectedOvers===10?'active':''}" onclick="selectOvers(10)">10</button>
+      <button class="ov-btn ${selectedOvers===20?'active':''}" onclick="selectOvers(20)">20</button>
+    </div>
+    <button id="restart-btn" onclick="startGame()">BAT AGAIN</button>
+  `;
+  ov.style.display = 'flex';
+}
+
+function restartGame() {
+  const ov = document.getElementById('overlay');
+  ov.innerHTML = `
+    <h1>STICK CRICKET</h1>
+    <div class="subtitle">20 overs · 10 wickets<br>time your shots · hit the gaps</div>
+    <div class="ov-label">your name</div>
+    <input id="name-input" type="text" maxlength="16" placeholder="enter name..." autocomplete="off" value="${G.playerName}">
+    <button id="start-btn" onclick="startGame()">BAT FIRST</button>
+  `;
+  ov.style.display = 'flex';
+}
+
+// ── Scoreboard UI ──
+function updateScoreboard() {
+  document.getElementById('sc-runs').textContent = G.runs;
+  document.getElementById('sc-wkts').textContent = G.wickets;
+  document.getElementById('sc-overs').textContent = formatOvers(G.balls);
+  const rr = G.balls > 0 ? ((G.runs / G.balls) * 6).toFixed(2) : '0.00';
+  document.getElementById('sc-rr').textContent = rr;
+}
+
+function formatOvers(balls) {
+  return Math.floor(balls / 6) + '.' + (balls % 6);
+}
+
+function setComment(txt) {
+  document.getElementById('commentary').textContent = txt;
+}
+
+function enableShots(on) {
+  document.querySelectorAll('.shot-btn').forEach(b => {
+    b.disabled = !on;
+    if (!on) b.classList.remove('selected');
+  });
+  G.selectedShot = null;
+}
+
+// ── Result flash ──
+function showResultFlash(text, color) {
+  const el = document.getElementById('result-flash');
+  el.innerHTML = text;
+  el.style.color = color;
+  el.style.opacity = '1';
+  el.style.transform = 'translate(-50%, -50%) scale(1.2)';
+  el.style.transition = 'none';
+  setTimeout(() => {
+    el.style.transition = 'opacity 0.5s, transform 0.5s';
+    el.style.opacity = '0';
+    el.style.transform = 'translate(-50%, -60%) scale(0.9)';
+  }, 500);
+}
+
+function showCombo() {
+  if (G.combo < 2) return;
+  const key = G.combo >= 4 ? 'streak_4plus' : G.combo === 3 ? 'streak_3' : 'streak_2';
+  setComment(getCommentaryLine(key));
+}
+
+// ── Ball dot history ──
+function addBallDot(type, label) {
+  const hist = document.getElementById('ball-history');
+  if (G.balls % 6 === 1 && G.balls > 1) {
+    const sep = document.createElement('div');
+    sep.style.cssText = 'width:100%;height:1px;background:var(--border);margin:3px 0;';
+    hist.appendChild(sep);
+  }
+  const dot = document.createElement('div');
+  dot.className = 'ball-dot ' + type;
+  dot.textContent = label;
+  hist.appendChild(dot);
+  hist.scrollTop = hist.scrollHeight;
+}
+
+function updateBallHistory() {}
+
+// ── Leaderboard ──
+async function saveScore() {
+  if (G.runs === 0) return;
+  try {
+    await db.collection('cricket_scores').add({
+      name: G.playerName,
+      runs: G.runs,
+      wickets: G.wickets,
+      balls: G.balls,
+      ts: Date.now()
+    });
+    loadLeaderboard();
+  } catch(e) { console.warn('score save failed', e); }
+}
+
+async function loadLeaderboard() {
+  try {
+    const snap = await db.collection('cricket_scores').orderBy('runs','desc').limit(20).get();
+    const list = document.getElementById('lb-list');
+    list.innerHTML = '';
+    let scores = [];
+    snap.forEach(doc => scores.push(doc.data()));
+    scores.forEach((s, i) => {
+      const el = document.createElement('div');
+      el.className = 'lb-entry';
+      const rankClass = i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
+      const isYou = s.name === G.playerName;
+      el.innerHTML = `
+        <span class="lb-rank ${rankClass}">${i+1}</span>
+        <span class="lb-name ${isYou ? 'lb-you' : ''}">${s.name}</span>
+        <span class="lb-score ${isYou ? 'lb-you' : ''}">${s.runs}</span>
+      `;
+      list.appendChild(el);
+    });
+    // Stats
+    if (scores.length > 0) {
+      const myScores = scores.filter(s => s.name === G.playerName);
+      const best = myScores.length > 0 ? Math.max(...myScores.map(s => s.runs)) : '—';
+      const avg = myScores.length > 0 ? Math.round(myScores.reduce((a,s) => a + s.runs, 0) / myScores.length) : '—';
+      document.getElementById('stat-best').textContent = best;
+      document.getElementById('stat-avg').textContent = avg;
+    }
+  } catch(e) { console.warn('lb load failed', e); }
+}
+
+loadLeaderboard();
+
+// ── Drawing ──
+function drawScene() {
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0, 0, W, H);
+
+  // Background gradient
+  const bg = ctx.createLinearGradient(0, 0, 0, H);
+  bg.addColorStop(0, '#050a05');
+  bg.addColorStop(0.4, '#051205');
+  bg.addColorStop(1, '#020802');
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, W, H);
+
+  // Crowd (top section)
+  const crowdH = H * 0.18;
+  for (let i = 0; i < 80; i++) {
+    const x = (i / 80) * W;
+    const h = 8 + Math.sin(i * 0.7 + Date.now() * 0.001 * (G.crowdEnergy / 30)) * 4;
+    const alpha = 0.2 + (G.crowdEnergy / 100) * 0.4;
+    ctx.fillStyle = `rgba(${50 + i % 80},${100 + i % 60},${50 + i % 40},${alpha})`;
+    ctx.fillRect(x, crowdH - h, W / 80 - 1, h);
+  }
+
+  // Boundary rope
+  ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.ellipse(W/2, H * 0.55, W * 0.47, H * 0.38, 0, 0, Math.PI * 2);
+  ctx.stroke();
+
+  // Outfield
+  const outfield = ctx.createRadialGradient(W/2, H*0.55, 0, W/2, H*0.55, W*0.5);
+  outfield.addColorStop(0, 'rgba(20,60,20,0.6)');
+  outfield.addColorStop(0.6, 'rgba(15,45,15,0.4)');
+  outfield.addColorStop(1, 'rgba(5,20,5,0.2)');
+  ctx.fillStyle = outfield;
+  ctx.beginPath();
+  ctx.ellipse(W/2, H * 0.55, W * 0.47, H * 0.38, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Pitch (rectangle in centre)
+  const pitchW = W * 0.06, pitchH = H * 0.35;
+  const pitchX = W/2 - pitchW/2, pitchY = H * 0.32;
+  ctx.fillStyle = 'rgba(180,140,80,0.25)';
+  ctx.fillRect(pitchX, pitchY, pitchW, pitchH);
+  ctx.strokeStyle = 'rgba(200,160,100,0.3)';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(pitchX, pitchY, pitchW, pitchH);
+
+  // Crease lines
+  ctx.strokeStyle = 'rgba(255,255,255,0.4)';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(pitchX - 8, pitchY + pitchH * 0.85);
+  ctx.lineTo(pitchX + pitchW + 8, pitchY + pitchH * 0.85);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(pitchX - 8, pitchY + pitchH * 0.15);
+  ctx.lineTo(pitchX + pitchW + 8, pitchY + pitchH * 0.15);
+  ctx.stroke();
+
+  // Stumps (batter end)
+  const stumpY = pitchY + pitchH * 0.85;
+  const stumpX = W/2;
+  drawStumps(stumpX, stumpY, 18);
+
+  // Stumps (bowler end)
+  const bStumpY = pitchY + pitchH * 0.15;
+  drawStumps(W/2, bStumpY, 14);
+
+  // Fielders
+  G.fielders.forEach((pos, i) => {
+    const angle = (pos / 100) * Math.PI * 2 - Math.PI / 2;
+    const rx = W * 0.38, ry = H * 0.30;
+    const fx = W/2 + Math.cos(angle) * rx;
+    const fy = H * 0.55 + Math.sin(angle) * ry;
+    drawFielder(fx, fy, i);
+  });
+
+  // Bowler
+  const bowlerY = pitchY + pitchH * 0.22;
+  const bowlerX = W/2;
+  if (G.state === 'timing' || G.state === 'result') {
+    G.bowlerAnim = (G.bowlerAnim + 0.15) % (Math.PI * 2);
+  }
+  drawBowler(bowlerX, bowlerY, G.bowlerAnim);
+
+  // Batter
+  const batterY = stumpY - 18;
+  drawBatter(stumpX, batterY, G.batAnim);
+
+  // Ball in flight
+  if (G.ballActive) {
+    const progress = 1 - (G.ballX - G.ballTargetX) / (W/2 - G.ballTargetX);
+    G.ballX -= (W * 0.012);
+    if (G.ballX <= G.ballTargetX) G.ballActive = false;
+    ctx.beginPath();
+    ctx.arc(G.ballX, G.ballY, 5, 0, Math.PI * 2);
+    ctx.fillStyle = '#e8d5a0';
+    ctx.fill();
+    ctx.strokeStyle = '#c8a050';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    // seam
+    ctx.beginPath();
+    ctx.arc(G.ballX, G.ballY, 5, 0.5, Math.PI - 0.5);
+    ctx.strokeStyle = 'rgba(200,50,50,0.6)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  }
+
+  // Ball type indicator
+  if (G.state === 'selecting' || G.state === 'timing') {
+    const ballLabels = { bouncer: 'BOUNCER', yorker: 'YORKER', spinner: 'SPIN', fulltoss: 'FULL TOSS', normal: '' };
+    const label = ballLabels[G.ballType];
+    if (label) {
+      ctx.fillStyle = G.ballType === 'bouncer' ? 'var(--red)' : G.ballType === 'yorker' ? 'var(--pink)' : G.ballType === 'spinner' ? 'var(--cyan)' : 'var(--gold)';
+      ctx.font = '700 10px "Press Start 2P"';
+      ctx.textAlign = 'center';
+      ctx.fillText(label, W/2, pitchY - 12);
+    }
+  }
+
+  // Timing bar update
+  if (G.state === 'timing') {
+    G.timingPos += G.timingSpeed * G.timingDir;
+    if (G.timingPos >= 100 || G.timingPos <= 0) G.timingDir *= -1;
+    G.timingPos = Math.max(0, Math.min(100, G.timingPos));
+    document.getElementById('timing-cursor').style.left = G.timingPos + '%';
+  }
+}
+
+function drawStumps(x, y, size) {
+  const s = size;
+  ctx.strokeStyle = 'rgba(255,240,200,0.8)';
+  ctx.lineWidth = 2;
+  for (let i = -1; i <= 1; i++) {
+    ctx.beginPath();
+    ctx.moveTo(x + i * s/3, y);
+    ctx.lineTo(x + i * s/3, y - s);
+    ctx.stroke();
+  }
+  // bails
+  ctx.strokeStyle = 'rgba(255,240,200,0.6)';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(x - s/3 - 1, y - s + 2);
+  ctx.lineTo(x + s/3 + 1, y - s + 2);
+  ctx.stroke();
+}
+
+function drawBatter(x, y, anim) {
+  ctx.strokeStyle = 'var(--neon)';
+  ctx.lineWidth = 2.5;
+  ctx.lineCap = 'round';
+  // body
+  ctx.beginPath();
+  ctx.arc(x, y - 20, 6, 0, Math.PI * 2); // head
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(x, y - 14);
+  ctx.lineTo(x, y + 5); // torso
+  ctx.stroke();
+  // legs
+  ctx.beginPath();
+  ctx.moveTo(x, y + 5);
+  ctx.lineTo(x - 7, y + 18);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(x, y + 5);
+  ctx.lineTo(x + 7, y + 18);
+  ctx.stroke();
+  // bat arm
+  const batAngle = anim;
+  ctx.beginPath();
+  ctx.moveTo(x, y - 8);
+  ctx.lineTo(x + Math.cos(batAngle) * 16, y - 8 + Math.sin(batAngle) * 10);
+  ctx.stroke();
+  // bat
+  ctx.strokeStyle = '#d4a373';
+  ctx.lineWidth = 4;
+  const bx = x + Math.cos(batAngle) * 16;
+  const by = y - 8 + Math.sin(batAngle) * 10;
+  ctx.beginPath();
+  ctx.moveTo(bx, by);
+  ctx.lineTo(bx + Math.cos(batAngle + 0.5) * 14, by + Math.sin(batAngle + 0.5) * 14);
+  ctx.stroke();
+}
+
+function drawBowler(x, y, anim) {
+  const runOffset = Math.sin(anim * 2) * 3;
+  ctx.strokeStyle = 'rgba(255,100,100,0.7)';
+  ctx.lineWidth = 2;
+  ctx.lineCap = 'round';
+  // head
+  ctx.beginPath();
+  ctx.arc(x, y - 14 + runOffset, 5, 0, Math.PI * 2);
+  ctx.stroke();
+  // body
+  ctx.beginPath();
+  ctx.moveTo(x, y - 9 + runOffset);
+  ctx.lineTo(x, y + 4 + runOffset);
+  ctx.stroke();
+  // arms
+  ctx.beginPath();
+  ctx.moveTo(x, y - 4 + runOffset);
+  ctx.lineTo(x - 10, y - 2 + runOffset + Math.cos(anim) * 5);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(x, y - 4 + runOffset);
+  ctx.lineTo(x + 10, y - 2 + runOffset - Math.cos(anim) * 5);
+  ctx.stroke();
+  // legs
+  ctx.beginPath();
+  ctx.moveTo(x, y + 4 + runOffset);
+  ctx.lineTo(x - 6 + Math.sin(anim) * 5, y + 15 + runOffset);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(x, y + 4 + runOffset);
+  ctx.lineTo(x + 6 - Math.sin(anim) * 5, y + 15 + runOffset);
+  ctx.stroke();
+}
+
+function drawFielder(x, y, idx) {
+  const size = 5;
+  const colors = ['#58a6ff','#3fb950','#d4a017','#f778ba','#39c5cf','#f85149','#bc8cff','#39d353','#e3b341'];
+  ctx.fillStyle = colors[idx % colors.length];
+  ctx.globalAlpha = 0.7;
+  // head
+  ctx.beginPath();
+  ctx.arc(x, y - size * 2, size * 0.7, 0, Math.PI * 2);
+  ctx.fill();
+  // body
+  ctx.fillRect(x - size * 0.4, y - size, size * 0.8, size * 1.5);
+  ctx.globalAlpha = 1;
+}
+
+// ── Game loop ──
+let raf = null;
+function gameLoop() {
+  drawScene();
+  if (G.state !== 'over' && G.state !== 'idle') {
+    raf = requestAnimationFrame(gameLoop);
+  }
+}
+
+// ── Canvas click ──
+canvas.addEventListener('click', () => {
+  if (G.state === 'timing') playShot();
+});
+
+// ── Initial draw ──
+drawScene();
+</script>
+</body>
+</html>
