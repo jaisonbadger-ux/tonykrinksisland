@@ -3424,6 +3424,14 @@ function save() {
   localStorage.setItem('tk_gmult',   globalMult);
   localStorage.setItem('tk_seenms',  JSON.stringify(seenMs));
   localStorage.setItem('tk_version', SAVE_VERSION);
+  // Save casino state
+  if (typeof _casino !== 'undefined') {
+    localStorage.setItem('tk_casino', JSON.stringify({
+      totalWon: _casino.totalWon, totalWagered: _casino.totalWagered,
+      totalBets: _casino.totalBets, biggestWin: _casino.biggestWin,
+      wins: _casino.wins, spins: _casino.spins, jackpotsHit: _casino.jackpotsHit,
+    }));
+  }
   if (typeof pushCloudSave === 'function') pushCloudSave();
 }
 window.addEventListener('beforeunload', save);
@@ -3570,11 +3578,25 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // ─── PASSIVE TICK ───
 let _cachedCasinoWon = 0, _lastCasinoCheck = 0, _lastDisplayTime = 0;
+let _pendingPassiveCoins = 0, _passiveFlushTimer = null;
+function _flushPassive() {
+  _passiveFlushTimer = null;
+  if (!_db || !_currentUser || _pendingPassiveCoins < 1) return;
+  const amt = Math.floor(_pendingPassiveCoins);
+  _pendingPassiveCoins = 0;
+  _db.doc(`userStats/${_currentUser.uid}`).set({
+    coinsEarned: firebase.firestore.FieldValue.increment(amt),
+    lastSeen: firebase.firestore.FieldValue.serverTimestamp(),
+  }, { merge: true }).catch(() => {});
+}
 setInterval(function() {
   if (cps > 0) {
     const tickMult = pacts.pac4 ? 2 : 1;
     const gain = cps * tickMult / 20;
     coins += gain; totalEarned += gain;
+    // Track passive earnings for leaderboard flush (every 60s)
+    _pendingPassiveCoins += gain;
+    if (!_passiveFlushTimer) _passiveFlushTimer = setTimeout(_flushPassive, 60000);
     checkMs();
     const now = Date.now();
     if (now - _lastCasinoCheck > 3000) {
@@ -4531,7 +4553,7 @@ function _sanitizeName(s, max) {
 // Event countdown timer
 let _eventTimerInterval = null;
 
-// Casino state (local, persisted to userStats)
+// Casino state (local, persisted to localStorage + userStats)
 let _casino = {
   bet:         10,
   totalBets:   0,
@@ -4544,6 +4566,21 @@ let _casino = {
   spins:       0,
   spinning:    false,
 };
+// Restore casino state from localStorage
+(function() {
+  try {
+    const s = JSON.parse(localStorage.getItem('tk_casino') || '{}');
+    if (s.spins > 0) {
+      _casino.totalWon     = s.totalWon     || 0;
+      _casino.totalWagered = s.totalWagered || 0;
+      _casino.totalBets    = s.totalBets    || 0;
+      _casino.biggestWin   = s.biggestWin   || 0;
+      _casino.wins         = s.wins         || 0;
+      _casino.spins        = s.spins        || 0;
+      _casino.jackpotsHit  = s.jackpotsHit  || 0;
+    }
+  } catch(e) {}
+})();
 
 // ──────────────────────────────────────────────
 // INIT
@@ -5578,11 +5615,11 @@ window.spinSlots = async function() {
       }
       _casino.wins++;
     }
-    // 2 match
+    // 2 match — pays 0.3× symbol mult (house edge maintained)
     else if (a.name === b.name || b.name === c.name || a.name === c.name) {
       const matched = a.name === b.name ? a : (b.name === c.name ? b : a);
-      payout = bet * matched.mult * 0.5 * japBonus;
-      resultText = `${matched.icon}${matched.icon} two ${matched.name} — ×${matched.mult / 2} = +${Math.floor(payout)} coins`;
+      payout = bet * matched.mult * 0.3 * japBonus;
+      resultText = `${matched.icon}${matched.icon} two ${matched.name} — ×${(matched.mult * 0.3).toFixed(1)} = +${Math.floor(payout)} coins`;
       _casino.wins++;
     }
     else {
@@ -5605,9 +5642,10 @@ window.spinSlots = async function() {
       // Firestore: update user stats
       if (_db && _currentUser) {
         const updates = {
-          totalWon:   firebase.firestore.FieldValue.increment(payout),
-          biggestWin: payout, // will overwrite — not ideal but simple
+          totalWon: firebase.firestore.FieldValue.increment(payout),
         };
+        // Only update biggestWin if this is a new personal best
+        if (payout >= _casino.biggestWin) updates.biggestWin = payout;
         if (isJackpot) {
           updates.jackpotsHit = firebase.firestore.FieldValue.increment(1);
           _casino.jackpotsHit++;
@@ -5615,7 +5653,8 @@ window.spinSlots = async function() {
             totalJackpots: firebase.firestore.FieldValue.increment(1),
           }).catch(() => {});
         }
-        _db.doc(`userStats/${_currentUser.uid}`).update(updates).catch(() => {});
+        // Use set+merge so it creates the doc if it doesn't exist yet
+        _db.doc(`userStats/${_currentUser.uid}`).set(updates, { merge: true }).catch(() => {});
       }
 
       // Win flash
