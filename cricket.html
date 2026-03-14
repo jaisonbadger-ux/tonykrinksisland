@@ -28,11 +28,9 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Fira C
 #game-area{flex:1;position:relative;overflow:hidden;}
 #gameCanvas{display:block;width:100%;height:100%;}
 
-/* Ball type label */
 #ball-label{position:absolute;top:12px;left:50%;transform:translateX(-50%);font-family:'Press Start 2P',monospace;font-size:10px;padding:5px 12px;border:1px solid;opacity:0;transition:opacity .3s;pointer-events:none;z-index:10;text-align:center;}
 #ball-label.show{opacity:1;}
 
-/* Key guide — positioned at bottom centre */
 #key-guide{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:4px;z-index:10;}
 .kg-row{display:flex;gap:4px;}
 .kk{font-family:'Press Start 2P',monospace;font-size:8px;width:54px;height:50px;border:2px solid var(--dim);color:var(--dim);background:rgba(0,0,0,.85);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:default;user-select:none;-webkit-user-select:none;transition:all .07s;letter-spacing:.5px;pointer-events:none;}
@@ -41,13 +39,11 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Fira C
 .kk.on span{color:var(--neon);}
 .kk.hit{border-color:var(--gold);color:var(--gold);background:rgba(212,160,23,.2);}
 
-/* Result flash */
 #result-flash{position:absolute;top:38%;left:50%;transform:translate(-50%,-50%);font-family:'Press Start 2P',monospace;font-size:32px;pointer-events:none;opacity:0;text-shadow:0 0 20px currentColor;z-index:20;text-align:center;}
 #result-sub{font-size:9px;margin-top:6px;opacity:.8;}
 #pp-flash{position:absolute;top:12px;left:50%;transform:translateX(-50%);font-family:'Press Start 2P',monospace;font-size:10px;color:var(--neon);background:rgba(0,255,65,.1);border:1px solid var(--neon);padding:5px 12px;pointer-events:none;opacity:0;transition:opacity .5s;z-index:25;}
 #ms-flash{position:absolute;top:46px;left:50%;transform:translateX(-50%);font-family:'Press Start 2P',monospace;font-size:9px;color:var(--gold);pointer-events:none;opacity:0;transition:opacity .5s;z-index:25;}
 
-/* Overlay */
 #overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(1,4,9,.93);z-index:30;}
 #overlay h1{font-family:'Press Start 2P',monospace;font-size:17px;color:var(--gold);margin-bottom:8px;text-shadow:0 0 18px rgba(212,160,23,.5);}
 .ov-sub{color:var(--muted);font-size:11px;margin-bottom:16px;text-align:center;max-width:320px;line-height:1.9;}
@@ -63,7 +59,6 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Fira C
 .hint-line{font-size:9px;color:var(--dim);margin-bottom:16px;text-align:center;line-height:2;letter-spacing:.5px;}
 .hint-line b{color:var(--muted);}
 
-/* Leaderboard */
 #lb-panel{width:212px;background:#010409;border-left:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;}
 #lb-hdr{padding:10px 12px;border-bottom:1px solid var(--border);font-size:10px;color:var(--neon);letter-spacing:1px;}
 #lb-list{flex:1;overflow-y:auto;padding:8px;}
@@ -158,13 +153,13 @@ function resize() {
 resize();
 window.addEventListener('resize', () => { resize(); if (G.phase === 'idle') drawStatic(); });
 
-// ── Layout (functions so they update after resize) ──
+// ── Layout ──
 const cx  = () => W * 0.50;
-const bty = () => H * 0.72;   // batter y
-const bwy = () => H * 0.22;   // bowler release y
-const PW  = 28;                // pitch width px
-const FRX = () => Math.min(W,H) * 0.42; // field radius x
-const FRY = () => Math.min(W,H) * 0.40; // field radius y
+const bty = () => H * 0.72;
+const bwy = () => H * 0.22;
+const PW  = 28;
+const FRX = () => Math.min(W,H) * 0.42;
+const FRY = () => Math.min(W,H) * 0.40;
 
 // ── Game state ──
 const G = {
@@ -177,25 +172,29 @@ const G = {
   halfCentury: false, century: false,
   combo: 0, crowdEnergy: 30,
 
-  // Ball in flight
   ballType: 'normal',
   ballX: 0, ballY: 0,
   ballStartTime: 0, ballDuration: 1500,
   shotDone: false,
 
-  // After hit — ball flying away
+  // Hit ball — target-based
   hitActive: false,
   hitX: 0, hitY: 0,
-  hitVX: 0, hitVY: 0,
+  hitStartX: 0, hitStartY: 0,
+  hitTargetX: 0, hitTargetY: 0,
+  hitStartTime: 0, hitDuration: 0,
 
-  // Bowler run-up
-  bowlerT: 0,    // 0 = at mark, 1 = at crease
-  bowlerAnim: 0,
+  // Bowler
+  bowlerT: 0, bowlerAnim: 0,
 
-  // Bat swing
-  batSwing: false,
-  batDir: 'd',
-  batT: 0,
+  // Bat
+  batSwing: false, batDir: 'd', batT: 0,
+
+  // Effects
+  particles: [],
+  ballTrail: [],
+  boundaryFlash: 0,
+  boundaryCol: '255,165,0',
 
   fielders: [],
 };
@@ -231,7 +230,7 @@ function pickBallType() {
   return r < .12 ? 'bouncer' : r < .25 ? 'spinner' : r < .36 ? 'fulltoss' : 'normal';
 }
 
-// ── Fielder positions (0..1 = fraction around oval) ──
+// ── Fielders ──
 function setFielding() {
   const over = Math.floor(G.balls / 6);
   if (G.powerplay) {
@@ -245,7 +244,7 @@ function setFielding() {
   }
 }
 
-// ── Timing quality ──
+// ── Timing ──
 function timingQuality(ballY) {
   const dist = Math.abs(ballY - bty());
   if (dist <= 25)  return 0;
@@ -274,12 +273,10 @@ function calcResult(key, ballType, timing) {
     return {out:true, type:t, runs:0};
   }
 
-  // Runs: [perfect, good, ok, poor, miss]
   const rt = {w:[6,4,4,0,0], a:[4,3,2,1,0], d:[4,4,2,1,0], s:[1,0,0,0,0]};
   let runs = (rt[key]||rt.d)[Math.min(timing,4)];
   if (isBad && runs > 1) runs = Math.max(0, runs - 2);
 
-  // Fielding cut-off
   const inDeath = Math.floor(G.balls/6) >= G.totalOvers - 4;
   if (!G.powerplay && runs===4 && Math.random() < (inDeath?.12:.20)) runs = Math.floor(Math.random()*3)+1;
   if (runs===6 && Math.random() < .08) runs = 4;
@@ -326,6 +323,9 @@ function startGame() {
   G.powerplay=true;
   G.halfCentury=false; G.century=false;
   G.combo=0;
+  G.particles=[];
+  G.ballTrail=[];
+  G.boundaryFlash=0;
   G.phase='ready';
   G.ballType=pickBallType();
   setFielding();
@@ -366,6 +366,7 @@ function releaseBall() {
   G.shotDone = false;
   G.hitActive = false;
   G.batSwing = false;
+  G.ballTrail = [];
   setComment(cmt('ball_' + G.ballType));
 }
 
@@ -381,7 +382,6 @@ window.pressShot = function(k) {
 
   const timing = timingQuality(G.ballY);
 
-  // Too early — feedback only, don't commit
   if (timing === 4 && G.ballY < bty() - 220) {
     setComment(cmt('miss_early'));
     flashKey(k, 'bad');
@@ -411,6 +411,7 @@ function resolveShot(k, timing) {
     showFlash('OUT!', 'var(--red)', res.type.toUpperCase() + '!');
     addDot('wkt','W');
     updateSB();
+    launchBall(k, 0);
     if (G.wickets >= 10) { setTimeout(endGame, 1400); return; }
     setTimeout(nextBall, 1600);
   } else {
@@ -428,13 +429,20 @@ function resolveShot(k, timing) {
     updateSB();
     checkMilestones();
     launchBall(k, res.runs);
+    if (res.runs >= 4) {
+      G.boundaryFlash = 1.0;
+      G.boundaryCol = res.runs >= 6 ? '0,255,65' : '255,165,0';
+      spawnParticles(G.hitStartX, G.hitStartY, res.runs);
+    } else if (res.runs > 0) {
+      spawnParticles(G.hitStartX, G.hitStartY, res.runs);
+    }
     const maxB = G.totalOvers * 6;
     if (G.balls >= maxB) { setTimeout(endGame, 1400); return; }
     setTimeout(nextBall, 1400);
   }
 }
 
-// Ball passes batter without shot — miss
+// Miss
 function checkMiss() {
   if (G.phase !== 'in_flight' || G.shotDone) return;
   if (G.ballY > bty() + 35) {
@@ -462,13 +470,48 @@ function checkMiss() {
   }
 }
 
+// ── Ball launch (target-based, distance proportional to runs) ──
 function launchBall(k, runs) {
   G.hitActive = true;
-  const spd = runs >= 6 ? 14 : runs >= 4 ? 11 : runs > 0 ? 6 : 3;
-  const dirs = { w:{vx:0,vy:-spd}, a:{vx:-spd,vy:0}, d:{vx:spd,vy:0}, s:{vx:0,vy:2} };
-  const d = dirs[k] || dirs.d;
-  G.hitX = cx(); G.hitY = bty() - 30;
-  G.hitVX = d.vx; G.hitVY = d.vy;
+  G.ballTrail = [];
+  G.hitStartX = cx();
+  G.hitStartY = bty() - 20;
+  G.hitStartTime = performance.now();
+
+  // Direction angle (from batter, 0=right, -PI/2=up)
+  const angles = { w: -Math.PI/2, a: -Math.PI*0.78, d: -Math.PI*0.22, s: Math.PI * 0.55 };
+  const angle = angles[k] ?? -Math.PI / 2;
+  const ca = Math.cos(angle), sa = Math.sin(angle);
+
+  if (runs === 0) {
+    // Small deflection for dot/miss
+    const dist = 25 + Math.random() * 15;
+    G.hitTargetX = G.hitStartX + ca * dist;
+    G.hitTargetY = G.hitStartY + sa * dist;
+    G.hitDuration = 280;
+    return;
+  }
+
+  // Ray-ellipse intersection: find distance to boundary from batter in shot direction
+  const fcx = cx(), fcy = H * 0.48;
+  const rx = FRX(), ry = FRY();
+  const dx0 = G.hitStartX - fcx, dy0 = G.hitStartY - fcy;
+  const A = (ca * ca) / (rx * rx) + (sa * sa) / (ry * ry);
+  const B = 2 * (dx0 * ca / (rx * rx) + dy0 * sa / (ry * ry));
+  const C = (dx0 * dx0) / (rx * rx) + (dy0 * dy0) / (ry * ry) - 1;
+  const disc = B * B - 4 * A * C;
+  const bdist = disc >= 0 ? (-B + Math.sqrt(Math.max(0, disc))) / (2 * A) : rx * 0.7;
+
+  // Fraction of boundary: 1→28%, 2→48%, 3→68%, 4→95%, 6→128% (clears rope)
+  const frac = runs >= 6 ? 1.28 : runs === 5 ? 1.10 : runs === 4 ? 0.95 : runs === 3 ? 0.68 : runs === 2 ? 0.48 : 0.28;
+  const dist = bdist * frac;
+
+  G.hitTargetX = G.hitStartX + ca * dist;
+  G.hitTargetY = G.hitStartY + sa * dist;
+
+  // Speed in px/ms — faster for bigger shots
+  const pxPerMs = runs >= 6 ? 1.1 : runs >= 4 ? 0.9 : runs >= 2 ? 0.65 : 0.50;
+  G.hitDuration = Math.max(250, dist / pxPerMs);
 }
 
 function nextBall() {
@@ -477,6 +520,7 @@ function nextBall() {
   G.shotDone = false;
   G.hitActive = false;
   G.batSwing = false;
+  G.ballTrail = [];
   G.ballX = cx(); G.ballY = bwy();
 
   const over = Math.floor(G.balls / 6);
@@ -551,7 +595,7 @@ function updateSB() {
 }
 function fmtOv(b) { return Math.floor(b/6)+'.'+b%6; }
 
-// ── UI helpers ──
+// ── UI ──
 function keysReady() { document.querySelectorAll('.kk').forEach(k => { k.classList.remove('on','hit','bad'); }); }
 function keysOn()    { document.querySelectorAll('.kk').forEach(k => { k.classList.remove('bad'); k.classList.add('on'); }); }
 function flashKey(k, cls) {
@@ -614,204 +658,337 @@ async function loadLB() {
 }
 loadLB();
 
-// ── DRAWING ──
+// ── Particles ──
+function spawnParticles(x, y, runs) {
+  const cols = runs>=6 ? ['#00ff41','#60ff90','#ffffff'] : runs>=4 ? ['#d4a017','#ffcc44','#fff8dc'] : ['#58a6ff','#80c0ff','#c9d1d9'];
+  const n = runs>=6 ? 22 : runs>=4 ? 16 : 10;
+  for (let i=0; i<n; i++) {
+    const a = Math.random()*Math.PI*2;
+    const spd = (2+Math.random()*(runs>=4?6:3));
+    G.particles.push({x,y,vx:Math.cos(a)*spd,vy:Math.sin(a)*spd,life:1,col:cols[i%cols.length]});
+  }
+}
+
+function drawParticles() {
+  G.particles = G.particles.filter(p=>p.life>0);
+  G.particles.forEach(p=>{
+    p.x+=p.vx; p.y+=p.vy; p.vx*=0.91; p.vy*=0.91; p.life-=0.032;
+    ctx.globalAlpha=p.life*p.life;
+    ctx.beginPath(); ctx.arc(p.x,p.y,2.5,0,Math.PI*2);
+    ctx.fillStyle=p.col; ctx.fill();
+    // Small sparkle line
+    if (p.life > 0.6) {
+      ctx.strokeStyle=p.col; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.moveTo(p.x-p.vx,p.y-p.vy); ctx.lineTo(p.x,p.y); ctx.stroke();
+    }
+  });
+  ctx.globalAlpha=1;
+}
+
+// ── Drawing ──
 function lerp(a,b,t){return a+(b-a)*Math.max(0,Math.min(1,t));}
 
 function drawField() {
-  const fcx = cx(), fcy = H * 0.48;
-  const rx = FRX(), ry = FRY();
+  const fcx=cx(), fcy=H*0.48;
+  const rx=FRX(), ry=FRY();
+  const now=performance.now();
 
-  // Stands (dark ring outside boundary)
+  // Outer ring (stands/dark)
   ctx.beginPath();
-  ctx.ellipse(fcx, fcy, rx*1.28, ry*1.28, 0, 0, Math.PI*2);
-  ctx.fillStyle = '#080808';
-  ctx.fill();
+  ctx.ellipse(fcx,fcy,rx*1.30,ry*1.30,0,0,Math.PI*2);
+  ctx.fillStyle='#080808'; ctx.fill();
 
-  // Crowd noise bars (animated)
-  const now = performance.now();
-  for (let i=0; i<28; i++) {
-    const a = (i/28)*Math.PI*2;
-    const a2 = ((i+1)/28)*Math.PI*2;
-    const wave = Math.sin(i*0.8 + now*0.0008*(G.crowdEnergy/40))*3;
-    const inner = rx*1.05 + wave;
-    const outer = rx*1.24 + wave;
-    ctx.beginPath();
-    ctx.arc(fcx, fcy, inner, a, a2);
-    ctx.arc(fcx, fcy, outer, a2, a, true);
-    ctx.closePath();
-    const alpha = 0.12 + (G.crowdEnergy/100)*0.22;
-    ctx.fillStyle = `rgba(${30+(i*8)%70},${60+(i*5)%50},${20+(i*3)%30},${alpha})`;
-    ctx.fill();
+  // Crowd dots in 3 rings
+  for (let ring=0;ring<3;ring++) {
+    const rr=rx*(1.08+ring*0.07), rry=ry*(1.08+ring*0.07);
+    const n=Math.round(52+ring*24);
+    for (let i=0;i<n;i++) {
+      const a=(i/n)*Math.PI*2;
+      const wave=Math.sin(i*0.7+now*0.001*(G.crowdEnergy/40))*(G.crowdEnergy/100)*4;
+      const px=fcx+Math.cos(a)*(rr+wave);
+      const py=fcy+Math.sin(a)*(rry+wave);
+      const hue=(i*17+ring*60)%360;
+      ctx.beginPath(); ctx.arc(px,py,2.0,0,Math.PI*2);
+      ctx.fillStyle=`hsla(${hue},55%,55%,0.65)`; ctx.fill();
+    }
   }
 
-  // Main grass oval
-  const grd = ctx.createRadialGradient(fcx, fcy, 0, fcx, fcy, rx);
-  grd.addColorStop(0,   '#1e6b1e');
-  grd.addColorStop(0.45,'#185f18');
-  grd.addColorStop(0.85,'#135413');
-  grd.addColorStop(1,   '#0e470e');
+  // Grass — alternating mowing stripes clipped to ellipse
+  ctx.save();
   ctx.beginPath();
-  ctx.ellipse(fcx, fcy, rx, ry, 0, 0, Math.PI*2);
-  ctx.fillStyle = grd;
-  ctx.fill();
+  ctx.ellipse(fcx,fcy,rx,ry,0,0,Math.PI*2);
+  ctx.clip();
 
-  // Mowing pattern (subtle light/dark stripes)
-  for (let i=0; i<10; i++) {
-    const y = fcy - ry + (i*ry*2/10);
-    const halfW = rx * Math.sqrt(Math.max(0, 1-Math.pow((y-fcy)/ry,2)));
-    ctx.beginPath();
-    ctx.rect(fcx - halfW, y, halfW*2, ry*2/10);
-    ctx.fillStyle = i%2===0 ? 'rgba(255,255,255,0.025)' : 'rgba(0,0,0,0.025)';
-    ctx.fill();
+  // Base fill
+  ctx.fillStyle='#185f18';
+  ctx.fillRect(fcx-rx,fcy-ry,rx*2,ry*2);
+
+  // Alternating stripes
+  const stripeCount=18;
+  for (let i=0;i<stripeCount;i++) {
+    const sy=fcy-ry+(i*ry*2/stripeCount);
+    const sh=ry*2/stripeCount;
+    ctx.fillStyle=i%2===0?'rgba(30,110,30,0.9)':'rgba(18,88,18,0.9)';
+    ctx.fillRect(fcx-rx,sy,rx*2,sh);
   }
 
-  // 30-yard circle
+  // Centre highlight (slight stadium light effect from top)
+  const lg=ctx.createRadialGradient(fcx,fcy-ry*0.3,0,fcx,fcy,rx);
+  lg.addColorStop(0,'rgba(255,255,220,0.06)');
+  lg.addColorStop(0.5,'rgba(0,0,0,0)');
+  lg.addColorStop(1,'rgba(0,0,0,0.18)');
+  ctx.fillStyle=lg;
+  ctx.fillRect(fcx-rx,fcy-ry,rx*2,ry*2);
+
+  ctx.restore();
+
+  // 30-yard circle (dashed)
   ctx.beginPath();
-  ctx.ellipse(fcx, fcy, rx*0.52, ry*0.52, 0, 0, Math.PI*2);
-  ctx.strokeStyle='rgba(255,255,255,0.10)';
+  ctx.ellipse(fcx,fcy,rx*0.52,ry*0.52,0,0,Math.PI*2);
+  ctx.strokeStyle='rgba(255,255,255,0.13)';
   ctx.lineWidth=1.5; ctx.setLineDash([5,5]); ctx.stroke(); ctx.setLineDash([]);
+
+  // Boundary flash (4s = gold, 6s = green)
+  if (G.boundaryFlash > 0) {
+    G.boundaryFlash = Math.max(0, G.boundaryFlash - 0.018);
+    ctx.save();
+    ctx.beginPath();
+    ctx.ellipse(fcx,fcy,rx*0.97,ry*0.97,0,0,Math.PI*2);
+    ctx.strokeStyle=`rgba(${G.boundaryCol},${G.boundaryFlash})`;
+    ctx.lineWidth=6+G.boundaryFlash*10;
+    ctx.shadowBlur=30*G.boundaryFlash;
+    ctx.shadowColor=`rgba(${G.boundaryCol},${G.boundaryFlash})`;
+    ctx.stroke();
+    ctx.restore();
+  }
 
   // Boundary rope
   ctx.beginPath();
-  ctx.ellipse(fcx, fcy, rx*0.96, ry*0.96, 0, 0, Math.PI*2);
-  ctx.strokeStyle='rgba(255,255,255,0.25)';
+  ctx.ellipse(fcx,fcy,rx*0.96,ry*0.96,0,0,Math.PI*2);
+  ctx.strokeStyle='rgba(255,255,255,0.28)';
   ctx.lineWidth=2.5; ctx.stroke();
+
+  // Rope dots (rope look)
+  const ropeSegs=60;
+  for (let i=0;i<ropeSegs;i++) {
+    if (i%3!==0) continue;
+    const a=(i/ropeSegs)*Math.PI*2;
+    const rpx=fcx+Math.cos(a)*rx*0.96;
+    const rpy=fcy+Math.sin(a)*ry*0.96;
+    ctx.beginPath(); ctx.arc(rpx,rpy,2,0,Math.PI*2);
+    ctx.fillStyle='rgba(255,255,255,0.35)'; ctx.fill();
+  }
 }
 
 function drawPitch() {
-  const pitchX = cx() - PW/2;
-  const pitchTop = bwy() - 8;
-  const pitchH = bty() - pitchTop + 20;
-  ctx.fillStyle='rgba(200,170,90,0.32)';
-  ctx.fillRect(pitchX, pitchTop, PW, pitchH);
-  ctx.strokeStyle='rgba(200,170,90,0.40)';
-  ctx.lineWidth=1; ctx.strokeRect(pitchX, pitchTop, PW, pitchH);
+  const pitchX=cx()-PW/2;
+  const pitchTop=bwy()-8;
+  const pitchH=bty()-pitchTop+20;
+
+  // Pitch surface
+  const pg=ctx.createLinearGradient(pitchX,pitchTop,pitchX+PW,pitchTop+pitchH);
+  pg.addColorStop(0,'rgba(210,180,100,0.45)');
+  pg.addColorStop(0.5,'rgba(200,165,85,0.38)');
+  pg.addColorStop(1,'rgba(190,155,75,0.45)');
+  ctx.fillStyle=pg;
+  ctx.fillRect(pitchX,pitchTop,PW,pitchH);
+  ctx.strokeStyle='rgba(200,170,90,0.5)';
+  ctx.lineWidth=1; ctx.strokeRect(pitchX,pitchTop,PW,pitchH);
+
+  // Pitch cracks/wear texture (subtle horizontal lines)
+  ctx.strokeStyle='rgba(160,130,60,0.25)';
+  ctx.lineWidth=0.5;
+  for (let i=1;i<8;i++) {
+    const y=pitchTop+pitchH*(i/8)+Math.sin(i*2.3)*2;
+    ctx.beginPath(); ctx.moveTo(pitchX+2,y); ctx.lineTo(pitchX+PW-2,y); ctx.stroke();
+  }
 
   // Crease lines
-  ctx.strokeStyle='rgba(255,255,255,0.65)';
+  ctx.strokeStyle='rgba(255,255,255,0.75)';
   ctx.lineWidth=1.5;
-  // Batter end
-  ctx.beginPath(); ctx.moveTo(cx()-22, bty()+10); ctx.lineTo(cx()+22, bty()+10); ctx.stroke();
-  // Bowler end
-  ctx.beginPath(); ctx.moveTo(cx()-22, bwy()-4); ctx.lineTo(cx()+22, bwy()-4); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(cx()-22,bty()+10); ctx.lineTo(cx()+22,bty()+10); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(cx()-22,bwy()-4); ctx.lineTo(cx()+22,bwy()-4); ctx.stroke();
 }
 
 function drawStumps(x, y, size) {
-  ctx.strokeStyle='rgba(255,245,200,0.85)'; ctx.lineWidth=2.5;
+  // Shadow
+  ctx.strokeStyle='rgba(0,0,0,0.3)'; ctx.lineWidth=3;
   for (let i=-1;i<=1;i++) {
     ctx.beginPath();
-    ctx.moveTo(x+i*(size/3), y);
-    ctx.lineTo(x+i*(size/3), y-size);
+    ctx.moveTo(x+i*(size/3)+1, y+2);
+    ctx.lineTo(x+i*(size/3)+1, y-size+2);
     ctx.stroke();
   }
-  ctx.strokeStyle='rgba(255,245,200,0.5)'; ctx.lineWidth=1.5;
-  ctx.beginPath(); ctx.moveTo(x-size/3-1, y-size+2); ctx.lineTo(x+size/3+1, y-size+2); ctx.stroke();
+  // Stumps
+  ctx.strokeStyle='rgba(255,245,200,0.90)'; ctx.lineWidth=2.5;
+  for (let i=-1;i<=1;i++) {
+    ctx.beginPath(); ctx.moveTo(x+i*(size/3),y); ctx.lineTo(x+i*(size/3),y-size); ctx.stroke();
+  }
+  // Bails
+  ctx.strokeStyle='rgba(255,245,200,0.6)'; ctx.lineWidth=1.5;
+  ctx.beginPath(); ctx.moveTo(x-size/3-1,y-size+2); ctx.lineTo(x+size/3+1,y-size+2); ctx.stroke();
 }
 
 function drawFielders() {
   const fcx=cx(), fcy=H*0.48, rx=FRX()*0.88, ry=FRY()*0.88;
-  const cols=['#58a6ff','#3fb950','#d4a017','#f778ba','#39c5cf','#f85149','#bc8cff','#39d353','#e3b341','#ff9060','#60c0ff'];
+  const capCols=['#1a7fd4','#d41a1a','#d4a017','#1ad44e','#d41a7f','#9b59b6'];
   G.fielders.forEach((pos,i) => {
-    const a = pos*Math.PI*2 - Math.PI/2;
-    const fx = fcx + Math.cos(a)*rx;
-    const fy = fcy + Math.sin(a)*ry;
-    ctx.globalAlpha=0.75;
-    ctx.fillStyle=cols[i%cols.length];
-    // Head (circle viewed from above)
-    ctx.beginPath(); ctx.arc(fx, fy-5, 5, 0, Math.PI*2); ctx.fill();
-    // Body
-    ctx.fillRect(fx-3, fy-1, 6, 7);
+    const a=pos*Math.PI*2-Math.PI/2;
+    const fx=fcx+Math.cos(a)*rx;
+    const fy=fcy+Math.sin(a)*ry;
+
+    // Shadow
+    ctx.globalAlpha=0.25;
+    ctx.beginPath(); ctx.ellipse(fx+2,fy+9,5,2.5,0,0,Math.PI*2);
+    ctx.fillStyle='#000'; ctx.fill();
     ctx.globalAlpha=1;
+
+    // Whites (body)
+    ctx.beginPath(); ctx.ellipse(fx,fy+2,5,7,0,0,Math.PI*2);
+    ctx.fillStyle='rgba(235,235,240,0.92)'; ctx.fill();
+    ctx.strokeStyle='rgba(180,180,190,0.5)'; ctx.lineWidth=0.5; ctx.stroke();
+
+    // Coloured cap (head)
+    ctx.beginPath(); ctx.arc(fx,fy-6,5.5,0,Math.PI*2);
+    ctx.fillStyle=capCols[i%capCols.length]; ctx.fill();
+    ctx.strokeStyle='rgba(0,0,0,0.4)'; ctx.lineWidth=0.8; ctx.stroke();
+
+    // Face
+    ctx.beginPath(); ctx.arc(fx,fy-5.5,3,0,Math.PI*2);
+    ctx.fillStyle='#e8c080'; ctx.fill();
   });
 }
 
 function drawBowler(t, anim, running) {
-  const x = cx();
-  // Run from mark (~80px above crease) toward crease
-  const y = lerp(bwy() - 75, bwy() + 5, Math.min(t,1));
-  const bob = running ? Math.sin(anim*2)*3 : 0;
+  const x=cx();
+  const y=lerp(bwy()-75,bwy()+5,Math.min(t,1));
+  const bob=running?Math.sin(anim*2)*3:0;
 
-  ctx.strokeStyle='rgba(255,80,80,0.8)';
-  ctx.lineWidth=2; ctx.lineCap='round';
-  // Head (top-down oval)
-  ctx.beginPath(); ctx.ellipse(x, y+bob-12, 6, 6, 0, 0, Math.PI*2); ctx.stroke();
+  // Shadow
+  ctx.globalAlpha=0.2;
+  ctx.beginPath(); ctx.ellipse(x+2,y+18,6,2.5,0,0,Math.PI*2);
+  ctx.fillStyle='#000'; ctx.fill();
+  ctx.globalAlpha=1;
+
+  ctx.strokeStyle='rgba(255,100,80,0.85)'; ctx.lineWidth=2; ctx.lineCap='round';
+  // Head
+  ctx.beginPath(); ctx.arc(x,y+bob-12,6,0,Math.PI*2); ctx.stroke();
+  // Cap
+  ctx.beginPath(); ctx.arc(x,y+bob-13,4,Math.PI,0);
+  ctx.fillStyle='rgba(255,80,60,0.7)'; ctx.fill();
   // Body
-  ctx.beginPath(); ctx.moveTo(x, y+bob-6); ctx.lineTo(x, y+bob+6); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(x,y+bob-6); ctx.lineTo(x,y+bob+6); ctx.stroke();
   // Arms
-  const as = running ? Math.cos(anim)*8 : 0;
-  ctx.beginPath(); ctx.moveTo(x, y+bob-2); ctx.lineTo(x-10+as, y+bob+2); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(x, y+bob-2); ctx.lineTo(x+10-as, y+bob-4); ctx.stroke();
+  const as=running?Math.cos(anim)*8:0;
+  ctx.beginPath(); ctx.moveTo(x,y+bob-2); ctx.lineTo(x-10+as,y+bob+2); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(x,y+bob-2); ctx.lineTo(x+10-as,y+bob-4); ctx.stroke();
   // Legs
-  const ls = running ? Math.sin(anim)*8 : 0;
-  ctx.beginPath(); ctx.moveTo(x, y+bob+6); ctx.lineTo(x-6+ls, y+bob+16); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(x, y+bob+6); ctx.lineTo(x+6-ls, y+bob+16); ctx.stroke();
+  const ls=running?Math.sin(anim)*8:0;
+  ctx.beginPath(); ctx.moveTo(x,y+bob+6); ctx.lineTo(x-6+ls,y+bob+16); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(x,y+bob+6); ctx.lineTo(x+6-ls,y+bob+16); ctx.stroke();
 }
 
 function drawBatter(swingDir, swingT) {
-  const x = cx(), y = bty();
+  const x=cx(), y=bty();
+
+  // Shadow
+  ctx.globalAlpha=0.2;
+  ctx.beginPath(); ctx.ellipse(x+3,y+8,9,3,0,0,Math.PI*2);
+  ctx.fillStyle='#000'; ctx.fill();
+  ctx.globalAlpha=1;
+
   ctx.strokeStyle='#00ff41'; ctx.lineWidth=2.5; ctx.lineCap='round';
   // Head
-  ctx.beginPath(); ctx.ellipse(x, y-28, 7, 7, 0, 0, Math.PI*2); ctx.stroke();
+  ctx.beginPath(); ctx.arc(x,y-28,7,0,Math.PI*2); ctx.stroke();
+  // Helmet
+  ctx.beginPath(); ctx.arc(x,y-29,5,Math.PI,0);
+  ctx.fillStyle='rgba(0,200,60,0.5)'; ctx.fill();
   // Body
-  ctx.beginPath(); ctx.moveTo(x, y-21); ctx.lineTo(x, y-6); ctx.stroke();
-  // Legs (slightly spread — stance)
-  ctx.beginPath(); ctx.moveTo(x, y-6); ctx.lineTo(x-8, y+6); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(x, y-6); ctx.lineTo(x+8, y+6); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(x,y-21); ctx.lineTo(x,y-6); ctx.stroke();
+  // Legs (stance)
+  ctx.beginPath(); ctx.moveTo(x,y-6); ctx.lineTo(x-8,y+6); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(x,y-6); ctx.lineTo(x+8,y+6); ctx.stroke();
 
-  // Bat arm + bat (pointing down in guard, swings in shot direction)
+  // Bat arm + bat
   let batAngle;
   if (!swingDir) {
-    batAngle = Math.PI * 0.5; // pointing down (guard)
+    batAngle=Math.PI*0.5;
   } else {
-    const targets = { w: -Math.PI*0.6, a: -Math.PI*0.1, d: -Math.PI*0.9, s: Math.PI*0.5 };
-    const target = targets[swingDir] ?? Math.PI*0.5;
-    const eased = swingT < 0.5 ? swingT*2 : 1-(swingT-0.5)*2;
-    batAngle = lerp(Math.PI*0.5, target, eased);
+    const targets={w:-Math.PI*0.6,a:-Math.PI*0.1,d:-Math.PI*0.9,s:Math.PI*0.5};
+    const target=targets[swingDir]??Math.PI*0.5;
+    const eased=swingT<0.5?swingT*2:1-(swingT-0.5)*2;
+    batAngle=lerp(Math.PI*0.5,target,eased);
   }
 
-  const armLen = 14;
-  const ax = x + Math.cos(batAngle - Math.PI*0.3) * armLen;
-  const ay = y - 16 + Math.sin(batAngle - Math.PI*0.3) * armLen;
-  ctx.beginPath(); ctx.moveTo(x, y-16); ctx.lineTo(ax, ay); ctx.stroke();
+  const armLen=14;
+  const ax=x+Math.cos(batAngle-Math.PI*0.3)*armLen;
+  const ay=y-16+Math.sin(batAngle-Math.PI*0.3)*armLen;
+  ctx.beginPath(); ctx.moveTo(x,y-16); ctx.lineTo(ax,ay); ctx.stroke();
 
-  // Bat blade
-  ctx.strokeStyle='#c8a050'; ctx.lineWidth=5;
+  // Bat blade (wood colour with edge highlight)
+  ctx.lineCap='butt';
+  ctx.strokeStyle='#c8a050'; ctx.lineWidth=6;
   ctx.beginPath();
-  ctx.moveTo(ax, ay);
-  ctx.lineTo(ax + Math.cos(batAngle)*16, ay + Math.sin(batAngle)*16);
+  ctx.moveTo(ax,ay);
+  ctx.lineTo(ax+Math.cos(batAngle)*16,ay+Math.sin(batAngle)*16);
   ctx.stroke();
-  ctx.strokeStyle='#00ff41'; ctx.lineWidth=2.5;
+  ctx.strokeStyle='rgba(255,220,130,0.6)'; ctx.lineWidth=2;
+  ctx.beginPath();
+  ctx.moveTo(ax,ay);
+  ctx.lineTo(ax+Math.cos(batAngle)*16,ay+Math.sin(batAngle)*16);
+  ctx.stroke();
+  ctx.strokeStyle='#00ff41'; ctx.lineWidth=2.5; ctx.lineCap='round';
 }
 
 function drawBall(bx, by) {
-  // Glow
-  const g = ctx.createRadialGradient(bx,by,1,bx,by,14);
-  g.addColorStop(0,'rgba(230,50,30,0.45)'); g.addColorStop(1,'rgba(230,50,30,0)');
-  ctx.beginPath(); ctx.arc(bx,by,14,0,Math.PI*2); ctx.fillStyle=g; ctx.fill();
-  // Ball
+  // Outer glow
+  const g=ctx.createRadialGradient(bx,by,1,bx,by,16);
+  g.addColorStop(0,'rgba(230,60,30,0.5)'); g.addColorStop(1,'rgba(230,60,30,0)');
+  ctx.beginPath(); ctx.arc(bx,by,16,0,Math.PI*2); ctx.fillStyle=g; ctx.fill();
+
+  // Ball body with radial gradient
+  const bg=ctx.createRadialGradient(bx-2,by-2,1,bx,by,7);
+  bg.addColorStop(0,'#e83520'); bg.addColorStop(0.6,'#cc2211'); bg.addColorStop(1,'#7a0c06');
   ctx.beginPath(); ctx.arc(bx,by,7,0,Math.PI*2);
-  ctx.fillStyle='#cc2211'; ctx.fill();
-  ctx.strokeStyle='#7a1008'; ctx.lineWidth=1; ctx.stroke();
-  // Shine
-  ctx.beginPath(); ctx.arc(bx-2,by-2,2.5,0,Math.PI*2);
-  ctx.fillStyle='rgba(255,190,170,0.5)'; ctx.fill();
-  // Seam (horizontal — top-down view)
+  ctx.fillStyle=bg; ctx.fill();
+  ctx.strokeStyle='#5a0804'; ctx.lineWidth=0.8; ctx.stroke();
+
+  // Seam
   ctx.beginPath(); ctx.arc(bx,by,7,0.2,Math.PI-0.2);
-  ctx.strokeStyle='rgba(255,255,255,0.25)'; ctx.lineWidth=1; ctx.stroke();
+  ctx.strokeStyle='rgba(255,220,200,0.35)'; ctx.lineWidth=1.2; ctx.stroke();
+
+  // Shine
+  ctx.beginPath(); ctx.arc(bx-2.5,by-2.5,2.5,0,Math.PI*2);
+  ctx.fillStyle='rgba(255,200,180,0.55)'; ctx.fill();
+}
+
+function drawTrail() {
+  const n = G.ballTrail.length;
+  G.ballTrail.forEach((p,i) => {
+    const alpha=(i/n)*0.45;
+    const r=2+(i/n)*4.5;
+    ctx.beginPath(); ctx.arc(p.x,p.y,r,0,Math.PI*2);
+    ctx.fillStyle=`rgba(220,60,30,${alpha})`; ctx.fill();
+  });
 }
 
 function drawHitZone(by) {
-  const dist = Math.abs(by - bty());
-  if (dist > 180) return;
-  const alpha = Math.max(0, 1 - dist/180) * 0.7;
-  const pulse = 0.5 + 0.5 * Math.sin(performance.now() * 0.015);
+  const dist=Math.abs(by-bty());
+  if (dist>180) return;
+  const alpha=Math.max(0,1-dist/180)*0.75;
+  const pulse=0.5+0.5*Math.sin(performance.now()*0.015);
+  // Outer ring
   ctx.beginPath();
-  ctx.arc(cx(), bty()-20, 30 + pulse*6, 0, Math.PI*2);
-  ctx.strokeStyle = `rgba(0,255,65,${alpha * (0.5 + pulse*0.5)})`;
-  ctx.lineWidth = 2; ctx.stroke();
+  ctx.arc(cx(),bty()-20,36+pulse*7,0,Math.PI*2);
+  ctx.strokeStyle=`rgba(0,255,65,${alpha*(0.3+pulse*0.3)})`;
+  ctx.lineWidth=3; ctx.stroke();
+  // Inner ring
+  ctx.beginPath();
+  ctx.arc(cx(),bty()-20,18+pulse*4,0,Math.PI*2);
+  ctx.strokeStyle=`rgba(0,255,65,${alpha*(0.5+pulse*0.5)})`;
+  ctx.lineWidth=1.5; ctx.stroke();
 
-  // Also light up keys
-  if (dist < 120) keysOn();
+  if (dist<120) keysOn();
 }
 
 // ── MAIN DRAW ──
@@ -820,63 +997,78 @@ function drawScene(now) {
   drawField();
   drawPitch();
   drawFielders();
-  drawStumps(cx(), bty()+14, 20);
-  drawStumps(cx(), bwy()-2, 14);
-  drawBowler(G.bowlerT, G.bowlerAnim, G.phase==='bowling');
-  drawBatter(G.batSwing ? G.batDir : null, G.batT);
+  drawStumps(cx(),bty()+14,20);
+  drawStumps(cx(),bwy()-2,14);
+  drawBowler(G.bowlerT,G.bowlerAnim,G.phase==='bowling');
+  drawBatter(G.batSwing?G.batDir:null,G.batT);
 
-  // Ball
-  if (G.phase === 'in_flight') {
-    const t = (now - G.ballStartTime) / G.ballDuration;
-    G.ballX = cx() + getSpin(t, G.ballType);
-    G.ballY = lerp(bwy(), bty()+40, t);
+  // Ball in flight (bowled)
+  if (G.phase==='in_flight') {
+    const t=(now-G.ballStartTime)/G.ballDuration;
+    G.ballX=cx()+getSpin(t,G.ballType);
+    G.ballY=lerp(bwy(),bty()+40,t);
     if (!G.shotDone) {
       drawHitZone(G.ballY);
       checkMiss();
     }
-    drawBall(G.ballX, G.ballY);
-  } else if (G.phase === 'resolving' && G.hitActive) {
-    G.hitX += G.hitVX;
-    G.hitY += G.hitVY;
-    drawBall(G.hitX, G.hitY);
-  } else if (G.phase === 'resolving' && !G.hitActive && !G.shotDone) {
-    drawBall(G.ballX, G.ballY);
+    // Trail for incoming ball
+    G.ballTrail.push({x:G.ballX,y:G.ballY});
+    if (G.ballTrail.length>6) G.ballTrail.shift();
+    drawTrail();
+    drawBall(G.ballX,G.ballY);
+  } else if (G.phase==='resolving' && G.hitActive) {
+    // Hit ball — lerp to target with ease-out
+    const elapsed=now-G.hitStartTime;
+    const rawT=Math.min(elapsed/G.hitDuration,1);
+    const t=1-Math.pow(1-rawT,2.5); // ease-out
+    G.hitX=lerp(G.hitStartX,G.hitTargetX,t);
+    G.hitY=lerp(G.hitStartY,G.hitTargetY,t);
+    if (rawT>=1) G.hitActive=false;
+    // Trail for hit ball
+    G.ballTrail.push({x:G.hitX,y:G.hitY});
+    if (G.ballTrail.length>10) G.ballTrail.shift();
+    drawTrail();
+    drawBall(G.hitX,G.hitY);
+  } else if (G.phase==='resolving' && !G.hitActive && !G.shotDone) {
+    drawBall(G.ballX,G.ballY);
   }
 
-  // Ball type label above pitch (during ready/bowling)
-  if (G.phase === 'ready' || G.phase === 'bowling') {
-    const def = BDEFS[G.ballType]||BDEFS.normal;
-    ctx.fillStyle = def.col;
-    ctx.font = '700 9px "Press Start 2P"';
-    ctx.textAlign = 'center';
-    ctx.fillText(def.name, cx(), bwy() - 28);
-    ctx.textAlign = 'left';
+  // Ball type label (during ready/bowling)
+  if (G.phase==='ready'||G.phase==='bowling') {
+    const def=BDEFS[G.ballType]||BDEFS.normal;
+    ctx.fillStyle=def.col;
+    ctx.font='700 9px "Press Start 2P"';
+    ctx.textAlign='center';
+    ctx.fillText(def.name,cx(),bwy()-30);
+    ctx.textAlign='left';
   }
+
+  // Particles
+  drawParticles();
 
   // Bat + bowler animations
-  if (G.batSwing) { G.batT = Math.min(G.batT + 0.09, 1); if (G.batT >= 1) G.batSwing = false; }
-  if (G.phase === 'bowling') { G.bowlerT += 0.016; G.bowlerAnim += 0.20; }
+  if (G.batSwing) { G.batT=Math.min(G.batT+0.09,1); if (G.batT>=1) G.batSwing=false; }
+  if (G.phase==='bowling') { G.bowlerT+=0.016; G.bowlerAnim+=0.20; }
 }
 
-// Slight lateral drift for spin balls
 function getSpin(t, type) {
-  if (type !== 'spinner') return 0;
-  return Math.sin(t * Math.PI) * 12;
+  if (type!=='spinner') return 0;
+  return Math.sin(t*Math.PI)*12;
 }
 
 // ── GAME LOOP ──
 function loop(now) {
-  if (G.phase === 'idle' || G.phase === 'gameover') return;
+  if (G.phase==='idle'||G.phase==='gameover') return;
   drawScene(now);
-  _raf = requestAnimationFrame(loop);
+  _raf=requestAnimationFrame(loop);
 }
 
 function drawStatic() {
   resize();
   ctx.clearRect(0,0,W,H);
   drawField(); drawPitch(); drawFielders();
-  drawStumps(cx(), bty()+14, 20);
-  drawStumps(cx(), bwy()-2, 14);
+  drawStumps(cx(),bty()+14,20);
+  drawStumps(cx(),bwy()-2,14);
   drawBatter(null,0);
   drawBowler(0,0,false);
 }
